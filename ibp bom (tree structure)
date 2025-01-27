@@ -1,0 +1,2854 @@
+View.xml(main) //app/webapp/view
+
+<mvc:View controllerName="pumorips.ibpbom.psibppdsbom.controller.psibppdsview"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns:smartTable="sap.ui.comp.smarttable"
+	xmlns:core="sap.ui.core"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+    xmlns="sap.m">
+    <Page id="page" title="{i18n>title}" showHeader="false">
+        <content>
+        <smartFilterBar:SmartFilterBar 
+		id="smartFilterBarID" showMessages="true" showClearOnFB="true" persistencyKey="SmartFilterPKey"
+		entitySet="BOMHeaderPDSIdentifierView" clear="onClearPress">
+
+
+        <smartFilterBar:controlConfiguration>
+
+                        <smartFilterBar:ControlConfiguration id="IDvalidfrm" key="frmDt" label="{i18n>BOM_VALID_FRM}" visibleInAdvancedArea="true" >
+                            <smartFilterBar:customControl>
+                                <DatePicker id="fltrValidFrm" placeholder="e.g. : Jan 1, 2022" />
+                            </smartFilterBar:customControl>
+        </smartFilterBar:ControlConfiguration>
+
+        <smartFilterBar:ControlConfiguration id="IDvalidto" key="toDt" label="{i18n>BOM_VALID_TO}" visibleInAdvancedArea="true" >
+                            <smartFilterBar:customControl>
+                                <DatePicker id="fltrValidTo" placeholder="e.g. : Dec 31, 2022" />
+                            </smartFilterBar:customControl>
+                        </smartFilterBar:ControlConfiguration>
+        <smartFilterBar:ControlConfiguration id="IDimprtdt" key="impDt" label="{i18n>bomImpDate}" visibleInAdvancedArea="true">
+							<smartFilterBar:customControl>
+								<DateRangeSelection id="fltrImpDtRng"/>
+							</smartFilterBar:customControl>
+						</smartFilterBar:ControlConfiguration>
+        </smartFilterBar:controlConfiguration>
+
+        </smartFilterBar:SmartFilterBar>
+
+        
+
+
+        <smartTable:SmartTable id="idBDSmrtTableIBPhyer" smartFilterId="smartFilterBarID" tableType="ResponsiveTable" editable="false" entitySet="BOMHeaderPDSIdentifierView" useVariantManagement="true" showVariantManagement="true" 
+                header="{i18n>res}" showRowCount="true" enableExport="true" enableAutoBinding="false" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindTable" persistencyKey="SmartTablePersistencyKey">
+
+                    <Table id="idtable" sticky="ColumnHeaders,HeaderToolbar" growing="true" growingScrollToLoad="true" growingThreshold="20" >
+						<items>
+							<ColumnListItem id="tb1" type="Navigation" press="handlePress"></ColumnListItem>
+						</items>
+					</Table>
+				</smartTable:SmartTable>
+        </content>
+    </Page>
+</mvc:View>
+
+
+View.xml(details) //app/webapp/view
+
+
+<mvc:View controllerName="pumorips.ibpbom.psibppdsbom.controller.ibppdsdetails"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m" 
+    xmlns:core="sap.ui.core"
+    xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:layout="sap.ui.layout" 
+    xmlns:table="sap.ui.table"
+    xmlns:u="sap.ui.unified" 
+    xmlns:f="sap.f"
+    xmlns:fb="sap.ui.comp.filterbar">
+    <Page id="pageID" title="{i18n>title}" showHeader="false">
+        <content>
+        
+        <layout:HorizontalLayout class="layout" id="horizonlayoutID" allowWrapping="true">
+						<layout:VerticalLayout id="vertlayoutID" class="BOMDtls">
+							<ObjectAttribute id="ObjectAttribute3ID" class="odjDtl" title="{i18n>facCode}" text="{selData>/factoryNumber}"/>
+						</layout:VerticalLayout>
+
+						
+					</layout:HorizontalLayout>
+              
+       <table:TreeTable
+                    class="table"
+                    id="itemsTbl"  rows="{path:'/'}"
+                    selectionMode="None"
+                    enableSelectAll="false"
+                    ariaLabelledBy="title">
+   
+               <table:extension>
+			        <OverflowToolbar id="OVRFLWTOLBRID" style="Clear">
+						<Title id="title" text="{i18n>BOM_DIS_ITMS}"/>
+						<ToolbarSpacer id="tolbrspcrID"/>
+                        
+                        <Input id="idInput" placeholder="rows input" change=".onInpSubmit"   submit=".onInpSubmit" width="10%" ></Input>
+                        <Button
+                            id="btn1"
+							text="{i18n>COL_ALL}"
+							press="onCollapseTreeTable"
+                            type="Emphasized"/>
+                         <Button
+                            id="btn2"
+							text="{i18n>EXP_ALL}"
+							press="onExpandTreeTable"
+                            type="Emphasized"/> 
+                        <Button
+                            id="btn3"
+							icon="sap-icon://download"
+							press="onDownloadPress"
+                            type="Emphasized"/>
+						
+					    <Button
+                            id="btn4"
+							icon="sap-icon://action-settings"
+							press="onSettingsSelect"
+                            type="Emphasized"/>
+                            
+			        </OverflowToolbar>
+				</table:extension>
+                <table:rowSettingsTemplate>
+     
+    <table:RowSettings id="rowsettingID" highlight="{path: 'highlightGenHPPN', formatter: '.highlightFun' }" />
+    </table:rowSettingsTemplate>
+    <table:rowMode>
+		<rowmodes:Auto id="idRowM" xmlns:rowmodes="sap.ui.table.rowmodes" maxRowCount="10"/>
+    </table:rowMode>
+                <table:columns>
+
+                    <table:Column id="column1" width="12rem" sortProperty="LEVELNO" filterProperty="LEVELNO">
+                        <Label id="lbl1" text="{i18n>LEVELNO}"/>
+                        <table:template>
+                            <Text id="txt1" text="{LEVELNO}" />
+                        </table:template>
+                    </table:Column>
+
+                    <table:Column id="column2" width="12rem" sortProperty="FACTORYNUMBER" filterProperty="FACTORYNUMBER">
+                        <Label id="lbl2" text="{i18n>facCode}"/>
+                        <table:template>
+                            <Text id="txt2" text="{FACTORYNUMBER}" />
+                        </table:template>
+                    </table:Column>
+
+                    <table:Column id="column11" width="13rem" sortProperty="NODEID" filterProperty="NODEID">
+                        <Label id="lbl11" text="{i18n>srcofsply}"/>
+                        <table:template>
+                            <Text id="txt11" text="{NODEID}" />
+                        </table:template>
+                    </table:Column>
+        
+                    <table:Column id="column5" width="13rem" sortProperty="QUANTITY" filterProperty="QUANTITY">
+                        <Label id="lbl5" text="{i18n>BOM_BaseUOM}"/>
+                        <table:template>
+                            <Text id="txt5" text="{QUANTITY}" />
+                        </table:template>
+                    </table:Column>
+
+                    <table:Column id="column14" width="13rem" sortProperty="ZHPPARTNO" filterProperty="ZHPPARTNO">
+                        <Label id="lbl14" text="{i18n>MAT_NUM_HPPN}"/>
+                        <table:template>
+                            <Text id="txt14" text="{ZHPPARTNO}" />
+                        </table:template>
+                    </table:Column>
+                    
+                    <table:Column id="column6" width="13rem" sortProperty="VALIDFROM" filterProperty="VALIDFROM">
+                        <Label id="lbl6" text="{i18n>BOM_VALID_FRM}"/>
+                        <table:template>
+                            <Text id="txt6" text="{VALIDFROM}" />
+                        </table:template>
+                    </table:Column>
+
+                    <table:Column id="column7" width="13rem" sortProperty="VALIDTO" filterProperty="VALIDTO">
+                        <Label id="lbl7" text="{i18n>BOM_VALID_TO}"/>
+                        <table:template>
+                            <Text id="txt7" text="{VALIDTO}" />
+                        </table:template>
+                    </table:Column>
+
+                    <table:Column id="column8" width="13rem" sortProperty="SCRAP" filterProperty="SCRAP">
+                        <Label id="lbl8" text="{i18n>SCRAP}"/>
+                        <table:template>
+                            <Text id="txt8" text="{SCRAP}" />
+                        </table:template>
+                    </table:Column>
+
+                    <table:Column id="column16" width="13rem" sortProperty="ACTID" filterProperty="ACTID">
+                        <Label id="lbl16" text="{i18n>ACTID}"/>
+                        <table:template>
+                            <Text id="txt16" text="{ACTID}" />
+                        </table:template>
+                    </table:Column>
+
+                    <table:Column id="column19" width="13rem" sortProperty="ALTITEMGROUP" filterProperty="ALTITEMGROUP">
+                        <Label id="lbl19" text="{i18n>altItemGroup}"/>
+                        <table:template>
+                            <Text id="txt19" text="{ALTITEMGROUP}" />
+                        </table:template>
+                    </table:Column>
+
+                    <table:Column id="column20" width="13rem" sortProperty="UOMALT" filterProperty="UOMALT">
+                        <Label id="lbl20" text="{i18n>uomAlt}"/>
+                        <table:template>
+                            <Text id="txt20" text="{UOMALT}" />
+                        </table:template>
+                    </table:Column>
+
+                    <table:Column id="column17" width="13rem" sortProperty="PROCUREMENTTYPE" filterProperty="PROCUREMENTTYPE">
+                        <Label id="lbl17" text="{i18n>PROCUREMENTTYPE}"/>
+                        <table:template>
+                            <Text id="txt17" text="{PROCUREMENTTYPE}" />
+                        </table:template>
+                    </table:Column>
+
+                    
+
+                    <!-- <table:Column id="column21" width="13rem" sortProperty="FACTORYCHILDPN" filterProperty="FACTORYCHILDPN">
+                        <Label id="lbl21" text="{i18n>factoryChildPn}"/>
+                        <table:template>
+                            <Text id="txt21" text="{FACTORYCHILDPN}" />
+                        </table:template>
+                    </table:Column>
+
+                    <table:Column id="column22" width="13rem" sortProperty="MPNCHILDPN" filterProperty="MPNCHILDPN">
+                        <Label id="lbl22" text="{i18n>mpnChildPn}"/>
+                        <table:template>
+                            <Text id="txt22" text="{MPNCHILDPN}" />
+                        </table:template>
+                    </table:Column> -->
+                </table:columns>
+                </table:TreeTable>
+        </content>
+    </Page>
+</mvc:View>
+
+
+controllers(main) //app/webapp/controller
+
+sap.ui.define([
+    "./BaseController",
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/table/RowAction",
+    "sap/ui/table/RowActionItem",
+    "sap/ui/table/RowSettings",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "sap/m/MessageBox"
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (BaseController, Controller, JSONModel, RowAction, RowActionItem, RowSettings, Filter, FilterOperator, MessageBox) {
+        "use strict";
+
+        return BaseController.extend("pumorips.ibpbom.psibppdsbom.controller.psibppdsview", {
+            onInit: function () {
+                this.smartFilterBar = this.getView().byId("smartFilterBarID");
+                this.getRouter().getRoute("Routepsibppdsview").attachPatternMatched(this._onObjectMatched, this);
+
+            },
+
+            _onObjectMatched: function () {
+                var oSmartTable = this.getView().byId("idBDSmrtTableIBPhyer");
+                var oSmartFilterBar = this.getView().byId(oSmartTable.getSmartFilterId());
+                if (oSmartTable && oSmartFilterBar.isInitialised()) {
+                    oSmartTable.rebindTable(true);
+                }
+
+            },
+
+            onBeforeRebindTable: function (oEvent) {
+                var smartTable = oEvent.getSource()
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (smartTable) {
+                    var aFilters = [];
+                    var frmDt = this.smartFilterBar.getControlByKey("frmDt").getDateValue();
+                    var toDt = this.smartFilterBar.getControlByKey("toDt").getDateValue();
+                    var impFrmDt = this.smartFilterBar.getControlByKey("impDt").getDateValue();
+                    var impToDt = this.smartFilterBar.getControlByKey("impDt").getSecondDateValue();
+                    var dateFormat = sap.ui.core.format.DateFormat.getDateInstance({ pattern: "yyyy-MM-dd", UTC: false });
+                    var dateFormatID = sap.ui.core.format.DateFormat.getDateTimeInstance({ pattern: "yyyy-MM-dd HH:mm:ss" ,UTC:false});
+
+                    if (frmDt != null) {
+                        var dateFormattedFrmDt = dateFormat.format(new Date(frmDt));
+                        aFilters.push(new Filter("bomValidFrom", FilterOperator.GE, dateFormattedFrmDt));
+                    }
+                    if (toDt != null) {
+                        var dateFormattedToDt = dateFormat.format(new Date(toDt));
+                        aFilters.push(new Filter("bomValidTo", FilterOperator.LE, dateFormattedToDt));
+                    }
+                    if (impFrmDt != null&&impToDt!== null) {
+                        var dateFormattedFrmDt = dateFormatID.format(new Date(impFrmDt));
+                        var dateFormattedToDt = dateFormatID.format(new Date(impToDt));
+                       aFilters.push(new Filter("bomImportDate", FilterOperator.GE, dateFormattedFrmDt));
+                        aFilters.push(new Filter("bomImportDate", FilterOperator.LE, dateFormattedToDt));
+                    }
+                    if (aFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aFilters, true));
+                    }
+                }
+                
+            },
+
+            getRouter: function () {
+                return sap.ui.core.UIComponent.getRouterFor(this);
+            },
+            handlePress: function (oEvent) {
+            
+                var oSelObj = oEvent.getSource().getBindingContext().getObject()
+                var oPayload = {};
+                oPayload.zmpaPartno = oSelObj.zmpaPartno;
+                oPayload.factoryNumber = oSelObj.factoryNumber;
+                // oPayload.zpdsIdentifier = oSelObj.zpdsIdentifier;
+                // oPayload.prodDesc = encodeURIComponent(oSelObj.prodDesc);
+    
+                
+                this.getOwnerComponent().getRouter().navTo("ibppdsdetail", { obj: JSON.stringify(oPayload) });
+            
+            },
+
+
+            onClearPress:function(){
+                this.byId("fltrValidFrm").setValue("");
+                this.byId("fltrValidTo").setValue("");
+                this.byId("fltrImpDtRng").setValue(null);
+                
+            },
+
+
+            
+        });
+    });
+
+
+    controller details page //app/webapp/controller
+
+    sap.ui.define([
+    "./BaseController",
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/table/TablePersoController",
+    "./TreeTableSetting",
+    "sap/ui/core/library",
+    "sap/ui/export/library",
+    "sap/ui/export/Spreadsheet"
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (BaseController, Controller, JSONModel, TablePersoController, treeTableSettings, coreLibrary, exportLibrary, Spreadsheet) {
+        "use strict";
+
+        var valueState = coreLibrary.ValueState;
+        var EdmType = exportLibrary.EdmType;
+
+        return BaseController.extend("pumorips.ibpbom.psibppdsbom.controller.ibppdsdetails", {
+            onInit: function () {
+                this._oTPC = new TablePersoController({
+                    table: this.byId("itemsTbl"),
+                    //specify the first part of persistence ids e.g. 'demoApp-productsTable-dimensionsCol'
+                    componentName: "treeTable",
+                    //resetAllMode: ResetAllMode.ServiceReset,
+                    persoService: treeTableSettings
+                });
+                this.oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+                this.getRouter().getRoute("ibppdsdetail").attachPatternMatched(this._onObjectMatched, this);
+
+            },
+
+
+
+
+            _onObjectMatched: function (oEve) {
+               
+
+                this.oSelData = JSON.parse(oEve.getParameters().arguments.obj);
+                var selDataMdl = this.getOwnerComponent().getModel("selData");
+                // var CompDataModel = this.getOwnerComponent().getModel("CompDataModel");
+                selDataMdl.setData(this.oSelData);
+                if(!this.oSelData.generatedHppn){
+                    this.oSelData.generatedHppn="";
+                }
+                if(!this.oSelData.zbtpMfgGrpComp){
+                    this.oSelData.zbtpMfgGrpComp="";
+                }
+                var that = this;
+                that.oTable = that.byId("itemsTbl");
+                that.oTable.setBusy(true);
+                that.oDataModel = this.getOwnerComponent().getModel();
+                that.oDataModel.callFunction("/multilevelPDS", {
+                    method: "GET",
+                    urlParameters: {"zmpaPartno": this.oSelData.zmpaPartno, "factoryNumber": this.oSelData.factoryNumber},
+                    success: function (oData, response) {
+                       
+
+                       
+                        var data = JSON.parse(oData.multilevelPDS);
+                        var levelVal = data.numOfLevelsExpand-1;
+                        // data = { "children": data };
+                       
+                        // CompDataModel.setProperty("/prodDescItem",data.children[0].PRODDESC);
+                        // CompDataModel.refresh();
+                        
+                        var oModel = new JSONModel(data);
+                        that.oTable.setModel(oModel);
+                        that.oTable.expandToLevel(0);
+                        that.oTable.setBusy(false);
+
+                    },
+                    error: function (oError) {
+                        var msg = JSON.parse(oError.responseText).error.message.value;
+                        that.errorDialog(msg);
+
+                    }
+                });
+
+                //this.byId("title").setText("BOM Display("+data.length+")");
+                //this.getView().setModel(oModel);
+            },
+
+
+
+            onSettingsSelect: function () {
+                this._oTPC.openDialog();
+            },
+            errorDialog: function (msg) {
+                var errorDialog = new sap.m.Dialog({
+                    title: "Error",
+                    state: valueState.Error,
+                    content: new sap.m.Text({ text: msg }).addStyleClass("errorText"),
+                    endButton: new sap.m.Button({
+                        text: "Ok",
+                        press: function () {
+                            errorDialog.close();
+                        }.bind(this)
+                    })
+                });
+                errorDialog.open();
+            },
+
+
+
+
+            onDownloadPress: function () {
+
+                var that = this;
+                var oView = that.getView()
+
+                oView.setBusy(true);
+                var oFilter = [];
+                oFilter[0] = new sap.ui.model.Filter("ZMPAPARTNO", sap.ui.model.FilterOperator.EQ, this.oSelData.zmpaPartno);
+                oFilter[1] = new sap.ui.model.Filter("FACTORYNUMBER", sap.ui.model.FilterOperator.EQ, this.oSelData.factoryNumber);
+
+                that.oDataModel.read("/DownloadBOM", {
+                    filters: oFilter,
+                    success: function (oData, response) {
+
+                        that.onExport(oData.results);
+                        oView.setBusy(false);
+                    },
+                    error: function (oError) {
+
+                        var msg = JSON.parse(oError.responseText).error.message.value;
+                        that.errorDialog(msg);
+                        oView.setBusy(false);
+                    }
+                });
+            },
+
+
+
+
+            createColumnConfig: function () {
+                return [
+                    {
+                        label: 'Level No',
+                        property: 'LEVELNO'
+                    },
+                    {
+                        label: 'Factory Number',
+                        property: 'FACTORYNUMBER'
+                    },
+                    {
+                        label: 'Source Of Supply',
+                        property: 'NODEID'
+                    },
+                    // {
+                    //     label: 'MPA/Factory PN - Parent',
+                    //     property: 'ZMPAPARTNO'
+                    // },
+                    {
+                        label: 'Component Qty',
+                        property: 'QUANTITY'
+                    },
+                    {
+                        label: 'Material Number (HPPN) For Child',
+                        property: 'ZHPPARTNO'
+                    },
+                    {
+                        label: 'BOM Valid From',
+                        property: 'VALIDFROM'
+                    },
+                    {
+                        label: 'BOM Valid To',
+                        property: 'VALIDTO'
+                    },
+                    {
+                        label: 'Component Scrap',
+                        property: 'SCRAP'
+                    },
+                    {
+                        label: 'Activity ID',
+                        property: 'ACTID'
+                    },
+                    {
+                        label: 'Alternative Group',
+                        property: 'ALTITEMGROUP'
+                    },
+                    {
+                        label: 'Unit of Measure',
+                        property: 'UOMALT'
+                    },
+                    {
+                        label: 'Procurement Type',
+                        property: 'PROCUREMENTTYPE'
+                    }
+                    // {
+                    //     label: 'Factory Part Number for Child',
+                    //     property: 'FACTORYCHILDPN'
+                    // },
+                    // {
+                    //     label: 'Manufacturer Part Number(MPN) for Child ',
+                    //     property: 'MPNCHILDPN'
+                    // },
+                    // {
+                    //     label: 'ZPDS Identifier',
+                    //     property: 'ZPDSIDENTIFIER'
+                    // },
+                    // {
+                    //     label: 'Factory PN Description',
+                    //     property: 'PRODDESC'
+                    // },
+                    // {
+                    //     label: 'Sort Sequence',
+                    //     property: 'SORTSEQUENCE'
+                    // },
+                    // {
+                    //     label: 'Parent ID',
+                    //     property: 'PARENTID'
+                    // },
+                    
+                    
+                    
+                   
+                ];
+            },
+
+
+
+            onExport: function (data) {
+                var aCols, items, oSettings, oSheet;
+                var oModel = new JSONModel(data);
+                aCols = this.createColumnConfig();
+                items = oModel.getProperty('/');
+
+                oSettings = {
+                    workbook: { columns: aCols },
+                    dataSource: items,
+                    fileName: "IBP BOM Hierarchy",
+                };
+
+                oSheet = new Spreadsheet(oSettings);
+                oSheet.build()
+                    .then(function () {
+                        MessageToast.show(this.getResourceBundleText("EXP_DONE"));
+                    })
+                    .finally(oSheet.destroy);
+            },
+
+
+
+            highlightFun: function (highlightFlg) {
+                var noneVal = "None", succVal = "Success!!!";
+                if (highlightFlg == "X") {
+                    return succVal;
+                }
+                else
+                    return noneVal;
+            },
+
+           
+
+            
+            onExpandTreeTable:function(oEvent){
+                var that = this;
+                that.oTable = that.byId("itemsTbl");
+                that.oTable.expandToLevel(999);
+
+            },
+
+            
+
+
+            onCollapseTreeTable:function(oEvent){
+                var that = this;
+                that.oTable = that.byId("itemsTbl");
+                that.oTable.collapseAll();
+
+            },
+
+            onInpSubmit: function(oEvent){
+                let row = this.getView().byId("idRowM");
+                row.setMaxRowCount(parseInt(oEvent.getSource().mProperties.value)); 
+            }
+
+
+            
+        });
+    });
+
+
+controller tree structure //app/webapp/controller
+
+sap.ui.define(['sap/ui/thirdparty/jquery'],
+	function(jQuery) {
+	"use strict";
+
+	var treeTableSettings = {
+
+	
+
+
+		getPersData : function () {
+			var oDeferred = new jQuery.Deferred();
+			if (!this._oBundle) {
+				this._oBundle = this.oData;
+			}
+			oDeferred.resolve(this._oBundle);
+			
+			return oDeferred.promise();
+		},
+
+		setPersData : function (oBundle) {
+			var oDeferred = new jQuery.Deferred();
+			this._oBundle = oBundle;
+			oDeferred.resolve();
+			return oDeferred.promise();
+		},delPersData : function (oBundle) {
+        }
+
+	
+		
+	};
+
+	return treeTableSettings;
+
+});
+
+
+base controller //app/webapp/controller
+
+
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/core/UIComponent",
+    "sap/m/MessageBox"
+], function (Controller, UIComponent, MessageBox) {
+    "use strict";
+
+    return Controller.extend("pumorips.ibpbom.psibppdsbom.controller.BaseController", {
+		/**
+		 * Convenience method for accessing the router.
+		 * @public
+		 * @returns {sap.ui.core.routing.Router} the router for this component
+		 */
+
+        getRouter: function () {
+            return UIComponent.getRouterFor(this);
+        },
+
+		/**
+		 * Convenience method for getting the view model by name.
+		 * @public
+		 * @param {string} [sName] the model name
+		 * @returns {sap.ui.model.Model} the model instance
+		 */
+        getModel: function (sName) {
+            return this.getView().getModel(sName);
+        },
+
+		/**
+		 * Convenience method for setting the view model.
+		 * @public
+		 * @param {sap.ui.model.Model} oModel the model instance
+		 * @param {string} sName the model name
+		 * @returns {sap.ui.mvc.View} the view instance
+		 */
+        setModel: function (oModel, sName) {
+            return this.getView().setModel(oModel, sName);
+        },
+
+		/**
+		 * Getter for the resource bundle.
+		 * @public
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundle: function () {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
+        },
+        /**
+		 * Getter for the resource bundle text.
+		 * @public
+         * @param 
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundleText: function (sTextProperty) {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle().getText(sTextProperty);
+        },
+		/**
+		 * Convenience method for displaying error messages
+		 * @public
+		 */
+
+        showMsgBoxError: function (message) {
+            var title = this.getResourceBundle().getText("ErrorDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.ERROR,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+
+        },
+        showMsgBoxSuccess: function (message) {
+            var title = this.getResourceBundle().getText("SuccessDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.SUCCESS,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        showMsgBoxWarning: function (message) {
+            var title = this.getResourceBundle().getText("WarningDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.WARNING,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        showMsgBoxInformation: function (message) {
+            var title = "Information"
+            var title = this.getResourceBundle().getText("InformationDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.INFORMATION,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        /**
+		 * Convenience method for getting the user details 
+		 * @public
+		 */
+        _getUserInfoService: function () {
+            return new Promise(resolve => sap.ui.require([
+                "sap/ushell/library"
+            ], oSapUshellLib => {
+                const oContainer = oSapUshellLib.Container;
+                const pService = (oContainer) ? oContainer.getServiceAsync("UserInfo") : ""; // .getService is deprecated!
+                resolve(pService);
+            }));
+        }
+
+    });
+
+});
+
+
+
+app/psibppdsbom/webapp/manifest.json
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+      "id": "pumorips.ibpbom.psibppdsbom",
+      "type": "application",
+      "i18n": "i18n/i18n.properties",
+      "applicationVersion": {
+          "version": "0.0.1"
+      },
+      "title": "{{appTitle}}",
+      "description": "{{appDescription}}",
+      "resources": "resources.json",
+      "sourceTemplate": {
+          "id": "@sap/generator-fiori:basic",
+          "version": "1.13.3",
+          "toolsId": "9c5eb15b-aa7b-4b22-b8e3-607ea0940c91"
+      },
+      "dataSources": {
+          "mainService": {
+              "uri": "srv-api/v2/ibp-bom/",
+              "type": "OData",
+              "settings": {
+                  "annotations": [],
+                  "localUri": "localService/metadata.xml",
+                  "odataVersion": "2.0"
+              }
+          }
+      },
+      "crossNavigation": {
+        "inbounds": {
+          "psibppdsbom-display": {
+            "semanticObject": "psibppdsbom",
+            "action": "display",
+            "title": "{{flpTitle}}",
+            "signature": {
+              "parameters": {},
+              "additionalParameters": "allowed"
+            }
+          }
+        }
+      }
+  },
+  "sap.ui": {
+      "technology": "UI5",
+      "icons": {
+          "icon": "",
+          "favIcon": "",
+          "phone": "",
+          "phone@2": "",
+          "tablet": "",
+          "tablet@2": ""
+      },
+      "deviceTypes": {
+          "desktop": true,
+          "tablet": true,
+          "phone": true
+      }
+  },
+  "sap.ui5": {
+      "flexEnabled": true,
+      "dependencies": {
+          "minUI5Version": "1.123.1",
+          "libs": {
+              "sap.m": {},
+              "sap.ui.core": {},
+              "sap.f": {},
+              "sap.suite.ui.generic.template": {},
+              "sap.ui.comp": {},
+              "sap.ui.generic.app": {},
+              "sap.ui.table": {},
+              "sap.ushell": {}
+          }
+      },
+      "contentDensities": {
+          "compact": true,
+          "cozy": true
+      },
+      "models": {
+          "i18n": {
+              "type": "sap.ui.model.resource.ResourceModel",
+              "settings": {
+                  "bundleName": "pumorips.ibpbom.psibppdsbom.i18n.i18n"
+              }
+          },
+          "": {
+              "dataSource": "mainService",
+              "preload": true,
+              "settings": {
+                  "synchronizationMode": "None",
+                  "operationMode": "Server",
+                  "autoExpandSelect": true,
+                  "earlyRequests": true
+              }
+          },
+            "selData": {
+            "type": "sap.ui.model.json.JSONModel"
+            },
+            "CompDataModel": {
+            "type": "sap.ui.model.json.JSONModel"
+            }
+
+      },
+      "resources": {
+          "css": [
+              {
+                  "uri": "css/style.css"
+              }
+          ]
+      },
+      "routing": {
+          "config": {
+              "routerClass": "sap.m.routing.Router",
+              "viewType": "XML",
+              "async": true,
+              "viewPath": "pumorips.ibpbom.psibppdsbom.view",
+              "controlAggregation": "pages",
+              "controlId": "app",
+              "clearControlAggregation": false
+          },
+          "routes": [
+              {
+                  "name": "Routepsibppdsview",
+                  "pattern": "",
+                  "target": [
+                      "Targetpsibppdsview"
+                  ]
+              },
+              {
+                "name": "ibppdsdetail",
+                "pattern": "ibppdsdetail/{obj}",
+                "target": [
+                    "Targetibppdsdetail"
+                ]
+            }
+          ],
+          "targets": {
+              "Targetpsibppdsview": {
+                  "viewType": "XML",
+                  "transition": "slide",
+                  "clearControlAggregation": false,
+                  "viewId": "psibppdsview",
+                  "viewName": "psibppdsview"
+              },
+              "Targetibppdsdetail": {
+                "viewType": "XML",
+                "transition": "slide",
+                "clearControlAggregation": false,
+                "viewId": "ibppdsID",
+                "viewName": "ibppdsdetails"
+            }
+          }
+      },
+      "rootView": {
+          "viewName": "pumorips.ibpbom.psibppdsbom.view.App",
+          "type": "XML",
+          "async": true,
+          "id": "App"
+      }
+  },
+  "sap.cloud": {
+      "public": true,
+      "service": "psibp_bomdisplay"
+  }
+}
+
+
+
+
+
+
+
+
+services.cds file //app/
+
+using from './psibppdsbom/annotations';
+
+// annotate IbpBomService.BOMHeaderPDSIdentifierView with @(Capabilities: {FilterRestrictions: {FilterExpressionRestrictions: [
+//     {
+//         $Type             : 'Capabilities.FilterExpressionRestrictionType',
+//         Property          : bomValidFrom,
+//         AllowedExpressions: 'SingleValue'
+//     },
+//     {
+//         $Type             : 'Capabilities.FilterExpressionRestrictionType',
+//         Property          : bomValidTo,
+//         AllowedExpressions: 'SingleValue'
+//     }
+// ]}});
+
+annotate IbpBomService.zmpaPartnoValueHelp with {
+    zmpaPartno @(title: '{i18n>MPA_FPN_P}');
+}
+
+annotate IbpBomService.zbtpCompValueHelp with {
+    zbtpComp   @(title: '{i18n>zbtpComp}');
+}
+
+annotate IbpBomService.factoryNumberValueHelp with {
+    factoryNumber @(title: '{i18n>facCode}');
+}
+
+annotate IbpBomService.prodDescValueHelp with {
+    prodDesc @(title: '{i18n>MPA_PN_DESC}');
+}
+
+annotate IbpBomService.zhpPartnoValueHelp with {
+    zhpPartno @(title: '{i18n>MAT_NUM_HPPN}');
+}
+
+annotate IbpBomService.alternativeBomValueHelp with {
+    alternativeBom @(title: '{i18n>altbom}');
+}
+
+annotate IbpBomService.baseunitofMeasureValueHelp with {
+    baseunitofMeasure @(title: '{i18n>buom}');
+}
+
+annotate IbpBomService.planningDivValueHelp with {
+    planningDiv @(title: '{i18n>busType}');
+}
+
+annotate IbpBomService.BOMHeaderPDSIdentifierView with {
+    zmpaPartno        @(title: '{i18n>MPA_FPN_P}');
+    prodDesc          @(title: '{i18n>MPA_PN_DESC}');
+    zhpPartno         @(title: '{i18n>MAT_NUM_HPPN}');
+    factoryNumber     @(title: '{i18n>facCode}');
+    baseQuantity      @(title: '{i18n>BOM_BaseUOM}');
+    baseunitofMeasure @(title: '{i18n>buom}');
+    bomValidFrom      @(title: '{i18n>BOM_VALID_FRM}');
+    bomValidTo        @(title: '{i18n>BOM_VALID_TO}');
+    planningDiv       @(title: '{i18n>busType}');
+    markedForDeletion @(title: '{i18n>MARKED_FOR_DEL}');
+    @UI.HiddenFilter
+    bomImportDate     @(title: '{i18n>bomImpDate}');
+    bomVersion        @(title: '{i18n>BOM_VERSION}');
+    @UI.HiddenFilter
+    zpdsIdentifier    @(title: '{i18n>ZPDS_IDENTIFIER}');
+    alternativeBom    @(title: '{i18n>altbom}');
+    yield             @(title: '{i18n>yield}');
+    zbtpComp          @(title: '{i18n>zbtpComp}');
+    @UI.HiddenFilter markedForDeletion;
+    @UI.Hidden markedForDeletion;
+    @UI.Hidden zpdsIdentifier;
+    @UI.HiddenFilter baseunitofMeasure;
+    @UI.Hidden baseunitofMeasure;
+}
+
+annotate IbpBomService.BOMHeaderPDSIdentifierView with @(UI: {
+    SelectionFields: [
+        zmpaPartno,
+        factoryNumber,
+        prodDesc,
+        bomVersion,
+        zhpPartno,
+        planningDiv
+    ],
+    LineItem       : [
+        {
+            Value: zmpaPartno,
+            Label: '{i18n>MPA_FPN_P}'
+        },
+        {
+            Value: factoryNumber,
+            Label: '{i18n>facCode}'
+        },
+        {
+            Value: prodDesc,
+            Label: '{i18n>MPA_PN_DESC}'
+        },
+        {
+            Value: zbtpComp,
+            Label: '{i18n>zbtpComp}'
+        },
+        {
+            Value: bomVersion,
+            Label: '{i18n>BOM_VERSION}'
+        },
+        {
+            Value: zhpPartno,
+            Label: '{i18n>MAT_NUM_HPPN}'
+        },
+        {
+            Value: bomValidFrom,
+            Label: '{i18n>BOM_VALID_FRM}'
+        },
+        {
+            Value: bomValidTo,
+            Label: '{i18n>BOM_VALID_TO}'
+        },
+        {
+            Value: baseQuantity,
+            Label: '{i18n>BOM_BaseUOM}'
+        },
+        {
+            Value: alternativeBom,
+            Label: '{i18n>altbom}'
+        },
+        {
+            Value: bomImportDate,
+            Label: '{i18n>bomImpDate}'
+        },
+        {
+            Value: zpdsIdentifier,
+            Label: '{i18n>ZPDS_IDENTIFIER}'
+        }
+        
+    ]
+}) {
+    zmpaPartno        @(Common: {
+        Text     : {
+            $value                : zmpaPartno,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : '{i18n>MPA_FPN_P}',
+            CollectionPath : 'zmpaPartnoValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: zmpaPartno,
+                ValueListProperty: 'zmpaPartno'
+            }]
+        }
+    });
+    zbtpComp        @(Common: {
+        Text     : {
+            $value                : zbtpComp,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : '{i18n>MPA_FPN_P}',
+            CollectionPath : 'zbtpCompValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: zbtpComp,
+                ValueListProperty: 'zbtpComp'
+            }]
+        }
+    });
+    factoryNumber     @(Common: {
+        Text     : {
+            $value                : factoryNumber,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : '{i18n>facCode}',
+            CollectionPath : 'factoryNumberValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: factoryNumber,
+                ValueListProperty: 'factoryNumber'
+            }]
+        }
+    });
+    bomVersion        @(Common: {
+        Text     : {
+            $value                : bomVersion,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : '{i18n>BOM_VERSION}',
+            CollectionPath : 'bomVersionValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: bomVersion,
+                ValueListProperty: 'bomVersion'
+            }]
+        }
+    });
+    prodDesc          @(Common: {
+        Text     : {
+            $value                : prodDesc,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : '{i18n>MPA_PN_DESC}',
+            CollectionPath : 'prodDescValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: prodDesc,
+                ValueListProperty: 'prodDesc'
+            }]
+        }
+    });
+    zhpPartno         @(Common: {
+        Text     : {
+            $value                : zhpPartno,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : '{i18n>MAT_NUM_HPPN}',
+            CollectionPath : 'zhpPartnoValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: zhpPartno,
+                ValueListProperty: 'zhpPartno'
+            }]
+        }
+    });
+    alternativeBom    @(Common: {
+        Text     : {
+            $value                : alternativeBom,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : '{i18n>altbom}',
+            CollectionPath : 'alternativeBomValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: alternativeBom,
+                ValueListProperty: 'alternativeBom'
+            }]
+        }
+    });
+    baseunitofMeasure @(Common: {
+        Text     : {
+            $value                : baseunitofMeasure,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : '{i18n>buom}',
+            CollectionPath : 'baseunitofMeasureValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: baseunitofMeasure,
+                ValueListProperty: 'baseunitofMeasure'
+            }]
+        }
+    });
+    planningDiv       @(Common: {
+        Text     : {
+            $value                : planningDiv,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : '{i18n>busType}',
+            CollectionPath : 'planningDivValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: planningDiv,
+                ValueListProperty: 'planningDiv'
+            }]
+        },
+        ValueListWithFixedValues: true
+    });
+
+};
+
+
+
+
+Service.js //srv/
+
+
+// //-----------------------------------------------------------------------------------*
+// //Confidential and Proprietary
+// //Copyright 2024, HP
+// //All Rights Reserved
+// //-----------------------------------------------------------------------------------*
+// // Application Name :    BOM IBP Display
+// // WRICEF No        : 
+// // Release          :    
+// // Author           :    varun.pathipaka1
+// // Date             :    07.05.2024
+// // Description      :    Display IBP BOM
+// //-----------------------------------------------------------------------------------*
+// //Descriptions: Holds logic for services
+// //-----------------------------------------------------------------------------------*
+// //Change Log:
+// //    Date      |   Author      |   Defect/Incident     |   Change Description
+// //------------------------------------------------------------------------------------*/
+
+const cds = require('@sap/cds');
+cds.env.features.assert_integrity = false;
+const TextBundle = require('@sap/textbundle').TextBundle;
+const bundle = new TextBundle('./_i18n/i18n');
+const hdbext = require("@sap/hdbext");
+const dbclass = require("sap-hdbext-promisfied");
+const express = require('express');
+
+const { IbpProductionHead, IbpProductionComponent, IbpBOMHeaderTrack } = cds.entities('pumori.ibpbom');
+const { BOMHeaderView, BOMStructureViewLatest, BOMHeaderViewLatest, syn_BOMHeader, syn_BOMStructure, syn_BTPFlattenedBOM } = cds.entities('pumori.ibpbom');
+const {
+    SUCCESS_STATUS_CODE,
+    RESULT_STATUS_CODE,
+    ACCEPT_STATUS_CODE, CONSTPROPS } = require('./constants');
+const { handleAsyncJob } = require('./helper');
+
+
+module.exports = cds.service.impl(async function () {
+
+
+
+
+    //     /************************Multilevel PDS ***********************************************/
+
+    function _convertToNestedJson(arr) {
+        let arrMap = new Map(arr.map(item => [item.NODEID, item]));
+        let tree = [];
+        arr[0].LEVELNO = 0;
+        tree.push(arr[0]);
+
+        for (let i = 1; i < arr.length; i++) {
+            let item = arr[i];
+
+            if (item.PARENTID !== null) {
+                let parentItem = arrMap.get(item.PARENTID);
+                if (parentItem) {
+                    let { children } = parentItem;
+                    item.LEVELNO = parentItem.LEVELNO + 1;
+                    if (children) {
+                        parentItem.children.push(item);
+                    } else {
+                        parentItem.children = [item];
+                    }
+                }
+            } else {
+                item.LEVELNO = 1;
+                tree.push(item);
+            }
+        }
+
+        return tree;
+    }
+
+
+    function _orderArray(array) {
+        let orderArr = [];
+        orderArr.push(array.pop());
+        let stack = array.filter(elem => elem.SORTSEQUENCE == 1);
+
+        while (stack.length != 0) {
+            let poppedElem = stack.pop();
+            orderArr.push(poppedElem);
+            let childs = array.filter(elem => elem.PARENTID == poppedElem.NODEID);
+            if (childs.length != 0) {
+                stack = stack.concat(childs);
+            }
+        }
+
+        return orderArr;
+    }
+
+    function _getNodeId(arr) {
+        let arrMap = new Map(arr.map(item => [item.NODEID, item]));
+        let tree = [];
+        arr[0].LEVELNO = 0;
+        tree.push(arr[0]);
+
+        for (let i = 1; i < arr.length; i++) {
+            let item = arr[i];
+
+            if (item.PARENTID !== null) {
+                let parentItem = arrMap.get(item.PARENTID);
+                if (parentItem) {
+                    item.LEVELNO = parentItem.LEVELNO + 1;
+                    tree.push(item);
+                }
+            } else {
+                item.LEVELNO = 1;
+                tree.push(item);
+            }
+        }
+
+        return tree;
+    }
+
+    this.on('multilevelPDS', async (req) => {
+        const tx = cds.transaction(req);
+        const { zmpaPartno, factoryNumber } = req.data;
+        try {
+            //Call procedure to get PDS header and its respective components
+            let db = await cds.connect.to('db');
+            let dbConn = new dbclass(await dbclass.createConnection(db.options.credentials));
+            let sp = await dbConn.loadProcedurePromisified(hdbext, null, "ibpmultilevelpds");
+            let output = await dbConn.callProcedurePromisified(sp, { "I_ZMPAPARTNO": zmpaPartno, "I_FACTORYNUMBER": factoryNumber });
+
+            db = null;
+            dbConn = null;
+            headers = null;
+            sp = null;
+            // Sort the PDS items to be in order
+            let orderedArray = _orderArray(output.results);
+            //Convert PDS into tree format
+            let convertedNestedJson = _convertToNestedJson(orderedArray);
+            return JSON.stringify(convertedNestedJson);
+        } catch (error) {
+            return req.error(417, error.message);
+        }
+    });
+
+    this.on('READ', 'DownloadBOM', async (req) => {
+        const tx = cds.transaction(req);
+        //capture the payload
+        const payloadFilterString = req._query.$filter;
+        const apayload = payloadFilterString.split('and');
+        let zmpaPartno = apayload[0].split(`'`)[1];
+        let factoryNumber = apayload[1].split(`'`)[1];
+        //let zpdsIdentifier = apayload[2].split(`'`)[1];
+        try {
+            //Call procedure to get PDS header and its respective components
+            let db = await cds.connect.to('db');
+            let dbConn = new dbclass(await dbclass.createConnection(db.options.credentials));
+            let sp = await dbConn.loadProcedurePromisified(hdbext, null, "ibpmultilevelpds");
+            let output = await dbConn.callProcedurePromisified(sp, { "I_ZMPAPARTNO": zmpaPartno, "I_FACTORYNUMBER": factoryNumber});
+
+            db = null;
+            dbConn = null;
+            headers = null;
+            sp = null;
+            // Sort the PDS items to be in order
+            let orderedArray = _orderArray(output.results);
+            //Convert PDS into tree format
+            let JsonArray = _getNodeId(orderedArray);
+            return JsonArray;
+        } catch (error) {
+            return req.error(417, error.message);
+        }
+    });
+
+    /*********************** Background job schedular for schedularJob ***********************/
+    this.on('GeneratePDS', async (req) => {
+        let aError = [];
+        try {
+            req.notify(ACCEPT_STATUS_CODE, bundle.getText('longRunAccept'));
+            // afterwards the actual processing
+            let finalResult = await handleAsyncJob(req.headers, req, aError);
+            return finalResult;
+        } catch (error) {
+            aError.push(error.message);
+            return req.error(400, error.message);
+        }
+    });
+
+})
+
+
+
+xs security.json
+
+
+{
+  "xsappname": "pumorips_ibpbom",
+  "tenant-mode": "dedicated",
+  "description": "Security profile of called application",
+  "scopes": [
+    {
+      "name": "uaa.user",
+      "description": "UAA"
+    },
+    {
+      "name": "$XSAPPNAME.scopeformyapp",
+      "description": "Users of display ibp bom need this special role",
+      "grant-as-authority-to-apps": [
+          "$XSSERVICENAME(pumori_job-scheduling-service)"
+      ]
+  }
+  ],
+  "role-templates": [
+    {
+      "name": "Token_Exchange",
+      "description": "UAA",
+      "scope-references": [
+        "uaa.user"
+      ]
+    },
+    {
+      "name": "RoleTemplateForPumoriPSIbpBomApp",
+      "description": "Users of pumoriPS ibp bom app need this special role",
+      "default-role-name": "Pumori IBP Role",
+      "scope-references": [
+          "$XSAPPNAME.scopeformyapp"
+      ]
+    }
+  ],
+  "role-collections": [
+    {
+        "name": "app_job_schedular_ps_ibpbom_app",
+        "description": "job schedular",
+        "role-template-references": [
+            "$XSAPPNAME.scopeformyapp"
+        ]
+    }
+]
+}
+
+
+mta.yaml
+
+_schema-version: "3.1"
+ID: pumorips_ibpbom
+description: A simple CAP project.
+version: 1.0.0
+modules:
+- name: pumorips_ibpbom-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: PUMORIPS_IBPBOM
+  - name: uaa_pumorips_ibpbom
+  - name: pumori_job-scheduling-service
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+    readiness-health-check-http-endpoint: /health
+    readiness-health-check-type: http
+  build-parameters:
+    builder: npm
+    ignore : ["node_modules/"]
+- name: pumorips_ibpbom-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: PUMORIPS_IBPBOM
+    properties:
+      TARGET_CONTAINER: PUMORIPS_IBPBOM
+  - name: pumoriproduct-grantor
+    group: SERVICE_REPLACEMENTS
+    properties:
+      key: logical-pumoriproduct-grantor
+      service: ~{pumoriproduct-grantor-service}
+  - name: displaybom-grantor
+    group: SERVICE_REPLACEMENTS
+    properties:
+      key: logical-displaybom-grantor
+      service: ~{displaybom-grantor-service}
+  - name: facprod-grantor
+    group: SERVICE_REPLACEMENTS
+    properties:
+      key: logical-facprod-grantor
+      service: ~{facprod-grantor-service}
+  parameters:
+    buildpack: nodejs_buildpack
+- name: pumorips_ibpbom-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: pumorips_ibpbom-destination-service
+    parameters:
+      content-target: true
+  - name: pumorips_ibpbom_html_repo_host
+    parameters:
+      service-key:
+        name: pumorips_ibpbom_html_repo_host-key
+  - name: uaa_pumorips_ibpbom
+    parameters:
+      service-key:
+        name: uaa_pumorips_ibpbom-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: psibp_bomdisplay_pumorips_ibpbom_html_repo_host
+          ServiceInstanceName: pumorips_ibpbom-html5-app-host-service
+          ServiceKeyName: pumorips_ibpbom_html_repo_host-key
+          sap.cloud.service: psibp_bomdisplay
+        - Authentication: OAuth2UserTokenExchange
+          Name: psibp_bomdisplay_uaa_pumorips_ibpbom
+          ServiceInstanceName: pumorips_ibpbom-xsuaa-service
+          ServiceKeyName: uaa_pumorips_ibpbom-key
+          sap.cloud.service: psibp_bomdisplay
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: pumorips_ibpbom-app-content
+  type: com.sap.application.content
+  path: app
+  requires:
+  - name: pumorips_ibpbom_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - pumoripsibpbompsibppdsbom.zip
+      name: pumoripsibpbompsibppdsbom
+      target-path: resources/
+- name: pumoripsibpbompsibppdsbom
+  type: html5
+  path: app/psibppdsbom
+  requires:
+    - name: uaa_pumorips_ibpbom
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: PUMORIPS_IBPBOM
+  type: com.sap.xs.hdi-container
+  parameters:
+    config:
+      schema: PUMORIPS_IBPBOM
+    service: hana
+    service-plan: hdi-shared
+- name: pumorips_ibpbom-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            HTML5.DynamicDestination: true
+            HTML5.ForwardAuthToken: true
+            Name: pumorips_ibpbom-srv-api
+            ProxyType: Internet
+            Type: HTTP
+            URL: ~{srv-api/srv-url}
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: pumorips_ibpbom-destination-service
+    service-plan: lite
+  requires:
+  - name: srv-api
+- name: pumorips_ibpbom_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: pumorips_ibpbom-html5-app-host-service
+    service-plan: app-host
+- name: uaa_pumorips_ibpbom
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: pumorips_ibpbom-xsuaa-service
+    service-plan: application
+- name: pumori_job-scheduling-service
+  type: org.cloudfoundry.existing-service
+  parameters:
+    config:
+      enable-xsuaa-support: true
+    service: jobscheduler
+    service-plan: standard
+    service-name: pumori_job-scheduling-service
+- name: pumoriproduct-grantor
+  type: org.cloudfoundry.existing-service
+  parameters:
+    service-name: PUMORIPS_PRODUCT
+  properties:
+    pumoriproduct-grantor-service: ${service-name}
+- name: displaybom-grantor
+  type: org.cloudfoundry.existing-service
+  parameters:
+    service-name: PUMORIPS_BOMDISP
+  properties:
+    displaybom-grantor-service: ${service-name}
+- name: facprod-grantor
+  type: org.cloudfoundry.existing-service
+  parameters:
+    service-name: PUMORIPS_FACPROD
+  properties:
+    facprod-grantor-service: ${service-name}
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npx cds build --production
+
+
+
+package.json
+
+
+{
+  "name": "pumorips_ibpbom",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap/cds": "^6",
+    "@sap/cds-hana": "^2",
+    "@sap/cds-odata-v2-adapter-proxy": "^1.9.7",
+    "@sap/hana-client": "^2.19.21",
+    "@sap/hdbext": "^8.0.3",
+    "@sap/hdi-deploy": "^4.9.2",
+    "@sap/textbundle": "^4.3.0",
+    "@sap/xsenv": "^4.2.0",
+    "@sap/xssec": "3.6.1",
+    "express": "^4",
+    "hdb": "^0.19.8",
+    "passport": "^0",
+    "sap-hdbext-promisfied": "^2.202402.1"
+  },
+  "devDependencies": {
+    "@sap/cds-dk": "^7",
+    "@sap/ux-specification": "^1.120.6",
+    "rimraf": "^3.0.2"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch-psibppdsbom": "cds watch --open psibppdsbom/webapp/index.html?sap-ui-xx-viewCache=false",
+    "undeploy": "cf undeploy pumorips_ibpbom --delete-services --delete-service-keys --delete-service-brokers",
+    "build": "rimraf resources mta_archives && mbt build --mtar archive",
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "hana"
+      },
+      "uaa": {
+        "kind": "xsuaa"
+      }
+    },
+    "auth": {
+      "passport": {
+        "strategy": "JWT"
+      }
+    },
+    "hana": {
+      "deploy-format": "hdbtable"
+    }
+  },
+  "sapux": [
+    "app/psibppdsbom"
+  ]
+}
+
+
+server .js //srv/
+
+"use strict";
+const cds = require("@sap/cds");
+const proxy = require("@sap/cds-odata-v2-adapter-proxy");
+cds.on("bootstrap", app => app.use(proxy()));
+module.exports = cds.server;
+
+
+schedular.js 
+
+
+const TextBundle = require('@sap/textbundle').TextBundle;
+const bundle = new TextBundle('../_i18n/i18n');
+const passport = require('passport');
+const xsenv = require('@sap/xsenv');
+const JWTStrategy = require('@sap/xssec').JWTStrategy;
+//configure passport
+const xsuaaService = xsenv.getServices({ myXsuaa: { tag: 'xsuaa' } });
+const xsuaaCredentials = xsuaaService.myXsuaa;
+const jwtStrategy = new JWTStrategy(xsuaaCredentials);
+passport.use(jwtStrategy);
+// configure express server with authentication middleware
+const express = require('express');
+const app = express();
+app.use(passport.initialize());
+app.use(passport.authenticate('JWT', { session: false }));
+const https = require('https');
+// access credentials from environment variable (alternatively use xsenv)
+const VCAP_SERVICES = JSON.parse(process.env.VCAP_SERVICES)
+const CREDENTIALS = VCAP_SERVICES.jobscheduler[0].credentials
+//oauth
+const UAA = CREDENTIALS.uaa
+const OA_CLIENTID = UAA.clientid;
+const OA_SECRET = UAA.clientsecret;
+const OA_ENDPOINT = UAA.url;
+const { SUCCESS_STATUS_CODE, RESULT_STATUS_CODE, ACCEPT_STATUS_CODE } = require('../constants');
+
+
+/********************Set the status in Jobscheduler***********************/
+const doUpdateStatus = function (headers, success, message) {
+    return new Promise((resolve, reject) => {
+        return fetchJwtToken(OA_CLIENTID, OA_SECRET)
+            .then((jwtToken) => {
+                const jobId = headers['x-sap-job-id']
+                const scheduleId = headers['x-sap-job-schedule-id']
+                const runId = headers['x-sap-job-run-id']
+                const host = headers['x-sap-scheduler-host']
+                const data = JSON.stringify({ success: success, message: JSON.stringify(message) })
+                const options = {
+                    host: host.replace('https://', ''),
+                    path: `/scheduler/jobs/${jobId}/schedules/${scheduleId}/runs/${runId}`,
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Content-Length': data.length,
+                        Authorization: 'Bearer ' + jwtToken
+                    }
+                }
+                const req = https.request(options, (res) => {
+                    res.setEncoding('utf8')
+                    const status = res.statusCode
+                    if (status !== SUCCESS_STATUS_CODE && status !== RESULT_STATUS_CODE && status !== ACCEPT_STATUS_CODE) {
+                        return reject(new Error(bundle.getText('updateStatusErr')))
+                    }
+                    res.on('data', () => {
+                        console.log(bundle.getText('callJobSuccess'))
+                        resolve(message)
+                    })
+                });
+                req.on('error', (error) => {
+                    console.log(bundle.getText('errCallJob'))
+                    return reject({ error: error })
+                });
+                req.write(data)
+                req.end()
+            })
+            .catch((error) => {
+                console.log(error)
+                reject(error)
+            })
+    })
+}
+/***********************JWT token required for calling REST API ***********************/
+const fetchJwtToken = function (clientId, clientSecret) {
+    return new Promise((resolve, reject) => {
+        const options = {
+            host: OA_ENDPOINT.replace('https://', ''),
+            path: '/oauth/token?grant_type=client_credentials&response_type=token',
+            headers: {
+                Authorization: "Basic " + Buffer.from(clientId + ':' + clientSecret).toString("base64")
+            }
+        }
+        https.get(options, res => {
+            res.setEncoding('utf8')
+            let response = ''
+            res.on('data', chunk => {
+                response += chunk
+            })
+            res.on('end', () => {
+                try {
+                    const responseAsJson = JSON.parse(response)
+                    const jwtToken = responseAsJson.access_token
+                    if (!jwtToken) {
+                        return reject(new Error(bundle.getText('errFetchToken')))
+                    }
+                    resolve(jwtToken)
+                } catch (error) {
+                    return reject(new Error(bundle.getText('errFetchToken')))
+                }
+            })
+        })
+            .on("error", (error) => {
+                console.log("Error: " + error.message);
+                return reject({ error: error })
+            });
+    })
+}
+
+
+module.exports = {
+    doUpdateStatus
+}
+
+
+helper.js 
+
+const TextBundle = require('@sap/textbundle').TextBundle;
+const bundle = new TextBundle('./_i18n/i18n');
+const { doUpdateStatus } = require('./jobscheduler/scheduler');
+const { _callHdbProcedure } = require('./validation');
+const { BOMHeaderViewLatest, BOMStructureViewLatest } = cds.entities('pumorips.ibpbom');
+const { ERROR_STATUS_CODE } = require('./constants');
+
+
+/************************Handle job for TransferJob *******************************/
+const handleAsyncJob = async function (headers, req, aError) {
+    try {
+        let result = await operationMasterUpload(req, aError)
+        if ((typeof result !== 'undefined') && (result !== null)) {
+            await doUpdateStatus(headers, true, result)
+            return result;
+        } else {
+            await operationMasterUpload(req, aError)
+        }
+    } catch (error) {
+        doUpdateStatus(headers, false, error.message)
+            .then(() => {
+                console.log(bundle.getText('successResJob'))
+            }).catch((error) => {
+                console.log(bundle.getText('errResJob') + error)
+            })
+    }
+}
+
+/***********************Operation for TransferJob *******************************/
+const operationMasterUpload = async function (req, aError) {
+    try {
+        const tx = cds.transaction(req);
+        const ibpheaderandComponentUpload = await insertIbpheaderComponent(req, tx, aError);
+        if (aError.length > 0) {
+            return aError;
+        } else {
+            return ibpheaderandComponentUpload;
+        }
+
+    } catch (error) {
+        aError.push(error.message);
+        return req.error(400, error.message);
+    }
+}
+
+
+const insertIbpheaderComponent = async function (req, tx, aError) {
+    let aIbpComponentItems = [];
+    try {
+        let structHeaderData = [];
+        let aInputToProcedure = [];
+        let sFactoryNumber = req.data.FactoryNumber;
+        let aFactoryNumber = [];
+        if (sFactoryNumber != null && sFactoryNumber != '') {
+            aFactoryNumber = sFactoryNumber.split(",");
+            aFactoryNumber.map(item => {
+                let o1 = {};
+                o1.FACTORYNUMBER = item;
+                aInputToProcedure.push(o1);
+            });
+            structHeaderData = await cds.run(SELECT.from(BOMHeaderViewLatest).where({ factoryNumber: aFactoryNumber })).catch((error) => req.error({ code: 400, message: error.message }));
+        } 
+        else {
+            structHeaderData = await cds.run(SELECT.from(BOMHeaderViewLatest));
+        }
+        let structData = [];
+        let structDatastrat = [];
+        let strategicData = [];
+        let btpmfgdata = [];
+        let refactoredData = [];
+        let parentChildData = [];
+        let parentchildStrategicData = [];
+        let aBTPMFGGRPRPNTrack = [];
+        let bomIBPComponents = [];
+        let dupMat = [];
+        let bomIBPHeaders = [];
+        let bomIBPHeaderTracks = [];
+
+        for (let record = 0; record < structHeaderData.length; record++) {
+            //bomIBPComponents = [];
+            structData = await cds.run(SELECT.from(BOMStructureViewLatest).where({ zmpaPartno: structHeaderData[record].zmpaPartno, factoryNumber: structHeaderData[record].factoryNumber, bomVersion: structHeaderData[record].bomVersion }).orderBy('lineNoSequence'));
+            //If Bom do not have any valid component.Do not consider that BOM for PDS
+            structDatastrat = structData.filter(x => x.strategicAutoFlag == 'X' && new Date(x.componentValidTo).getTime() >= new Date() && x.phantomBOM !== 'Y');
+            if (structDatastrat.length == 0) {
+                continue;
+            }
+            let structDataUom = structData.filter(x => x.materialtypeBTP == 'FERT');
+            if (structDataUom.length > 0) {
+                if (structDataUom[0].uomAltBTP != structDataUom[0].uomAlt) {
+                    let normalize = (1 / structDataUom[0].untUsgBTP);
+                    structData = structData.map(obj => {
+                        return { ...obj, untUsgBTP: parseFloat(obj.untUsgBTP * normalize).toFixed(3) };
+                    });
+                }
+            }
+            //Establish parent-child relation 
+            parentChildData = await getParentChild(structData, req);
+            parentstrategic = await getParentStrategic(parentChildData);
+            parentchildStrategicData = parentChildData.filter(x => x.strategicAutoFlag == 'X' && new Date(x.componentValidTo).getTime() >= new Date() && x.phantomBOM !== 'Y' && x.CalQtyPDS > 0.000);
+
+            let posNr = 0;
+            dupMat = [];
+            for (let parentChilditem of parentchildStrategicData) {
+                if (parentChilditem.materialtypeBTP === 'FERT' || parentChilditem.materialtypeBTP === 'HALB') {
+                    bomIBPHeaders.push(ibpProductionHeaderObject(parentChilditem));
+                    bomIBPHeaderTracks.push(ibpProductionHeaderTrackObject(parentChilditem));
+                }
+                if (parentChilditem.materialtypeBTP === 'FERT')
+                    continue;
+                generateIBPComponent(bomIBPComponents, aIbpComponentItems, dupMat, parentChilditem, parentChilditem.genHPPNBelongs, parentChilditem.generatedHppn, parentChilditem.CalQtyPDS);
+
+            }
+
+
+            structData = [];
+            structDatastrat = [];
+            strategicData = [];
+            btpmfgdata = [];
+            refactoredData = [];
+            parentChildData = [];
+            parentchildStrategicData = [];
+            aBTPMFGGRPRPNTrack = [];
+            // bomIBPComponents = [];
+            dupMat = [];
+
+        }
+        const output = await _callHdbProcedure("ibpgeneration", { "DELTA_INPUT": aInputToProcedure, "I_IBPHEADER": bomIBPHeaders, "I_IBPSTRUCTURE": bomIBPComponents, "I_IBPHEADERTRACK": bomIBPHeaderTracks });
+        structHeaderData = [];
+
+        structData = null;
+        structDatastrat = null;
+        strategicData = null;
+        btpmfgdata = null;
+        refactoredData = null;
+        parentChildData = null;
+        parentchildStrategicData = null;
+        aBTPMFGGRPRPNTrack = null;
+        bomIBPComponents = null;
+        db = null;
+        dbConn = null;
+        sp = null;
+        let msg = "Successful Insertion in IBP Header." + " PDS Headers generated = " + output.outputScalar.INSERTED_HEADER_ROWS + " **** " + " Successful Insertion in IBP Component. " + "PDS components generated = " + output.outputScalar.INSERTED_COMPONENT_ROW;
+        return msg;
+    } catch (error) {
+        aError.push(error.message);
+        return req.error(400, error.message);
+    }
+}
+
+
+/*********************** function to validate and create IBP component ***********************/
+function generateIBPComponent(bomIBPComponents, aIbpComponentItems, dupMat, parentChilditem, pposidMaterial, checkDupParam, IBPMarketShareParam) {
+    let ppsosId = parentChilditem.factoryNumber + "_" + pposidMaterial + "_" + '001';
+    let isPpssoidExists = aIbpComponentItems.filter(x => x.PPSOSID === ppsosId);
+    let dupSortstring = isPpssoidExists.filter(x => x.LINENO == parentChilditem.lineNo);
+    let dupIbpComp = aIbpComponentItems.filter(x => x.PPSOSID === ppsosId && x.MATNR === checkDupParam);
+    if (dupIbpComp.length === 0) {
+        if (isPpssoidExists.length === 0) {
+            posNr = 10;
+        } else {
+            if (dupSortstring == 0) {
+                let uniquelineno = isPpssoidExists.filter(({ LINENO }, index, a) =>
+                    a.findIndex(e => LINENO === e.LINENO) === index);
+                posNr = parseInt(uniquelineno[uniquelineno.length - 1].POSNR) + 10;
+            } else {
+                posNr = parseInt(isPpssoidExists[isPpssoidExists.length - 1].POSNR) + 1;
+
+            }
+
+        }
+        aIbpComponentItems.push(aibpProductionComponentObject(parentChilditem, ppsosId, checkDupParam, posNr, IBPMarketShareParam));
+        bomIBPComponents.push(bomibpProductionComponentObject(parentChilditem, ppsosId, checkDupParam, posNr, IBPMarketShareParam));
+        dupMat.push(dupbomibpProductionComponentObject(parentChilditem, ppsosId, checkDupParam, posNr, IBPMarketShareParam));
+    } else {
+        let dupcheck = dupMat.filter(x => x.PPSOSID === ppsosId && x.MATNR === checkDupParam && x.LINENO === parentChilditem.lineNo);
+        if (dupcheck.length > 0) {
+            aIbpComponentItems[aIbpComponentItems.findIndex(el => el.PPSOSID === ppsosId && el.MATNR === checkDupParam)].MENGE = parseFloat(parseFloat(aIbpComponentItems[aIbpComponentItems.findIndex(el => el.PPSOSID === ppsosId && el.MATNR === checkDupParam)].MENGE) + parseFloat(IBPMarketShareParam)).toFixed(3);
+            bomIBPComponents[bomIBPComponents.findIndex(el => el.PPSOSID === ppsosId && el.MATNR === checkDupParam)].MENGE = parseFloat(parseFloat(bomIBPComponents[bomIBPComponents.findIndex(el => el.PPSOSID === ppsosId && el.MATNR === checkDupParam)].MENGE) + parseFloat(IBPMarketShareParam)).toFixed(3);
+        }
+    }
+
+}
+
+function bomibpProductionComponentObject(item, ppsosIdData, materialNum, posNr, menge) {
+    try {
+        return {
+            PPSOSID: ppsosIdData,
+            LOGCOMP: ppsosIdData + "_" + posNr,
+            VALFR: item.componentValidFrom,
+            VALTO: item.componentValidTo,
+            MATNR: materialNum,
+            SCRAP: item.scrap,
+            MENGE: Number.isInteger(menge) == true ? JSON.stringify(menge) : menge,
+            ACTID: "DEF",
+            POSNR: posNr.toString(),
+            PROCUREMENTTYPE: item.procurementType,
+            ALTITEMGROUP: item.altItemGroup,
+            SORTSTRING: item.sortString,
+            UOMALT: item.uomAltBTP,
+            FACTORYCHILDPN: item.factoryChildPn,
+            MPNCHILDPN: item.mpnChildPn
+        }
+    }
+    catch (err) {
+        return err;
+    }
+}
+function aibpProductionComponentObject(item, ppsosIdData, materialNum, posNr, menge) {
+    try {
+        return {
+            PPSOSID: ppsosIdData,
+            LOGCOMP: ppsosIdData + "_" + posNr,
+            VALFR: item.componentValidFrom,
+            VALTO: item.componentValidTo,
+            MATNR: materialNum,
+            SCRAP: item.scrap,
+            MENGE: Number.isInteger(menge) == true ? JSON.stringify(menge) : menge,
+            ACTID: "DEF",
+            POSNR: posNr.toString(),
+            PROCUREMENTTYPE: item.procurementType,
+            LINENO: item.lineNo,
+            ALTITEMGROUP: item.altItemGroup,
+            SORTSTRING: item.sortString,
+            UOMALT: item.uomAltBTP,
+            FACTORYCHILDPN: item.factoryChildPn,
+            MPNCHILDPN: item.mpnChildPn
+        }
+    }
+    catch (err) {
+        return err;
+    }
+}
+function dupbomibpProductionComponentObject(item, ppsosIdData, materialNum, posNr, menge) {
+    try {
+        return {
+            PPSOSID: ppsosIdData,
+            MATNR: materialNum,
+            MENGE: Number.isInteger(menge) == true ? JSON.stringify(menge) : menge,
+            POSNR: posNr.toString(),
+            LINENO: item.lineNo
+        }
+    }
+    catch (err) {
+        return err;
+    }
+}
+function ibpProductionHeaderObject(item) {
+    try {
+        let ppsosIdData = item.factoryNumber + "_" + item.generatedHppn + "_" + '001';
+        return {
+            "PPSOSID": ppsosIdData,
+            "VERID": "001",
+            "VERSTEXT": ppsosIdData,
+            "BSTMI": null,
+            "BSTMA": null,
+            "ADATU": item.componentValidFrom,
+            "BDATU": item.componentValidTo,
+            "PROCPRIO": null,
+            "MATNR": ppsosIdData.split("_")[1],
+            "LOCNO": ppsosIdData.split("_")[0],
+            "BMENG": 1,
+            "LSMIN": null,
+            "LSMAX": null,
+            "BSTRF": null,
+            "BOMEXPLRULE": 1,
+            "ZPDSIDENTIFIER": "DSP",
+            "YIELD": 0
+        }
+    }
+    catch (err) {
+        return err;
+    }
+}
+
+function ibpProductionHeaderTrackObject(item) {
+    try {
+        let ppsosIdData = item.factoryNumber + "_" + item.generatedHppn + "_" + '001';
+        return {
+            "ZMPAPARTNO": item.zmpaPartno,
+            "FACTORYNUMBER": item.factoryNumber,
+            "PPSOSID": ppsosIdData,
+            "SORTSEQUENCE": item.materialtypeBTP == "FERT" ? 1 : 2,
+            "ZPDSIDENTIFIER": "DSP"
+        }
+    }
+    catch (err) {
+        return err;
+    }
+}
+const getParentChild = async function (structData, req) {
+    try {
+        let aParentId = [], afinalResult = [], aPDSParent = [], agenHPPNActual = [];
+        let prevLevel = 0, currLevel = 0;
+        let agenHPPN = []; let aCalQtyPDS = [];
+        let oNode = {};
+        let Leveltobeskipped = false;
+        //capture the parent child relation
+        for (let item of structData) {
+
+            if (Leveltobeskipped && Leveltobeskipped < item.levelNo) {
+                continue;
+            }
+
+            if (item.materialtypeBTP == 'HALB' && (item.sortString == 'ALT' || item.sortString == 'GEN') && item.marketShare == 0) {
+                Leveltobeskipped = item.levelNo;
+                continue;
+            }
+            else {
+                Leveltobeskipped = false
+            }
+
+            if (Leveltobeskipped && Leveltobeskipped < item.levelNo) {
+                continue;
+            }
+
+            oNode = {};
+
+            currLevel = item.levelNo;
+
+            oNode['NodeID'] = item.lineNoBTP;
+            oNode['zmpaSonPartNo'] = item.zmpaSonPartNo;
+
+            //if a level number is less for this item than previous item, that indicates it is not child of above subassembly.So its actual parent need to found using aParentId array.
+            if (parseInt(prevLevel) > parseInt(currLevel)) {
+                let levelDiff = parseInt(prevLevel) - parseInt(currLevel);
+
+                if (levelDiff > 0) {
+                    while (levelDiff--) {
+                        agenHPPN = agenHPPN.filter(x => x != agenHPPNActual[agenHPPNActual.length - 1]);
+                        aPDSParent = aPDSParent.filter(x => x != aParentId[aParentId.length - 1]);
+                        aParentId.pop();
+                        agenHPPNActual.pop();
+                        aCalQtyPDS.pop();
+                    }
+                }
+            }
+            if (item.sortString !== null && item.sortString !== '' && item.sortString !== ' ' && Number.isInteger(item.marketShare) && parseInt(item.marketShare) >= 0) {
+                oNode['CalQtyPDS'] = parseFloat(item.untUsgBTP * (item.marketShare / 100)).toFixed(3);
+            } else {
+                oNode['CalQtyPDS'] = item.untUsgBTP;
+            }
+
+
+            //check if FERT has untUsgBTP or not with functional
+            if (item.materialtypeBTP === 'FERT') {
+                oNode['CalQtyPDS'] = 1;
+            }
+
+
+            //capture parent ID using parentIDs stored in aParentId array.
+            oNode['ParentNodeID'] = aParentId[aParentId.length - 1];
+            oNode['genHPPNBelongs'] = agenHPPN[agenHPPN.length - 1];
+            oNode['PDSParentNodeID'] = aPDSParent[aPDSParent.length - 1];
+
+            if (aCalQtyPDS.length > 0)
+                for (let i = aCalQtyPDS.length - 1; aCalQtyPDS[i].NodeID != oNode.PDSParentNodeID; i--) {
+                    oNode['CalQtyPDS'] = parseFloat(oNode['CalQtyPDS'] * aCalQtyPDS[i].untUsgBTP).toFixed(3);
+
+                    if (i == 0)
+                        break;
+                }
+
+
+            if (item.materialtypeBTP === 'HALB' || item.materialtypeBTP === 'FERT') {
+                aParentId.push(item.lineNoBTP);
+                agenHPPNActual.push(item.generatedHppn);
+                aCalQtyPDS.push({
+                    "NodeID": oNode.NodeID,
+                    "untUsgBTP": item.untUsgBTP
+                });
+            }
+
+            //if material type is SUBASSEMBLY, then it is subassembly and is parent for other items, so drillstate should be expanded otherwise should be leaf.
+            //Push the item zmpaSonPartNo to aParentId array and use to capture parentNodeId relation for its child items.
+            if ((item.materialtypeBTP === 'HALB' && item.phantomBOM !== 'Y') || (item.materialtypeBTP === 'FERT' && item.phantomBOM !== 'Y')) {
+                agenHPPN.push(item.generatedHppn);
+                aPDSParent.push(item.lineNoBTP);
+            }
+            prevLevel = item.levelNo;
+
+            // all the fields for tree structure
+            oNode['zmpaPartno'] = item.zmpaPartno;
+            oNode['factoryNumber'] = item.factoryNumber;
+            oNode['lineNo'] = item.lineNo;
+            oNode['levelNo'] = item.levelNo;
+            oNode['prodId'] = item.prodId;
+            oNode['generatedHppn'] = item.generatedHppn;
+            oNode['strategicAutoFlag'] = item.strategicAutoFlag;
+            oNode['untUsgBTP'] = item.untUsgBTP;
+            oNode['materialtypeBTP'] = item.materialtypeBTP;
+            oNode['marketShare'] = item.marketShare;
+            oNode['componentValidFrom'] = item.componentValidFrom;
+            oNode['componentValidTo'] = item.componentValidTo;
+            oNode['bomVersion'] = item.bomVersion;
+            oNode['phantomBOM'] = item.phantomBOM;
+            oNode['scrap'] = item.scrap;
+            oNode['procurementType'] = item.procurementType;
+            oNode['sortString'] = item.sortString;
+            oNode['altItemGroup'] = item.altItemGroup;
+            oNode['uomAlt'] = item.uomAlt,
+                oNode['uomAltBTP'] = item.uomAltBTP,
+                oNode['factoryChildPn'] = item.factoryChildPn,
+                oNode['mpnChildPn'] = item.mpnChildPn
+            //push final Object to final array
+            afinalResult.push(oNode);
+        }
+        aParentId = null, aPDSParent = null, agenHPPNActual = null;
+        prevLevel = null, currLevel = null;
+        agenHPPN = null; aCalQtyPDS = null;
+        oNode = null;
+        return afinalResult
+    } catch (err) {
+        return req.error(err.message);
+    }
+}
+
+const getParentStrategic = async function (structData) {
+    try {
+        let arrMap = new Map(structData.map(item => [item.generatedHppn, item]));
+        let tree = [];
+        for (let i = 0; i < structData.length; i++) {
+            let item = structData[i];
+
+            if (item.genHPPNBelongs !== null && item.strategicAutoFlag == 'X') {
+                let parentarray = [];
+                parentarray.push(item.genHPPNBelongs);
+                while (parentarray[0] !== undefined) {
+                    let parentItem = arrMap.get(parentarray[0]);
+                    if (parentItem && parentItem.strategicAutoFlag !== 'X') {
+                        parentItem.strategicAutoFlag = 'X';
+                        parentarray.length = 0;
+                        parentarray.push(parentItem.genHPPNBelongs);
+                    } else {
+                        parentarray.length = 0;
+                    }
+                }
+                if (item.sortString == 'GEN') {
+                    let altgrp = structData.filter(x => x.genHPPNBelongs == item.genHPPNBelongs && x.lineNo == item.lineNo && x.strategicAutoFlag !== 'X')
+                    if (altgrp.length > 0) {
+                        for (let item1 of altgrp) {
+                            item1.strategicAutoFlag = 'X';
+                        }
+                    }
+
+                }
+                tree.push(item);
+
+            } else {
+                tree.push(item);
+            }
+        }
+
+        return tree;
+    }
+
+    catch (err) {
+        return req.error(err.message);
+    }
+}
+
+module.exports = {
+    handleAsyncJob
+}
+
+
+-service.cds
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    BOM IBP Display
+// WRICEF No        :
+// Release          :
+// Author           :    varun.pathipaka1, ajeet.singh1
+// Date             :    07.05.2024
+// Description      :    Display IBP BOM
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds logic for services
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+
+//-----------------------------------------------------------------------------------*/
+
+using pumorips.ibpbom as IBPBOM from '../db/pumoripsibpbom-model';
+
+service IbpBomService @(requires: 'authenticated-user') {
+  entity IbpProductionHead          as projection on IBPBOM.IbpProductionHead;
+  entity IbpProductionComponent     as projection on IBPBOM.IbpProductionComponent;
+  entity IbpProductionComponentView as projection on IBPBOM.IbpProductionComponentView;
+  entity IbpProductionHeadView      as projection on IBPBOM.IbpProductionHeadView;
+  entity IbpBOMHeaderTrack          as projection on IBPBOM.IbpBOMHeaderTrack;
+  entity materialNumberValueHelp    as projection on IBPBOM.materialNumberValueHelp;
+  entity factoryCodeValueHelp       as projection on IBPBOM.factoryCodeValueHelp;
+  entity hppnValueHelp              as projection on IBPBOM.hppnValueHelp;
+  entity generatedHPPNValueHelp     as projection on IBPBOM.generatedHPPNValueHelp;
+  entity businessTypeValueHelp      as projection on IBPBOM.businessTypeValueHelp;
+  entity BOMHeaderView              as projection on IBPBOM.BOMHeaderView;
+  entity BOMHeaderPDSIdentifierView as projection on IBPBOM.BOMHeaderPDSIdentifierView;
+  entity BOMStructureView           as projection on IBPBOM.BOMStructureView;
+  entity BOMStructureViewLatest     as projection on IBPBOM.BOMStructureViewLatest;
+  entity BOMStructure               as projection on IBPBOM.syn_BOMStructure;
+  entity BOMHeader                  as projection on IBPBOM.syn_BOMHeader;
+  entity zmpaPartnoValueHelp        as projection on IBPBOM.zmpaPartnoValueHelp;
+  entity factoryNumberValueHelp     as projection on IBPBOM.factoryNumberValueHelp;
+  entity bomVersionValueHelp        as projection on IBPBOM.bomVersionValueHelp;
+  entity prodDescValueHelp          as projection on IBPBOM.prodDescValueHelp;
+  entity zhpPartnoValueHelp         as projection on IBPBOM.zhpPartnoValueHelp;
+  entity alternativeBomValueHelp    as projection on IBPBOM.alternativeBomValueHelp;
+  entity baseunitofMeasureValueHelp as projection on IBPBOM.baseunitofMeasureValueHelp;
+  entity planningDivValueHelp       as projection on IBPBOM.planningDivValueHelp;
+  entity zbtpCompValueHelp       as projection on IBPBOM.zbtpCompValueHelp;
+
+
+  entity DownloadBOM {
+    ZMPAPARTNO        : String;
+    PRODDESC          : String;
+    ZHPPARTNO         : String;
+    FACTORYNUMBER     : String;
+    LEVELNO           : String;
+    //MATNR          : String;
+    QUANTITY          : String;
+    BASEUNITOFMEASURE : String;
+    VALIDFROM         : String;
+    VALIDTO           : String;
+    PLANNINGDIV       : String;
+    MARKEDFORDELETION : String;
+    BOMVERSION        : String;
+    //ZPDSIDENTIFIER    : String;
+    NODEID            : String;
+    SCRAP             : String;
+    ACTID             : String;
+    PROCUREMENTTYPE   : String;
+    ALTITEMGROUP      : String;
+    SORTSTRING        : String;
+    UOMALT            : String;
+    FACTORYCHILDPN    : String;
+    MPNCHILDPN        : String;
+  }
+
+  type Success      : {
+    totalRecords : String;
+    created      : String;
+    updated      : String;
+    deleted      : String;
+    duplicate    : String;
+  }
+
+  //error response type for bulkupload
+  type Error        : {
+    errorFields : String;
+  }
+
+  //response type for bulkupload
+  type ResponseType : {
+    success : String;
+    error   : Error;
+  }
+
+  // type responseData {
+  //   data : array of String
+  // };
+
+  action GeneratePDS(FactoryNumber : String)      returns String;
+  function multilevelPDS(zmpaPartno : String, factoryNumber : String) returns LargeString;
+
+}
+
+
+
+db/src/procedure/ibpgeneration.hdbprocedure
+
+------------------------------------------------------------------------------------
+PROCEDURE "ibpgeneration" (
+    IN DELTA_INPUT table(factoryNumber NVARCHAR(20)),
+    I_IBPHEADER TABLE (
+        PPSOSID NVARCHAR(35),
+        VERID NVARCHAR(4),
+        VERSTEXT NVARCHAR(40),
+        BSTMI DECIMAL(13, 3),
+        BSTMA DECIMAL(13, 3),
+        ADATU DATE,
+        BDATU DATE,
+        PROCPRIO DECIMAL(13, 2),
+        MATNR NVARCHAR(40),
+        LOCNO NVARCHAR(20),
+        BMENG DECIMAL(13, 3),
+        LSMIN DECIMAL(13, 3),
+        LSMAX DECIMAL(13, 3),
+        BSTRF DECIMAL(13, 3),
+        BOMEXPLRULE NVARCHAR(1),
+        ZPDSIDENTIFIER NVARCHAR(10),
+        YIELD DECIMAL(5, 2)
+    ),
+    I_IBPSTRUCTURE TABLE (
+        PPSOSID NVARCHAR(35),
+        LOGCOMP NVARCHAR(40),
+        VALFR DATE,
+        VALTO DATE,
+        MATNR NVARCHAR(40),
+        SCRAP DECIMAL(5, 2),
+        MENGE NVARCHAR(13),
+        ACTID NVARCHAR(52),
+        PDSCOMPID NVARCHAR(60),
+        POSNR NVARCHAR(4),
+        PROCUREMENTTYPE NVARCHAR(1),
+        ALTITEMGROUP NVARCHAR(2),
+        SORTSTRING NVARCHAR(20),
+        UOMALT NVARCHAR(3), 
+        FACTORYCHILDPN NVARCHAR(40),
+        MPNCHILDPN NVARCHAR(40)
+    ),
+    I_IBPHEADERTRACK TABLE(
+        ZMPAPARTNO NVARCHAR(40),
+        FACTORYNUMBER NVARCHAR(20),
+        PPSOSID NVARCHAR(35),
+        SORTSEQUENCE INTEGER,
+        ZPDSIDENTIFIER NVARCHAR(10)
+    ),
+    OUT inserted_header_rows INT,
+    OUT inserted_header_track_rows INT,
+    OUT inserted_component_row INT 
+
+  ) 
+  LANGUAGE SQLSCRIPT 
+  SQL SECURITY INVOKER 
+  --READS SQL DATA
+  AS 
+BEGIN 
+  SEQUENTIAL EXECUTION
+  DECLARE delta_input_check INT;
+    i_bomheaders = SELECT
+                        PPSOSID,
+                        VERID,
+                        VERSTEXT,
+                        BSTMI,
+                        BSTMA,
+                        ADATU,
+                        BDATU,
+                        PROCPRIO,
+                        MATNR,
+                        LOCNO,
+                        BMENG,
+                        LSMIN,
+                        LSMAX,
+                        BSTRF,
+                        BOMEXPLRULE,
+                        ZPDSIDENTIFIER,
+                        YIELD,
+                        ROW_NUMBER() OVER(PARTITION BY PPSOSID ORDER BY PPSOSID DESC) AS R_N
+                        from :I_IBPHEADER;
+    
+    i_insertbomHeaders = SELECT 
+                            PPSOSID,
+                            VERID,
+                            VERSTEXT,
+                            BSTMI,
+                            BSTMA,
+                            ADATU,
+                            BDATU,
+                            PROCPRIO,
+                            MATNR,
+                            LOCNO,
+                            BMENG,
+                            LSMIN,
+                            LSMAX,
+                            BSTRF,
+                            BOMEXPLRULE,
+                            ZPDSIDENTIFIER,
+                            YIELD from :i_bomheaders
+                            where R_N = 1;
+
+    i_bomComponents = SELECT
+                            PPSOSID,
+                            LOGCOMP,
+                            VALFR,
+                            VALTO,
+                            MATNR,
+                            SCRAP,
+                            MENGE,
+                            ACTID,
+                            PDSCOMPID,
+                            POSNR,
+                            PROCUREMENTTYPE,
+                            ALTITEMGROUP,
+                            SORTSTRING,
+                            UOMALT,
+                            FACTORYCHILDPN,
+                            MPNCHILDPN,                        
+                            ROW_NUMBER() OVER(PARTITION BY PPSOSID,LOGCOMP,VALFR,VALTO ORDER BY PPSOSID DESC) AS R_N
+                            from :I_IBPSTRUCTURE;
+    
+i_insertbomComponents =  SELECT
+                            PPSOSID,
+                            LOGCOMP,
+                            VALFR,
+                            VALTO,
+                            MATNR,
+                            SCRAP,
+                            TO_DECIMAL(MENGE,13,3) AS MENGE,
+                            ACTID,
+                            PDSCOMPID,
+                            POSNR,
+                            PROCUREMENTTYPE,
+                            ALTITEMGROUP,
+                            SORTSTRING,
+                            UOMALT,
+                            FACTORYCHILDPN,
+                            MPNCHILDPN                         
+                            from :i_bomComponents
+                            where R_N = 1;
+
+    i_ibpheadertracks = SELECT 
+                            ZMPAPARTNO,
+                            FACTORYNUMBER,
+                            PPSOSID,
+                            SORTSEQUENCE,
+                            ZPDSIDENTIFIER,
+                            ROW_NUMBER() OVER(PARTITION BY ZMPAPARTNO,FACTORYNUMBER,PPSOSID,SORTSEQUENCE ORDER BY PPSOSID DESC) AS R_N
+                            from :I_IBPHEADERTRACK;
+
+    i_insertbomheadertracks = SELECT 
+                                ZMPAPARTNO,
+                                FACTORYNUMBER,
+                                PPSOSID,
+                                SORTSEQUENCE,
+                                ZPDSIDENTIFIER
+                                from :i_ibpheadertracks
+                                where R_N = 1;
+
+it_pumoristrategic = SELECT 
+                        PRODID AS MATNR 
+                        FROM PUMORIPS_IBPBOM_SYN_PUMORIPRODUCTS
+                        where strategicautoFlag = 'X';
+
+ it_joined = SELECT DISTINCT
+                MATNR
+                FROM :i_insertbomHeaders
+                UNION 
+                SELECT DISTINCT
+                MATNR
+                FROM :i_insertbomComponents
+                UNION
+                SELECT DISTINCT
+                MATNR
+                FROM :it_pumoristrategic;
+    
+    it_unique = SELECT 
+                MATNR,   
+                ROW_NUMBER() OVER(PARTITION BY MATNR ORDER BY MATNR DESC) AS R_N
+                FROM :it_joined;
+    it_main = SELECT
+              MATNR
+              FROM :it_unique
+              WHERE R_N=1;
+    
+    UPDATE PUMORIPS_IBPBOM_SYN_PUMORIPRODUCTS
+    SET pdsInheritedFlag = '';       
+    
+    MERGE INTO PUMORIPS_IBPBOM_SYN_PUMORIPRODUCTS AS a USING :it_main b
+            ON a.prodId = b.MATNR
+            WHEN MATCHED THEN 
+                UPDATE SET
+                a.pdsInheritedFlag = 'X',
+                a."MODIFIEDAT" = now();  
+
+
+-- check if factorynumber(S) filter present or not
+select count(*) into delta_input_check from :delta_input;
+
+IF delta_input_check = 0
+    THEN
+        DELETE FROM PUMORIPS_IBPBOM_IBPBOMHEADERTRACK;
+        DELETE FROM PUMORIPS_IBPBOM_IBPPRODUCTIONHEAD;
+        DELETE FROM PUMORIPS_IBPBOM_IBPPRODUCTIONCOMPONENT;
+ELSE
+    -- DELETE FROM PUMORIPS_IBPBOM_IBPBOMHEADERTRACK;
+    -- DELETE FROM PUMORIPS_IBPBOM_IBPPRODUCTIONHEAD;
+    -- DELETE FROM PUMORIPS_IBPBOM_IBPPRODUCTIONCOMPONENT;
+
+    DELETE FROM "PUMORIPS_IBPBOM_IBPBOMHEADERTRACK" AS headertrack
+    WHERE EXISTS (
+        SELECT *
+        FROM :delta_input AS input
+        WHERE headertrack.factoryNumber = input.factoryNumber
+      );
+    DELETE FROM "PUMORIPS_IBPBOM_IBPPRODUCTIONHEAD" AS header
+      WHERE EXISTS (
+          SELECT *
+          FROM :delta_input AS input
+          WHERE header.locNo = input.factoryNumber
+        );
+    DELETE FROM "PUMORIPS_IBPBOM_IBPPRODUCTIONCOMPONENT" AS comp
+      WHERE NOT EXISTS (
+          SELECT *
+          FROM  PUMORIPS_IBPBOM_IBPPRODUCTIONHEAD AS header
+          WHERE comp.PPSOSID = header.PPSOSID
+        );
+    
+END IF;
+
+
+    INSERT INTO PUMORIPS_IBPBOM_IBPBOMHEADERTRACK
+        SELECT
+            ZMPAPARTNO,
+            FACTORYNUMBER,
+            PPSOSID,
+            SORTSEQUENCE,
+            ZPDSIDENTIFIER
+            from :i_insertbomheadertracks;
+    inserted_header_track_rows =::ROWCOUNT;        
+    INSERT INTO PUMORIPS_IBPBOM_IBPPRODUCTIONHEAD
+        SELECT
+            now() as "CREATEDAT" ,
+            current_user as "CREATEDBY" ,
+            now() as "MODIFIEDAT" ,
+            current_user as "MODIFIEDBY",
+            PPSOSID,
+            VERID,
+            VERSTEXT,
+            BSTMI,
+            BSTMA,
+            ADATU,
+            BDATU,
+            PROCPRIO,
+            MATNR,
+            LOCNO,
+            BMENG,
+            LSMIN,
+            LSMAX,
+            BSTRF,
+            BOMEXPLRULE,
+            ZPDSIDENTIFIER,
+            YIELD
+            from :i_insertbomHeaders;
+    inserted_header_rows =::ROWCOUNT;
+
+    INSERT INTO PUMORIPS_IBPBOM_IBPPRODUCTIONCOMPONENT
+        SELECT
+            now() as "CREATEDAT" ,
+            current_user as "CREATEDBY" ,
+            now() as "MODIFIEDAT" ,
+            current_user as "MODIFIEDBY",
+            PPSOSID,
+            LOGCOMP,
+            VALFR,
+            VALTO,
+            MATNR,
+            SCRAP,
+            MENGE,
+            ACTID,
+            PDSCOMPID,
+            POSNR,
+            PROCUREMENTTYPE,
+            ALTITEMGROUP,
+            SORTSTRING,
+            UOMALT,
+            FACTORYCHILDPN,
+            MPNCHILDPN          
+            from :i_insertbomComponents;
+    inserted_component_row =::ROWCOUNT;
+END
+
+
+
+db/src/procedure/ibpmultilevelpds.hdbprocedure
+
+
+PROCEDURE "ibpmultilevelpds" (
+    IN i_zmpaPartno NVARCHAR(40),
+    IN i_factoryNumber NVARCHAR(20),
+   -- IN i_zpdsIdentifier NVARCHAR(10),
+      OUT o_pds_bom TABLE(
+        zmpaPartno NVARCHAR(40),
+        -- prodDesc NVARCHAR(40),  
+        -- zHpPartno NVARCHAR(40),
+        factoryNumber NVARCHAR(20),
+        quantity DECIMAL(13,3),
+        -- baseUnitOfMeasure NVARCHAR(3),
+        validFrom DATE,
+        validTo DATE,
+        -- planningDiv NVARCHAR(10),
+        -- markedForDeletion NVARCHAR(1),
+        -- bomVersion INTEGER,  
+        sortsequence INTEGER,
+        parentid NVARCHAR(35),
+        nodeid NVARCHAR(35),  
+        --zpdsIdentifier NVARCHAR(10),
+        scrap DECIMAL(5,2),
+        actId NVARCHAR(52),
+        procurementType NVARCHAR(1),
+        altItemGroup    NVARCHAR(2),
+        sortString      NVARCHAR(20),
+        UOMALT NVARCHAR(3), 
+        FACTORYCHILDPN NVARCHAR(40),
+        MPNCHILDPN NVARCHAR(40)   
+      )
+  ) 
+  LANGUAGE SQLSCRIPT 
+  SQL SECURITY INVOKER 
+  --READS SQL DATA
+  AS 
+BEGIN 
+  SEQUENTIAL EXECUTION 
+o_pds_bom_comp =
+  SELECT HeaderTrack.zmpaPartno,
+  -- bomHeader.prodDesc,
+  -- bomHeader.ZHPPARTNO,
+  HeaderTrack.factoryNumber,
+    --PDSComponent.matnr,
+   -- pumprod.zHpPartno,
+    PDSComponent.menge as quantity,
+    -- bomHeader.BASEUNITOFMEASURE,
+    PDSComponent.valFr as validFrom,
+    PDSComponent.valTo as validTo,
+    -- bomHeader.PLANNINGDIV,
+    -- bomHeader.MARKEDFORDELETION,
+    -- bomHeader.BOMVERSION,  
+    sortsequence,
+    CASE
+      WHEN sortsequence = 1
+      THEN NULL
+      ELSE HeaderTrack.ppsosid
+    END AS parentid,
+    CONCAT(
+      CONCAT(CONCAT(CONCAT(HeaderTrack.factoryNumber, '_'), PDSComponent.matnr), '_'),
+      '001'
+    ) AS nodeid,
+    -- :i_zpdsIdentifier as zpdsIdentifier,
+    PDSComponent.scrap,
+    PDSComponent.actId,
+    PDSComponent.procurementType,
+    PDSComponent.altItemGroup,
+    PDSComponent.sortString,
+    PDSComponent.uomAlt,
+    PDSComponent.factoryChildPn,
+    PDSComponent.mpnChildPn
+    FROM "PUMORIPS_IBPBOM_IBPBOMHEADERTRACK" AS HeaderTrack
+      LEFT OUTER JOIN "PUMORIPS_IBPBOM_IBPPRODUCTIONCOMPONENT" AS PDSComponent
+ ON HeaderTrack.ppsosid = PDSComponent.ppsosid
+--  LEFT OUTER JOIN "PUMORIPS_IBPBOM_SYN_PUMORIPRODUCTS" as pumprod
+--       on PDSComponent.matnr = pumprod.prodId
+--  LEFT OUTER JOIN "PUMORIPS_IBPBOM_SYN_BOMHEADER" as bomHeader
+--       on HeaderTrack.ZMPAPARTNO = bomHeader.ZMPAPARTNO 
+--          AND  HeaderTrack.FACTORYNUMBER = bomHeader.FACTORYNUMBER
+    WHERE HeaderTrack.zmpaPartno = :i_zmpaPartno
+      AND HeaderTrack.factoryNumber = :i_factoryNumber
+      --AND HeaderTrack.zpdsIdentifier = :i_zpdsIdentifier
+      AND PDSComponent.matnr is not null
+    ORDER BY sortsequence;
+
+it_pds_header0 = SELECT DISTINCT *
+        from "PUMORIPS_IBPBOM_IBPBOMHEADERTRACK" AS HeaderTrack
+        where sortsequence = 1 and
+        HeaderTrack.zmpaPartno = :i_zmpaPartno
+        AND HeaderTrack.factoryNumber = :i_factoryNumber;
+       -- AND HeaderTrack.zpdsIdentifier = :i_zpdsIdentifier;
+
+it_pds_header =   SELECT DISTINCT
+    HeaderTrack.zmpaPartno,
+    -- bomHeader.prodDesc,
+    -- bomHeader.ZHPPARTNO,
+    HeaderTrack.factoryNumber,
+   -- PDSheader.matnr,
+   -- pumprod.zHpPartno,
+   -- pumprod.prodDesc,
+    PDSheader.bmeng as quantity,
+    -- bomHeader.BASEUNITOFMEASURE,
+    PDSheader.adatu as validFrom,
+    PDSheader.bdatu as validTo,
+    -- bomHeader.PLANNINGDIV,
+    -- bomHeader.MARKEDFORDELETION,
+    -- bomHeader.BOMVERSION,
+    sortsequence,
+    NULL as parentid,
+    CONCAT(
+      CONCAT(CONCAT(CONCAT(HeaderTrack.factoryNumber, '_'), PDSheader.matnr), '_'),
+      '001'
+    ) AS nodeid,
+    -- :i_zpdsIdentifier as zpdsIdentifier,
+    bomstructlatest.scrap,
+    'DEF' as actId,
+    PumProdLoc.procurementType,
+    bomstructlatest.altItemGroup,
+    bomstructlatest.sortString,
+    bomstructlatest.uomAlt,
+    bomstructlatest.factoryChildPn,
+    bomstructlatest.mpnChildPn
+    FROM :it_pds_header0 AS HeaderTrack
+    LEFT OUTER JOIN "PUMORIPS_IBPBOM_IBPPRODUCTIONHEAD" AS PDSheader
+    on HeaderTrack.ppsosid = PDSheader.ppsosid
+    -- LEFT OUTER JOIN "PUMORIPS_IBPBOM_IBPPRODUCTIONCOMPONENT" AS PDSComponent
+    -- ON HeaderTrack.ppsosid = PDSComponent.ppsosid
+    LEFT OUTER JOIN "IBPBOMSERVICE_BOMSTRUCTUREVIEWLATEST" as bomstructlatest
+    on 
+          bomstructlatest.generatedhppn = PDSheader.matnr
+      AND bomstructlatest.zmpaPartno = :i_zmpaPartno
+      AND bomstructlatest.factoryNumber = :i_factoryNumber
+    LEFT OUTER JOIN "PUMORIPS_IBPBOM_SYN_PUMORIPRODLOC" as PumProdLoc
+    on PumProdLoc.prodId = bomstructlatest.generatedHppn
+    and PumProdLoc.locId = bomstructlatest.factoryNumber;
+
+o_pds_bom = SELECT * from :o_pds_bom_comp UNION ALL SELECT * from :it_pds_header;
+END
+
+
+
