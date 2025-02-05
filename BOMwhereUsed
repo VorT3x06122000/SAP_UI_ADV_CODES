@@ -1,0 +1,1399 @@
+NOTE: THIS APP IS MADE IN SAME REPO AS DISPLAY BOM SO ALL THE COMMON CODE SUCH AS MODEL.CDS AND SERVICE.CDS AND SERVICES.CDS IS IN display bom (tree structure) FILE 
+
+
+app/psbomwhereusedui/webapp/view
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Bom Where - Used Application 
+ RICEFW No                : 
+ Release                  :   M2 Release  
+ Author                   :   Samudrala, Sreenivas
+ Date                     :   29.05.2024
+ Description              :   Bom Where - Used Application
+ *Descriptions: Displays master data list filter bar and table  
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<mvc:View controllerName="pumorips.bomdisplay.psbomwhereusedui.controller.BomList"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:customData="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+    xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:table="sap.ui.table">
+    
+
+    <IconTabBar id="idIconTabBar" stretchContentHeight="true" >
+        <items>
+			<IconTabFilter id="idIconTabFilterSingleLevel" text="{i18n>singLvl}" >
+				<ScrollContainer id="scrollContainerSingleLevel" horizontal="false" vertical="true" height="100%" width="100%" >
+					<smartFilterBar:SmartFilterBar id="smartFilterBarSingleLevelBom" persistencyKey="SmartFilterPKey" showMessages="true" showClearOnFB="true" entitySet="SingleLevelBomWhereUseView" search="onSearchSingleLevelBOM" >
+                    </smartFilterBar:SmartFilterBar>
+
+					<smartTable:SmartTable id="idSmartTableSingleLevelBom"  smartFilterId="smartFilterBarSingleLevelBom" tableType="ResponsiveTable" editable="false" entitySet="SingleLevelBomWhereUseView" useVariantManagement="true" showVariantManagement="true" 
+                                header="{i18n>singLvl}" showRowCount="true" enableExport="true"  requestAtLeastFields="factoryNumber" beforeRebindTable="onBeforeRebindTableSingleBOM"
+                                enableAutoBinding="false" placeToolbarInTable="true"   persistencyKey="SmartTablePersistencyKey"
+                    >
+                        <Table id="idTableSingelLevelBom" mode="None"  sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="990">
+                            <items>
+                               
+                            </items>
+                        </Table> 
+                    </smartTable:SmartTable>
+				</ScrollContainer>
+			</IconTabFilter>
+
+			<IconTabFilter id="idIconTabFilterTopLevel" text="{i18n>topLvl}" >
+				<ScrollContainer id="scrollContainerTopLevel" horizontal="false" vertical="true" height="100%" width="100%" >
+					<smartFilterBar:SmartFilterBar id="smartFilterBarTopLevelBom" persistencyKey="SmartFilterPKeys" showMessages="true" showClearOnFB="true" entitySet="topLevelBomWhereUseView" search="onSeachTopLevelBOM" >
+                    </smartFilterBar:SmartFilterBar>
+
+					<smartTable:SmartTable id="idSmartTableTopLevelBom"  smartFilterId="smartFilterBarTopLevelBom" tableType="ResponsiveTable" editable="false" entitySet="topLevelBomWhereUseView" useVariantManagement="true" showVariantManagement="true" 
+                                header="{i18n>topLvl}" showRowCount="true" enableExport="true"  requestAtLeastFields="factoryNumber" 
+                                enableAutoBinding="false" placeToolbarInTable="true"   persistencyKey="SmartTablePersistencyKey" beforeRebindTable="onBeforeTopLevelBOM"
+                    >
+                        <Table id="idTable" mode="None"  sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="990">
+                            <items>
+                               
+                            </items>
+                        </Table> 
+                    </smartTable:SmartTable>
+				</ScrollContainer>
+			</IconTabFilter>
+
+            <IconTabFilter id="idIconTabFilterMultiLevel" text="{i18n>multLvl}" >
+                <ScrollContainer id="scrollContainerId" horizontal="true" vertical="true" height="100%" width="100%">
+                    <smartFilterBar:SmartFilterBar id="smartFilterBarWhere" showMessages="true" showClearOnFB="true" persistencyKey="SmartFilterPKey" 
+                                                   entitySet="BOMStructureMultiLevelView" search="onSearch" filterChange="onFilterChange" >
+                        <smartFilterBar:controlConfiguration>
+								<smartFilterBar:ControlConfiguration key="zmpaPartno" label="{i18n>fpnParent}"  filterType="single" index="0" id="zmpaPartnoid">
+                                </smartFilterBar:ControlConfiguration>
+                                <smartFilterBar:ControlConfiguration key="factoryNumber" label="{i18n>factry}"  filterType="single" index="1" id="facid">
+                                </smartFilterBar:ControlConfiguration>
+                                <smartFilterBar:ControlConfiguration key="factoryChildPn" label="{i18n>fpnChild}"  filterType="single" index="2" id="fpnid">
+                                </smartFilterBar:ControlConfiguration>
+                                <smartFilterBar:ControlConfiguration key="mpnChildPn" label="{i18n>mpnChild}"  filterType="single" index="3" id="mpnid">
+                                </smartFilterBar:ControlConfiguration>
+                                <smartFilterBar:ControlConfiguration key="generatedHppn" label="{i18n>hpParent}"  filterType="single" index="4" id="pumoripnid">
+                                </smartFilterBar:ControlConfiguration>
+                        </smartFilterBar:controlConfiguration>
+                    </smartFilterBar:SmartFilterBar>
+
+                    <smartTable:SmartTable id="idMultiLevelSmartTable" smartFilterId="smartFilterBarWhere" tableType="Table" editable="false"
+                            entitySet="BOMStructureMultiLevelView" useVariantManagement="true" showVariantManagement="true" header="{i18n>multLvl}" 
+                            showRowCount="false" enableExport="false"  enableAutoBinding="false" 
+                            enableAutoColumnWidth="true" useTablePersonalisation="false"
+                            placeToolbarInTable="true" persistencyKey="SmartTablePersistencyKey">
+                        
+                        <smartTable:customToolbar>
+                            <OverflowToolbar design="Transparent" id="ovFlw">
+                                <ToolbarSpacer id="tlSp"/>
+                                <Button press="onDownloadPress" icon="sap-icon://excel-attachment" id="excelBtn"  enabled="false"/>
+                            </OverflowToolbar>
+					    </smartTable:customToolbar>
+
+                        <table:Table id="idMultileveltable"   selectionMode="None" threshold="0"
+                                    enableColumnFreeze="false" width="auto"  enableColumnReordering="false" >
+                            <table:rowMode>
+							    <rowmodes:Auto id="idRowM" xmlns:rowmodes="sap.ui.table.rowmodes" minRowCount="20"/>	
+							</table:rowMode>
+
+                            <table:columns>
+								<table:Column id="zmpaPartno" visible="true" width="11rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "zmpaPartno", "leadingProperty": "zmpaPartno", "columnIndex": 0}' />
+									</table:customData>
+									<Label text="{i18n>fpnParent}" id="zmpaPartnoT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>zmpaPartno}"  id="zmpaPartnoV"/>
+									</table:template>
+                                </table:Column>
+
+                                <table:Column id="factry" visible="true" width="8rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "factoryNumber", "leadingProperty": "factoryNumber", "columnIndex": 1}' />
+									</table:customData>
+									<Label text="{i18n>factry}" id="factryT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>factoryNumber}"  id="factryV"/>
+									</table:template>
+                                </table:Column>
+
+								<table:Column id="lineNo" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "lineNo", "leadingProperty": "lineNo", "columnIndex": 2}' />
+									</table:customData>
+									<Label text="{i18n>lineNo}" id="lineNoT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>lineNo}"  id="lineNoV"/>
+									</table:template>
+                                </table:Column>
+
+								<table:Column id="levelNo" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "levelNo", "leadingProperty": "levelNo", "columnIndex": 3}' />
+									</table:customData>
+									<Label text="{i18n>lvl}" id="levelNoT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>levelNo}"  id="levelNoV"/>
+									</table:template>
+                                </table:Column>
+
+								<table:Column id="factoryChildPn" visible="true" width="8rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "factoryChildPn", "leadingProperty": "factoryChildPn", "columnIndex": 4}' />
+									</table:customData>
+									<Label text="{i18n>fpnChild}" id="factoryChildPnT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>factoryChildPn}"  id="factoryChildPnV"/>
+									</table:template>
+                                </table:Column>
+
+								<table:Column id="mpnChildPn" visible="true" width="14rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "mpnChildPn", "leadingProperty": "mpnChildPn", "columnIndex": 5}' />
+									</table:customData>
+									<Label text="{i18n>mpnChild}" id="mpnChildPnT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>mpnChildPn}"  id="mpnChildPnV"/>
+									</table:template>
+                                </table:Column>
+
+                                <table:Column id="hppnChildPn" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "hppnChildPn", "leadingProperty": "hppnChildPn", "columnIndex": 6}' />
+									</table:customData>
+									<Label text="{i18n>hpChild}" id="hppnChildPnT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>hppnChildPn}"  id="hppnChildPnV"/>
+									</table:template>
+                                </table:Column>
+
+                                <table:Column id="generatedHppn" visible="true" width="8rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "generatedHppn", "leadingProperty": "generatedHppn", "columnIndex": 7}' />
+									</table:customData>
+									<Label text="{i18n>hpParent}" id="generatedHppnT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>generatedHppn}"  id="generatedHppnV"/>
+									</table:template>
+                                </table:Column>
+
+
+								<table:Column id="uomAlt" visible="true" width="7rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "uomAlt", "leadingProperty": "uomAlt", "columnIndex": 8}' />
+									</table:customData>
+									<Label text="{i18n>uom}" id="uomAltT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>uomAlt}"  id="uomAltV"/>
+									</table:template>
+                                </table:Column>
+
+								<table:Column id="materialType" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "materialType", "leadingProperty": "materialType", "columnIndex": 9}' />
+									</table:customData>
+									<Label text="{i18n>materialType}" id="materialTypeT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>materialType}"  id="materialTypeV"/>
+									</table:template>
+                                </table:Column>
+
+								<table:Column id="sortString" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "sortString", "leadingProperty": "sortString", "columnIndex": 10}' />
+									</table:customData>
+									<Label text="{i18n>sortStr}" id="sortStringT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>sortString}"  id="sortStringV"/>
+									</table:template>
+                                </table:Column>
+
+								<table:Column id="marketShare" visible="true" width="6rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "marketShare", "leadingProperty": "marketShare", "columnIndex": 11}' />
+									</table:customData>
+									<Label text="{i18n>usage}" id="marketShareT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>marketShare}"  id="marketShareV"/>
+									</table:template>
+                                </table:Column>
+
+								<table:Column id="componentValidFrom" visible="true" width="9rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "componentValidFrom", "leadingProperty": "componentValidFrom", "columnIndex": 12}' />
+									</table:customData>
+									<Label text="{i18n>compValidFrm}" id="componentValidFromT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>componentValidFrom}"  id="componentValidFromV"/>
+									</table:template>
+                                </table:Column>
+
+                                <table:Column id="componentValidTo" visible="true" width="9rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "componentValidTo", "leadingProperty": "componentValidTo", "columnIndex": 13}' />
+									</table:customData>
+									<Label text="{i18n>compValidTo}" id="componentValidToT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>componentValidTo}"  id="componentValidToV"/>
+									</table:template>
+                                </table:Column>
+
+                                <table:Column id="parentGeneratedHppn" visible="true" width="11rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "parentGeneratedHppn", "leadingProperty": "parentGeneratedHppn", "columnIndex": 14}' />
+									</table:customData>
+									<Label text="{i18n>parent}" id="parentGeneratedHppnT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>parentGeneratedHppn}"  id="parentGeneratedHppnV"/>
+									</table:template>
+                                </table:Column>
+
+                                <table:Column id="requiredQuantity" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "requiredQuantity", "leadingProperty": "requiredQuantity", "columnIndex": 15}' />
+									</table:customData>
+									<Label text="{i18n>reqQnty}" id="requiredQuantityT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>requiredQuantity}"  id="requiredQuantityV"/>
+									</table:template>
+                                </table:Column>
+
+                                <table:Column id="resultingQuantity" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "resultingQuantity", "leadingProperty": "resultingQuantity", "columnIndex": 16}' />
+									</table:customData>
+									<Label text="{i18n>resQnty}" id="resultingQuantityT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>resultingQuantity}"  id="resultingQuantityV"/>
+									</table:template>
+                                </table:Column>
+
+								<table:Column id="parentmaterialtype" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "parentmaterialtype", "leadingProperty": "parentmaterialtype", "columnIndex": 17}' />
+									</table:customData>
+									<Label text="{i18n>prntMatType}" id="parentmaterialtypeT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>parentmaterialtype}"  id="parentmaterialtypeV"/>
+									</table:template>
+                                </table:Column>
+
+								<table:Column id="parentLevelNoid" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "parentLevelNo", "leadingProperty": "parentLevelNo", "columnIndex": 18}' />
+									</table:customData>
+									<Label text="{i18n>parentLevelNo}" id="parentLevelNoID" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>parentLevelNo}"  id="parentLevelNoId"/>
+									</table:template>
+                                </table:Column>
+								
+								
+								<!-- <table:Column id="manufName" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "manufName", "leadingProperty": "manufName", "columnIndex": 13}' />
+									</table:customData>
+									<Label text="{i18n>manufName}" id="manufNameT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>manufName}"  id="manufNameV"/>
+									</table:template>
+                                </table:Column> -->
+
+								<!-- <table:Column id="vendorId" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "vendorId", "leadingProperty": "vendorId", "columnIndex": 14}' />
+									</table:customData>
+									<Label text="{i18n>vendorId}" id="vendorIdT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>vendorId}"  id="vendorIdV"/>
+									</table:template>
+                                </table:Column> -->
+
+								
+								<!-- <table:Column id="altItemGroup" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "altItemGroup", "leadingProperty": "altItemGroup", "columnIndex": 19}' />
+									</table:customData>
+									<Label text="{i18n>altItemGroup}" id="altItemGroupT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>altItemGroup}"  id="altItemGroupV"/>
+									</table:template>
+                                </table:Column> -->
+
+								<!-- <table:Column id="scrap" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "scrap", "leadingProperty": "scrap", "columnIndex": 20}' />
+									</table:customData>
+									<Label text="{i18n>scrap}" id="scrapT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>scrap}"  id="scrapV"/>
+									</table:template>
+                                </table:Column> -->
+
+								<!-- <table:Column id="alternativeItem" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "alternativeItem", "leadingProperty": "alternativeItem", "columnIndex": 21}' />
+									</table:customData>
+									<Label text="{i18n>alternativeItem}" id="alternativeItemT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>alternativeItem}"  id="alternativeItemV"/>
+									</table:template>
+                                </table:Column> -->
+
+								<!-- <table:Column id="phantomBOM" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "alternativeItem", "leadingProperty": "alternativeItem", "columnIndex": 22}' />
+									</table:customData>
+									<Label text="{i18n>phantomBOM}" id="phantomBOMT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>phantomBOM}"  id="phantomBOMV"/>
+									</table:template>
+                                </table:Column> -->
+
+								<!-- <table:Column id="manufacturingOverhead" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "manufacturingOverhead", "leadingProperty": "manufacturingOverhead", "columnIndex": 23}' />
+									</table:customData>
+									<Label text="{i18n>manufacturingOverhead}" id="manufacturingOverheadT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>manufacturingOverhead}"  id="manufacturingOverheadV"/>
+									</table:template>
+                                </table:Column> -->
+
+								<!-- <table:Column id="costOfComponents" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "costOfComponents", "leadingProperty": "costOfComponents", "columnIndex": 24}' />
+									</table:customData>
+									<Label text="{i18n>costOfComponents}" id="costOfComponentsT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>costOfComponents}"  id="costOfComponentsV"/>
+									</table:template>
+                                </table:Column> -->
+
+								<!-- <table:Column id="rollUpCost" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "rollUpCost", "leadingProperty": "rollUpCost", "columnIndex": 25}' />
+									</table:customData>
+									<Label text="{i18n>rollUpCost}" id="rollUpCostT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>rollUpCost}"  id="rollUpCostV"/>
+									</table:template>
+                                </table:Column> -->
+
+								<!-- <table:Column id="bomImportDate" visible="true" width="5rem" >
+                                    <table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "bomImportDate", "leadingProperty": "bomImportDate", "columnIndex": 26}' />
+									</table:customData>
+									<Label text="{i18n>bomImportDate}" id="bomImportDateT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>bomImportDate}"  id="bomImportDateV"/>
+									</table:template>
+                                </table:Column> -->
+                            </table:columns>
+                        </table:Table> 
+                    </smartTable:SmartTable>
+
+					<FlexBox id="flexid" height="100px" alignItems="Center"
+							 justifyContent="Center" direction="Column" class="sapUiSmallMarginTop,sapUiSmallMarginBottom">
+						<Button text="{i18n>more}" press="onMore"  id="idMoreBtn" type="Emphasized" enabled="false" />
+						<Text text="" id="paginText" class="sapUiSmallMarginBottom"/>
+					</FlexBox>
+					
+                </ScrollContainer>
+            </IconTabFilter>
+
+			
+        </items>
+    </IconTabBar>
+</mvc:View>
+
+
+app/psbomwhereusedui/webapp/controller/BaseController.js
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Bom Where - Used Application 
+// WRICEF No        :    
+// Release          :    M2 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    29.05.2024
+// Description      :    Bom Where - Used Application
+//-----------------------------------------------------------------------------------*
+//Descriptions: Base Controller file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/core/UIComponent",
+    "sap/m/MessageBox"
+], function (Controller, UIComponent, MessageBox) {
+    "use strict";
+
+    return Controller.extend("pumorips.bomdisplay.psbomwhereusedui.controller.BaseController", {
+		/**
+		 * Convenience method for accessing the router.
+		 * @public
+		 * @returns {sap.ui.core.routing.Router} the router for this component
+		 */
+
+        getRouter: function () {
+            return UIComponent.getRouterFor(this);
+        },
+
+		/**
+		 * Convenience method for getting the view model by name.
+		 * @public
+		 * @param {string} [sName] the model name
+		 * @returns {sap.ui.model.Model} the model instance
+		 */
+        getModel: function (sName) {
+            return this.getView().getModel(sName);
+        },
+
+		/**
+		 * Convenience method for setting the view model.
+		 * @public
+		 * @param {sap.ui.model.Model} oModel the model instance
+		 * @param {string} sName the model name
+		 * @returns {sap.ui.mvc.View} the view instance
+		 */
+        setModel: function (oModel, sName) {
+            return this.getView().setModel(oModel, sName);
+        },
+
+		/**
+		 * Getter for the resource bundle.
+		 * @public
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundle: function () {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
+        },
+        /**
+		 * Getter for the resource bundle text.
+		 * @public
+         * @param 
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundleText: function (sTextProperty) {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle().getText(sTextProperty);
+        },
+		/**
+		 * Convenience method for displaying error messages
+		 * @public
+		 */
+        //method to show error message
+        showMsgBoxError: function (message) {
+            var title = this.getResourceBundle().getText("ErrorDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.ERROR,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+
+        },
+        //method to show success message
+        showMsgBoxSuccess: function (message) {
+            var title = this.getResourceBundle().getText("SuccessDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.SUCCESS,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show warning message
+        showMsgBoxWarning: function (message) {
+            var title = this.getResourceBundle().getText("WarningDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.WARNING,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show information message
+        showMsgBoxInformation: function (message) {
+            var title = "Information"
+            var title = this.getResourceBundle().getText("InformationDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.INFORMATION,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        /**            * 
+          * function to fetch the logged in user details             *  
+          **/
+         _getUserInfoService: function () {
+            return new Promise(resolve => sap.ui.require([
+                "sap/ushell/library"
+            ], oSapUshellLib => {
+                const oContainer = oSapUshellLib.Container;
+                const pService = (oContainer) ? oContainer.getServiceAsync("UserInfo") : ""; // .getService is deprecated!
+                resolve(pService);
+            }));
+        },
+		
+
+    });
+
+});
+
+
+
+app/psbomwhereusedui/webapp/controller/BomList.controller.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Bom Where - Used Application 
+// WRICEF No        :    
+// Release          :    M2 Release
+// Author           :    Samudrala, Sreenivas
+// Date             :    29.05.2024
+// Description      :    Bom Where - Used Application
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for display filter and table in the app
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/export/Spreadsheet",
+    "sap/m/library",
+    "../utils/constants"
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (BaseController,JSONModel,Spreadsheet,mobileLibrary,constants) {
+        "use strict";
+        var DialogType = mobileLibrary.DialogType;
+        return BaseController.extend("pumorips.bomdisplay.psbomwhereusedui.controller.BomList", {
+            /* =========================================================== */
+            /* lifecycle methods                                           */
+            /* =========================================================== */
+            /**
+            * This method will trigger once during app initialization
+            * **/
+            onInit: function () {
+                this.getOwnerComponent().getRouter().getRoute("BomList").attachPatternMatched(this._onObjectMatched, this);
+                this.BomWhereService = this.getOwnerComponent().getService('BomWhere');
+                this.oUIModel = this.getOwnerComponent().getModel("oUIModel");
+                this.oUIModel.setProperty("/", []);
+                this.getView().byId("idMultileveltable").setModel(this.oUIModel, "oUIModel");
+                this.getView().byId("idMultileveltable").bindRows("oUIModel>/");
+                this.getView().byId("idMultiLevelSmartTable").setTableBindingPath("oUIModel>/");
+
+            },
+            /* =========================================================== */
+            /* internal methods                                            */
+            /* =========================================================== */
+            /**
+            * App view routing pattern change event handler
+            * this method will trigger each time user navigate between views
+            * This method used here to load, initialize home screen 
+            * **/
+            _onObjectMatched: function () {
+
+            },
+            /* =========================================================== */
+            /* event handlers                                              */
+            /* =========================================================== */
+            /**
+             * triggers once user clicks on Go button in the smart filter bar for Single level BOM
+             */
+            onSearchSingleLevelBOM : function(oEvent){
+                var smartTable = oEvent.getSource()
+                if(smartTable){
+                    var selFilters = this.getView().byId("smartFilterBarSingleLevelBom").getFilterData();
+                    if(Object.keys(selFilters).length === 0 || (!selFilters.hasOwnProperty("mpnChildPn") && !selFilters.hasOwnProperty("factoryChildPn") && !selFilters.hasOwnProperty("generatedHppn"))){
+                        this.showMsgBoxInformation(this.getResourceBundleText("selValueHelp"));
+                        return false;
+                    }
+                    this.getView().byId("idSmartTableSingleLevelBom").rebindTable(true);
+                }
+                    
+                },
+            /**
+            * This method is triggered before table binding occurs to Singl Level BOM
+            */
+            onBeforeRebindTableSingleBOM: function (oEvent) {
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                var selFilters = this.getView().byId("smartFilterBarSingleLevelBom").getFilterData();
+                if (Object.keys(selFilters).length === 0 || (!selFilters.hasOwnProperty("mpnChildPn") && !selFilters.hasOwnProperty("factoryChildPn") && !selFilters.hasOwnProperty("generatedHppn"))) {
+                    oBindingParams.preventTableBind = "true";
+                }
+            },
+            /**
+             * triggers once user clicks on Go button in the smart filter bar for Top level BOM
+             */
+            onSeachTopLevelBOM: function(oEvent){
+                var smartTable = oEvent.getSource()
+                if(smartTable){
+                    var selFilters = this.getView().byId("smartFilterBarTopLevelBom").getFilterData();
+                    if(Object.keys(selFilters).length === 0 || (!selFilters.hasOwnProperty("mpnChildPn") && !selFilters.hasOwnProperty("factoryChildPn") && !selFilters.hasOwnProperty("generatedHppn"))){
+                        this.showMsgBoxInformation(this.getResourceBundleText("selValueHelp"));
+                        return false;
+                    }
+                    this.getView().byId("idSmartTableTopLevelBom").rebindTable(true);
+                }
+            },
+            /**
+            * This method is triggered before table binding occurs to Top Level BOM
+            */
+            onBeforeTopLevelBOM: function(oEvent){
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                var selFilters = this.getView().byId("smartFilterBarTopLevelBom").getFilterData();
+                if (Object.keys(selFilters).length === 0 || (!selFilters.hasOwnProperty("mpnChildPn") && !selFilters.hasOwnProperty("factoryChildPn") && !selFilters.hasOwnProperty("generatedHppn"))) {
+                    oBindingParams.preventTableBind = "true";
+                }
+            },
+            /**
+            * triggers once user clicks on Go button in the smart filter bar for Multi level BOM
+            */
+            onSearch :function () {
+                this.getView().byId("idMoreBtn").setEnabled(false);
+                this.oPayload = {};
+                this.oPayload.zmpaPartno = this.getView().byId("smartFilterBarWhere").getFilterGroupItems()[0].getControl().getValue();
+                this.oPayload.factoryNumber = this.getView().byId("smartFilterBarWhere").getFilterGroupItems()[1].getControl().getValue();
+                this.oPayload.factoryChildPn = this.getView().byId("smartFilterBarWhere").getFilterGroupItems()[2].getControl().getValue();
+                this.oPayload.mpnChild = this.getView().byId("smartFilterBarWhere").getFilterGroupItems()[3].getControl().getValue();
+                this.oPayload.generatedHppn = this.getView().byId("smartFilterBarWhere").getFilterGroupItems()[4].getControl().getValue();
+                if ((this.oPayload.factoryChildPn === undefined || this.oPayload.factoryChildPn === null || this.oPayload.factoryChildPn === '') &&
+                    (this.oPayload.mpnChild === undefined || this.oPayload.mpnChild === null || this.oPayload.mpnChild === '') &&
+                    (this.oPayload.generatedHppn === undefined || this.oPayload.generatedHppn === null || this.oPayload.generatedHppn === '') ){
+                        this.showMsgBoxInformation(this.getResourceBundleText("selValueHelp"));
+                        return;
+                }
+                this.bSearchBtn = true;
+                this.nTotalRes = 0;
+                this.nSkip = 0;
+                this.nTop = 999;
+                this.oPayload.top = this.nTop;
+                this.oPayload.skip = this.nSkip;
+                this._onFetchData(this.oPayload);
+            },
+            /**
+            * This method is triggered when More button is clicked
+            */
+            onMore: function () {
+                this.bSearchBtn = false;
+                this.nSkip = this.nSkip + this.nTop;
+                this.oPayload.top = this.nTop;
+                this.oPayload.skip = this.nSkip;
+                this._onFetchData(this.oPayload);
+            },
+            /**
+            * this method is triggered for fetching data
+            */
+            _onFetchData: function(oPayload){
+                var that= this;
+                this.getView().setBusy(true);
+                return this.BomWhereService.fetchPayload({payload: oPayload} ).then(
+                    
+                    function(odata){
+                        if (that.bSearchBtn === true) {
+                            that.getOwnerComponent().getModel("oUIModel").setProperty("/", []);
+                        }
+                        var oData = odata.data.multiLevelBom;
+                        var oSmartTable = that.getView().byId("idMultiLevelSmartTable");
+                        var oUIModel = that.getOwnerComponent().getModel("oUIModel");
+                        var aData = oUIModel.getProperty("/");
+
+                        if (oData.records.length !== 0){
+                            that.getView().byId("idMoreBtn").setEnabled(true);
+                            if (that.nSkip !== 0) {
+                                var aNewData = aData.concat(oData.records);
+                                oUIModel.setProperty("/", aNewData);
+                                if (that.nTotalRes === aNewData.length) {
+                                    that.getView().byId("idMoreBtn").setEnabled(false);
+                                }
+                                that.getView().byId("paginText").setText("[ " + aNewData.length + " / " + that.nTotalRes + " ]");
+                            } else {
+                                oUIModel.setProperty("/", oData.records);
+                                that.nTotalRes = oData.total;
+                                if (that.nTotalRes === oData.records.length) {
+                                    that.getView().byId("idMoreBtn").setEnabled(false);
+                                }
+                                that.getView().byId("paginText").setText("[ " + oData.records.length + " / " + that.nTotalRes + " ]");
+                            }
+                            oSmartTable.setHeader(that.getResourceBundleText("multLvl") + " (" + that.nTotalRes + ")");
+                            that.getView().byId("idMultileveltable").setModel(oUIModel, "oUIModel");
+                            that.getView().byId("excelBtn").setEnabled(true);
+                        } 
+                        // else if (oData.records.length === 0 && oUIModel.getProperty("/").length === 0 && oData.total !== undefined) {
+                        //     that.nTotalRes = oData.total;
+                        //     oUIModel.setProperty("/", oData.records);
+                        //     that.getView().byId("idMultileveltable").setModel(oUIModel, "oUIModel");
+                        //     if (that.nTotalRes === oData.records.length) {
+                        //         that.getView().byId("idMoreBtn").setEnabled(false);
+                        //     }
+                        //     that.getView().byId("paginText").setText("[ " + oData.records.length + " / " + that.nTotalRes + " ]");
+                        //     if (that.nSkip + that.nTop > that.nTotalRes && oData.records.length === 0) {
+                        //         that.getView().byId("excelBtn").setEnabled(false);
+                        //     } else {
+                        //         that.getView().byId("excelBtn").setEnabled(true);
+                        //     }
+                        // } 
+                        else if (oData.records.length === 0 && oUIModel.getProperty("/").length === 0) {
+                            oUIModel.setProperty("/", oData.records);
+                            oSmartTable.setHeader(that.getResourceBundleText("res") + " (" + that.nTotalRes + ")");
+                            that.getView().byId("idMultileveltable").setModel(oUIModel, "oUIModel");
+                            that.getView().byId("paginText").setText("");
+                            that.getView().byId("idMoreBtn").setEnabled(false);
+                            that.getView().byId("excelBtn").setEnabled(false);
+                        }
+                        that.getView().setBusy(false);
+                    },
+                    function (error) {
+                        console.log("error");
+                        var oerrMsg = JSON.parse(error.responseText).error.message.value;
+                        that.showMsgBoxError(that.getResourceBundleText(oerrMsg));
+                        that.getView().setBusy(false);
+                    }
+                );
+            },
+
+            /**
+            * This method is triggered when filter value is changed
+            */
+            onFilterChange: function () {
+                this.getView().byId("idMoreBtn").setEnabled(false);
+            },
+            
+            /**
+            * This method is triggered when excel button is pressed
+            */
+            onDownloadPress: function () {
+                var { skip, top, ...oExcelObj } = this.oPayload;
+                var oExcelModel = this.getOwnerComponent().getModel("oExcelModel");
+                oExcelModel.setProperty("/", []);
+                this._loadExcelData(oExcelObj);
+            },
+
+            /**
+            *  function for excel batch operation
+             */
+            _loadExcelData: async function (oExcelPayload) {
+                var iTotalRecords = this.nTotalRes;
+                var iBatchSize = 999;      // Number of records to fetch per call
+                var iNumberOfCalls = Math.ceil(iTotalRecords / iBatchSize);  // Number of calls needed
+                oExcelPayload.skip = 0;
+                this.nExcelSkip = 0;
+                oExcelPayload.top = 999;
+                this.bLength = false;
+                this.bCancel = false;
+                if (!this.oDialog) {
+                    this.oDialog = new sap.m.Dialog({
+                        type: DialogType.Message,
+                        title: "Export Document",
+                        contentHeight: "100px",
+                        contentWidth: "500px",
+                        content: [
+                            new sap.m.Text({ id: "dialogText" }),
+                            new sap.m.ProgressIndicator({
+                                displayValue: 0,
+                                percentValue: 0,
+                                displayAnimation: false,
+                                width: "100%",
+                                id: "progressIndicator"
+                            })
+                        ],
+                        beginButton: new sap.m.Button({
+                            text: "Cancel",
+                            press: function () {
+                                this.bCancel = true;
+                                this.oDialog.close();
+                            }.bind(this)
+                        })
+                    });
+                }
+                sap.ui.getCore().byId("dialogText").addStyleClass("sapUiSmallMarginBottom");
+                sap.ui.getCore().byId("dialogText").setText(this.getResourceBundleText("fetchServerMsg"));
+                sap.ui.getCore().byId("progressIndicator").setPercentValue(0);
+                sap.ui.getCore().byId("progressIndicator").setDisplayValue(0 + " / " + this.nTotalRes);
+                sap.ui.getCore().byId("progressIndicator").setState(this.getResourceBundleText("none"));
+                this.oDialog.open();
+
+                for (var i = 0; i < iNumberOfCalls; i++) {
+                    oExcelPayload.skip = i * iBatchSize;
+                    const data = await this._batchData(oExcelPayload, iBatchSize);
+                    if (this.bCancel) {
+                        break;
+                    }
+                    if (this.bLength) {
+                        var oExcelModel = this.getOwnerComponent().getModel("oExcelModel");
+                        var aDataExcel = oExcelModel.getProperty("/");
+                        this._exportData(aDataExcel);
+                        this.oDialog.close();
+                    }
+                }
+            },
+
+            /*  function to call service for  excel data*/
+            _batchData: function (oExcelPayload, iBatchSize) {
+                var that = this;
+                return this.BomWhereService.fetchPayload({ payload: oExcelPayload }).then(
+                    function (odata) {
+                        var oData = odata.data.multiLevelBom;
+                        var oExcelModel = that.getOwnerComponent().getModel("oExcelModel");
+                        if (oData.records.length !== 0) {
+                            var aData = oExcelModel.getProperty("/");
+                            if (that.nExcelSkip !== 0) {
+                                var aNewData = aData.concat(oData.records);
+                                oExcelModel.setProperty("/", aNewData);
+                            } else {
+                                oExcelModel.setProperty("/", oData.records);
+                            }
+                        } else if (oData.records.length === 0 && oExcelModel.getProperty("/").length === 0) {
+                            oExcelModel.setProperty("/", oData.records);
+                        }
+                        that.nExcelSkip = that.nExcelSkip + iBatchSize;
+                        var nPercentage = Math.ceil((that.nExcelSkip / that.nTotalRes) * 100);
+                        sap.ui.getCore().byId("progressIndicator").setPercentValue(nPercentage);
+                        var aExlData = oExcelModel.getProperty("/");
+                        sap.ui.getCore().byId("progressIndicator").setDisplayValue(aExlData.length + " / " + that.nTotalRes);
+                        sap.ui.getCore().byId("progressIndicator").setState(that.getResourceBundleText("information"));
+
+                        if (aExlData.length === that.nTotalRes) {
+                            that.bLength = true;
+                            sap.ui.getCore().byId("dialogText").setText(that.getResourceBundleText("genFileMsg"));
+                            sap.ui.getCore().byId("progressIndicator").setState(that.getResourceBundleText("success"));
+                        }
+                    },
+                    function (error) {
+                        that.bCancel = true;
+                        that.oDialog.close();
+                        that.showMsgBoxError(that.getResourceBundleText("technicalIssue"));
+                    }
+                );
+            },
+            /**
+            *  method for downloading data in  excel
+            */
+            _exportData: function (data) {
+                var aCols, items, oSettings, oSheet;
+                var oModel = new JSONModel(data);
+                aCols = this._createColumnConfig();
+                items = oModel.getProperty('/');
+                oSettings = {
+                    workbook: { columns: aCols },
+                    dataSource: items,
+                    showProgress: false
+                };
+                oSettings.fileName = 'WhereUsed-MultiLevel';
+                oSheet = new Spreadsheet(oSettings);
+                oSheet.build().finally(function () {
+                    oSheet.destroy();
+                });
+            },
+
+            /**
+           *  method for creating columns for excel download
+           */
+            _createColumnConfig: function () {
+                var aCols = [];
+                var aLabel = [...aColumnLabel];
+                var aProperty = [...aColumnProperty];
+                
+                for (var i = 0; i < aLabel.length; i++) {
+                    let o = {};
+                    o.label = aLabel[i];
+                    o.property = aProperty[i];
+                    aCols.push(o);
+                }
+                return aCols;
+            },
+        });
+    });
+
+
+
+
+app/psbomwhereusedui/webapp/service/BomWhereService.js
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    BOM Where - Used 
+// WRICEF No        :    
+// Release          :    M2 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    23.05.2024
+// Description      :    BOM Where - Used
+//-----------------------------------------------------------------------------------*
+//Descriptions: Application service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./CoreService"
+], function (CoreService) {
+    "use strict";
+
+    var BomWhereService = CoreService.extend("pumorips.bomdisplay.psbomwhereusedui.service.BomWhereService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        },
+        /**
+            *  method for maximum lead time  service call
+        */
+        fetchPayload: function (oGetPayload) {
+            return this.odata("/multiLevelBom").post(oGetPayload);
+        }
+    });
+    return BomWhereService;
+});
+
+
+
+app/psbomwhereusedui/webapp/service/CoreService.js
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    BOM Where - Used
+// WRICEF No        :    
+// Release          :   
+// Author           :    Chowdhary,Mamtha
+// Date             :    23.05.2024
+// Description      :    BOM Where - Used
+//-----------------------------------------------------------------------------------*
+//Descriptions: Core service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object"
+], function (Object) {
+	"use strict";
+
+	return Object.extend("pumorips.bomdisplay.psbomwhereusedui.service.CoreService", {
+		constructor: function (model) {
+			Object.call(this);
+			if (model) {
+				this.setModel(model);
+			}
+		},
+		setModel: function (model) {
+			this.model = model;
+		},
+		odata: function (url) {
+			var me = this;
+			var core = {
+				ajax: function (type, url, data, parameters) {
+					var promise = new Promise(function (resolve, reject) {
+						var args = [];
+						var params = {};
+						args.push(url);
+						if (data) {
+							args.push(data);
+						}
+						if (parameters) {
+							params = parameters;
+						}
+						params.success = function (result, response) {
+							resolve({
+								data: result,
+								response: response
+							});
+						};
+						params.error = function (error) {
+							reject(error);
+						};
+						args.push(params);
+						me.model[type].apply(me.model, args);
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (params) {
+					return core.ajax('read', url, false, params);
+				},
+				'post': function (data, params) {
+					return core.ajax('create', url, data, params);
+				},
+				'put': function (data, params) {
+					return core.ajax('update', url, data, params);
+				},
+				'delete': function (params) {
+					return core.ajax('remove', url, false, params);
+				}
+			};
+		},
+		http: function (url) {
+			var core = {
+				ajax: function (method, url, headers, args) {
+					var promise = new Promise(function (resolve, reject) {
+						var client = new XMLHttpRequest();
+						var uri = url;
+						if (args && method === 'GET') {
+							uri += '?';
+							var argcount = 0;
+							for (var key in args) {
+								if (args.hasOwnProperty(key)) {
+									if (argcount++) {
+										uri += '&';
+									}
+									uri += encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+								}
+							}
+						}
+						if (args && (method === 'POST' || method === 'PUT')) {
+							var data = {};
+							for (var keyp in args) {
+								if (args.hasOwnProperty(keyp)) {
+									data[keyp] = args[keyp];
+								}
+							}
+						}
+						client.open(method, uri);
+						
+						if (method === 'POST' || method === 'PUT') {
+							client.setRequestHeader("accept", "application/json");
+							client.setRequestHeader("content-type", "application/json");
+						}
+						for (var keyh in headers) {
+							if (headers.hasOwnProperty(keyh)) {
+								client.setRequestHeader(keyh, headers[keyh]);
+							}
+						}
+						if (data) {
+							client.send(JSON.stringify(data));
+						} else {
+							client.send();
+						}
+						client.onload = function () {
+							if (this.status == 200) {
+								resolve(this.response);
+							} else {
+								reject(this.statusText);
+							}
+						};
+						client.onerror = function () {
+							reject(this.statusText);
+						};
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (headers, args) {
+					return core.ajax('GET', url, headers, args);
+				},
+				'post': function (headers, args) {
+					return core.ajax('POST', url, headers, args);
+				},
+				'put': function (headers, args) {
+					return core.ajax('PUT', url, headers, args);
+				},
+				'delete': function (headers, args) {
+					return core.ajax('DELETE', url, headers, args);
+				}
+			};
+		}
+	});
+});
+
+
+
+
+app/psbomwhereusedui/webapp/state/BaseState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    BOM Where - Used
+// WRICEF No        :    
+// Release          :   
+// Author           :    Chowdhary,Mamtha
+// Date             :    09.05.2024
+// Description      :    BOM Where - Used
+//-----------------------------------------------------------------------------------*
+//Descriptions: Base State file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object",
+	"sap/ui/model/json/JSONModel"
+], function(Object, JSONModel) {
+	"use strict";
+	return Object.extend("pumorips.bomdisplay.psbomwhereusedui.state.BaseState", {
+       
+		getModel: function() {
+			if (!this.model) {
+				this.model = new JSONModel(this.data, true);
+			}
+			return this.model;
+		},
+		updateModel: function(bHardRefresh) {
+			if (this.model) {
+				this.model.refresh(bHardRefresh ? true : false);
+			}
+		}
+	});
+});
+
+
+
+app/psbomwhereusedui/webapp/state/BomWhereState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    BOM Where - Used 
+// WRICEF No        :    
+// Release          :    M2 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    23.05.2024
+// Description      :    BOM Where - Used
+//-----------------------------------------------------------------------------------*
+//Descriptions: Application state file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "../state/BaseState",
+], function (BaseState) {
+    "use strict";
+    var BomWhereState = BaseState.extend("pumorips.bomdisplay.psbomwhereusedui.state.BomWhereState", {
+        constructor: function (oService) {
+            this.data = {
+                display: true,
+                busy: true                
+            };
+            this.BomWhereService = oService;
+            BaseState.call(this);
+        }
+       
+
+    });
+    return BomWhereState;
+});
+
+
+
+app/psbomwhereusedui/webapp/manifest.json
+
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.bomdisplay.psbomwhereusedui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.13.4",
+      "toolsId": "d02975e7-bff7-4b14-bc4e-313b940f1ce1"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/bomdisplay/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "psbomwhere-display": {
+          "semanticObject": "psbomwhere",
+          "action": "display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.124.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.bomdisplay.psbomwhereusedui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "oUIModel": {
+        "type": "sap.ui.model.json.JSONModel"
+      },
+      "oExcelModel": {
+        "type": "sap.ui.model.json.JSONModel"
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.bomdisplay.psbomwhereusedui.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "BomList",
+          "pattern": "",
+          "target": [
+            "BomList"
+          ]
+        }
+      ],
+      "targets": {
+        "BomList": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "BomList",
+          "viewName": "BomList"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "pumorips.bomdisplay.psbomwhereusedui.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSBOMDISP"
+  }
+}
+
+
+
+app/psbomwhereusedui/xs-app.json
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumorips_bomdisp-srv-api",
+      "csrfProtection": false
+
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa"
+
+    }
+  ]
+}

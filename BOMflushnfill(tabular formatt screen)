@@ -1,0 +1,2221 @@
+
+NOTE: THIS APP IS MADE IN SAME REPO AS DISPLAY BOM SO ALL THE COMMON CODE SUCH AS MODEL.CDS AND SERVICE.CDS AND SERVICES.CDS IS IN display bom (tree structure) FILE 
+
+app/psbomflushandfillui/webapp/view/BOMFlushAndFill.view.xml
+
+
+<mvc:View controllerName="pumorips.bomdisplay.psbomflushandfillui.controller.BOMFlushAndFill"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:customData="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+	xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:table="sap.ui.table">
+    <IconTabBar id="idIconTabBar" stretchContentHeight="true" >
+        <items>
+            <IconTabFilter id="idIconTabFilterFlush" text="{i18n>fushBom}" >
+                <ScrollContainer id="scrollContainerId" horizontal="false" vertical="true" height="100%" width="100%">
+                    <smartFilterBar:SmartFilterBar id="smartFilterBarFlush" persistencyKey="SmartFilterPKey" showMessages="true" showClearOnFB="true" entitySet="BOMHeaderFlushView" search=".onSFBSearchFlush">
+                    
+                    </smartFilterBar:SmartFilterBar>
+                    
+                    <smartTable:SmartTable id="idSmartTableFlush"  smartFilterId="smartFilterBarFlush" tableType="ResponsiveTable" editable="false" entitySet="BOMHeaderFlushView" useVariantManagement="true" showVariantManagement="true" 
+                                header="{i18n>res}" showRowCount="true" enableExport="true"  requestAtLeastFields="factoryNumber" 
+                                enableAutoBinding="false" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindTable"   persistencyKey="SmartTablePersistencyKey"
+                    >
+                        <smartTable:customToolbar>
+                                <OverflowToolbar id="idOverflowToolBar">
+                                    <ToolbarSpacer id="toolbarSpaceId"/>
+                                    <Button id="idDelete" enabled="false" icon="sap-icon://delete" tooltip="{i18n>actionsht}" class="sapUiSmallMargin" press=".onActionPressFlush" ariaHasPopup="Menu">
+                                    </Button>
+                                </OverflowToolbar>
+                        </smartTable:customToolbar>
+                        
+                        <Table id="idTable" mode="MultiSelect" selectionChange="onItemSelectFlush" sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="5">
+                            <items>
+                                <!-- <ColumnListItem  press="handlePress" id="idColList"></ColumnListItem> -->
+                            </items>
+                        </Table> 
+                    </smartTable:SmartTable>
+                </ScrollContainer>
+            </IconTabFilter>
+            
+            <IconTabFilter id="idIconTabFilterFill" text="{i18n>fillBom}">
+                <ScrollContainer id="scrollContainerIdFill" horizontal="false" vertical="true" height="100%" width="100%">
+                    <smartFilterBar:SmartFilterBar id="idSmartFilterBarFill" persistencyKey="SmartFilterPKey" showMessages="true" showClearOnFB="true" clear="onClearPress" entitySet="BOMHeaderHistoryView" search=".onSFBSearchFill">
+                    </smartFilterBar:SmartFilterBar>
+                    <smartTable:SmartTable id="idSmartTableFill"  smartFilterId="idSmartFilterBarFill" tableType="ResponsiveTable" editable="false" entitySet="BOMHeaderHistoryView" useVariantManagement="true" showVariantManagement="true" 
+                                header="{i18n>res}" showRowCount="true" enableExport="true"  requestAtLeastFields="factoryNumber" 
+                                enableAutoBinding="false" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindTableFill"   persistencyKey="SmartTablePersistencyKey" 
+                    >
+                        <smartTable:customToolbar>
+                                <OverflowToolbar id="idOverflowToolBarFill">
+                                    <ToolbarSpacer id="toolbarSpaceIdFill"/>
+                                    <Button id="idSave" enabled="false" icon="sap-icon://save"  tooltip="{i18n>actionshtSave}" class="sapUiSmallMargin" press=".onActionPressFill" ariaHasPopup="Menu">
+                                    </Button>
+                                </OverflowToolbar>
+                        </smartTable:customToolbar>
+                        
+                        <Table id="idTableFill" mode="MultiSelect" selectionChange="onItemSelectFill" sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="5">
+                            <items>
+                                <!-- <ColumnListItem  press="handlePressFill" id="idColListFill"></ColumnListItem> -->
+                            </items>
+                        </Table>
+                    </smartTable:SmartTable>
+                </ScrollContainer>
+            </IconTabFilter>
+        </items>
+    </IconTabBar>
+</mvc:View>
+
+
+
+app/psbomflushandfillui/webapp/controller/BOMFlushAndFill.controller.js
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    BOM Flush And Fill 
+// WRICEF No        :    
+// Release          :    M2 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    30.05.2024
+// Description      :    BOM Flush And Fill
+//-----------------------------------------------------------------------------------*
+//Descriptions: BOM Flush And Fill Controller file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+
+sap.ui.define([
+    "./BaseController",
+    "sap/m/MessageBox"
+],
+function (BaseController,MessageBox) {
+    "use strict";
+
+    return BaseController.extend("pumorips.bomdisplay.psbomflushandfillui.controller.BOMFlushAndFill", {
+        /* =========================================================== */
+        /* lifecycle methods                                           */
+        /* =========================================================== */
+        /**
+        * This method will trigger once during app initialization
+        * **/
+        onInit: function () {
+            this.BOMFlushFillSrv = this.getOwnerComponent().getService('BOMFlushFill');
+            this.BOMFlushFillState = this.getOwnerComponent().getState('BOMFlushFill');
+        },
+        /* =========================================================== */
+            /* event handlers                                              */
+            /* =========================================================== */
+            /**
+             * triggers once user clicks on line item in the Flush table
+             */
+            onSFBSearchFlush: function () {
+                this.getView().byId("idSmartTableFlush").rebindTable();
+            },
+            /**
+            * triggers once user select line item from table
+            * **/
+            onItemSelectFlush: function (oEvent) {
+                if ((oEvent.getSource().getSelectedItems().length > 0) || (oEvent.mParameters.selectAll === true)) {
+                    this.getView().byId("idDelete").setEnabled(true);
+                }
+                else {
+                    this.getView().byId("idDelete").setEnabled(false);
+                }
+            },
+            /**
+           * triggers once user select line item from table
+           * **/
+            onItemSelectFill: function (oEvent) {
+                if ((oEvent.getSource().getSelectedItems().length > 0) || (oEvent.mParameters.selectAll === true)) {
+                    this.getView().byId("idSave").setEnabled(true);
+                }
+                else {
+                    this.getView().byId("idSave").setEnabled(false);
+                }
+            },
+            /**
+           * triggers after user clicks on any of the action items
+           * **/
+            onActionPressFlush: function (oEvent) {
+                this.iMsgCountr = 0;
+                var aPayload = [];
+                var that = this;
+
+                this.aSelData = this.getView().byId("idTable").getSelectedItems();
+                if (oEvent.getSource().sId.split("--")[2] === "idDelete") {
+
+                    var aSelData = this.getView().byId("idTable").getSelectedItems();
+                    this.operation = "Flush";
+                    for (var i = 0; i < aSelData.length; i++) {
+                        var oDeleteData = {};
+                        aSelData[i].getBindingContext().getObject();
+                        oDeleteData.factoryNumber = aSelData[i].getBindingContext().getObject().factoryNumber;
+                        oDeleteData.zmpaPartno = aSelData[i].getBindingContext().getObject().zmpaPartno;
+                        oDeleteData.bomVersion = aSelData[i].getBindingContext().getObject().bomVersion;
+                        aPayload.push(oDeleteData);
+                    }
+                }
+                MessageBox.confirm(this.getResourceBundleText("delConfirm"), {
+                    icon: "QUESTION",
+                    title: "Confirm",
+                    actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+                    onClose: function (oAction) {
+                        if (oAction === "OK") {
+                            that._DeleteSelectedData(aPayload, that.operation);
+                        }
+                        else {
+                            return;
+                        }
+                    }
+                });
+            },
+            /***  Method to perform the delete action* **/
+            _DeleteSelectedData: async function (aPriorityData, operation) {
+                var oView = this.getView();
+                var oUserInfo = await this._getUserInfoService();
+                var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                var oDeleteData = { PostingData: aPriorityData, Operation: operation, userEmail:sModifiedBy };
+                oView.setBusy(true);
+
+                return this.BOMFlushFillSrv.flushData(oDeleteData).then(
+                    function (data) {
+                        this.iMsgCountr++;
+                        oView.setBusy(false);
+                        this.showMsgBoxSuccess(JSON.parse(data.data.BOMflushAndFill)[0].message);
+                        this.getView().byId("idSmartTableFlush").rebindTable(true);
+                        this.getView().byId("idDelete").setEnabled(false);
+                    }.bind(this),
+                    function (error) {
+                        this.showMsgBoxError(this.getResourceBundleText("delError"));
+                        oView.setBusy(false);
+                    }.bind(this));
+
+            },
+
+            onSFBSearchFill: function () {
+                this.getView().byId("idSmartTableFill").rebindTable();
+            },
+            /**
+            * triggers after user clicks on any of the action items
+            * **/
+            onActionPressFill: function (oEvent) {
+                this.iMsgCountr = 0;
+                var aPayload = [];
+                var bUpdate = true;
+
+                this.aSelData = this.getView().byId("idTableFill").getSelectedItems();
+                if (oEvent.getSource().sId.split("--")[2] === "idSave") {
+
+                    var aSelData = this.getView().byId("idTableFill").getSelectedItems();
+                    this.operation = "Fill";
+                    for (var i = 0; i < aSelData.length; i++) {
+                        var oSaveData = {};
+                        aSelData[i].getBindingContext().getObject();
+                        oSaveData.factoryNumber = aSelData[i].getBindingContext().getObject().factoryNumber;
+                        oSaveData.zmpaPartno = aSelData[i].getBindingContext().getObject().zmpaPartno;
+                        oSaveData.bomVersion = aSelData[i].getBindingContext().getObject().bomVersion;
+                        aPayload.push(oSaveData);
+                    }
+                }
+                if (bUpdate) {
+                    var bIndi = true;
+                    var that = this;
+                    //validation if data is more than 1000
+                    if (aPayload.length > 1000) {
+                        bIndi = false;
+                        MessageBox.confirm(this.getResourceBundleText("lengthExcd"), {
+                            icon: "QUESTION",
+                            title: "Confirm",
+                            actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+                            onClose: function (oAction) {
+                                if (oAction === "OK") {
+                                    bIndi = true;
+                                    var aTempLoad = [];
+                                    for (var i = 0; i < 1000; i++) {
+                                        aTempLoad.push(aPayload[i]);
+                                    }
+
+                                    that._SaveSelectedData(aTempLoad, this.operation);
+                                }
+                                else {
+                                    return;
+                                }
+                            }
+                        });
+                    }
+                    //this will be called if data is less than or equal to 1000
+                    if (bIndi)
+                        this._SaveSelectedData(aPayload, this.operation);
+                }
+
+            },
+            /***  Method to perform the save action* **/
+            _SaveSelectedData: async function (aPriorityData, operation) {
+                var oView = this.getView();
+                var oUserInfo = await this._getUserInfoService();
+                var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                var oSaveData = { PostingData: aPriorityData, Operation: operation,userEmail:sModifiedBy };
+                oView.setBusy(true);
+
+                return this.BOMFlushFillSrv.fillData(oSaveData).then(
+                    function (data) {
+                        this.iMsgCountr++;
+                        oView.setBusy(false);
+                        this.showMsgBoxSuccess(JSON.parse(data.data.BOMflushAndFill)[0].message);
+                        this.getView().byId("idSmartTableFill").rebindTable(true);
+                        this.getView().byId("idSave").setEnabled(false);
+                    }.bind(this),
+                    function (error) {
+                        this.showMsgBoxError(this.getResourceBundleText("saveError"));
+                        oView.setBusy(false);
+                    }.bind(this));
+
+            },
+
+    });
+});
+
+
+
+
+app/psbomflushandfillui/webapp/service/BOMFlushFillService.js
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    BOM Flush And Fill 
+// WRICEF No        :    
+// Release          :    M2 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    30.05.2024
+// Description      :    BOM Flush And Fill
+//-----------------------------------------------------------------------------------*
+//Descriptions: BOM Flush And Fill Service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./CoreService",
+], function (CoreService) {
+    "use strict";
+
+    var BOMFlushFillService = CoreService.extend("pumorips.bomdisplay.psbomflushandfillui.service.BOMFlushFillService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        },
+
+        /**
+        * Odata service for Flush Data
+        * **/
+        flushData: function (oDeleteData) {
+            return this.odata("/BOMflushAndFill").post(oDeleteData);
+        },  
+        fillData: function (oSaveData) {
+            return this.odata("/BOMflushAndFill").post(oSaveData);
+        },
+
+    });
+    return BOMFlushFillService;
+});
+
+
+
+app/psbomflushandfillui/webapp/service/CoreService.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    BOM Flush And Fill 
+// WRICEF No        :    
+// Release          :    M2 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    30.05.2024
+// Description      :    BOM Flush And Fill
+//-----------------------------------------------------------------------------------*
+//Descriptions: Core Service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object"
+], function (Object) {
+	"use strict";
+
+	return Object.extend("pumorips.bomdisplay.psbomflushandfillui.service.CoreService", {
+		constructor: function (model) {
+			Object.call(this);
+			if (model) {
+				this.setModel(model);
+			}
+		},
+		setModel: function (model) {
+			this.model = model;
+		},
+		odata: function (url) {
+			var me = this;
+			var core = {
+				ajax: function (type, url, data, parameters) {
+					var promise = new Promise(function (resolve, reject) {
+						var args = [];
+						var params = {};
+						args.push(url);
+						if (data) {
+							args.push(data);
+						}
+						if (parameters) {
+							params = parameters;
+						}
+						params.success = function (result, response) {
+							resolve({
+								data: result,
+								response: response
+							});
+						};
+						params.error = function (error) {
+							reject(error);
+						};
+						args.push(params);
+						me.model[type].apply(me.model, args);
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (params) {
+					return core.ajax('read', url, false, params);
+				},
+				'post': function (data, params) {
+					return core.ajax('create', url, data, params);
+				},
+				'put': function (data, params) {
+					return core.ajax('update', url, data, params);
+				},
+				'delete': function (params) {
+					return core.ajax('remove', url, false, params);
+				}
+			};
+		},
+		http: function (url) {
+			var core = {
+				ajax: function (method, url, headers, args) {
+					var promise = new Promise(function (resolve, reject) {
+						var client = new XMLHttpRequest();
+						var uri = url;
+						if (args && method === 'GET') {
+							uri += '?';
+							var argcount = 0;
+							for (var key in args) {
+								if (args.hasOwnProperty(key)) {
+									if (argcount++) {
+										uri += '&';
+									}
+									uri += encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+								}
+							}
+						}
+						if (args && (method === 'POST' || method === 'PUT')) {
+							var data = {};
+							for (var keyp in args) {
+								if (args.hasOwnProperty(keyp)) {
+									data[keyp] = args[keyp];
+								}
+							}
+						}
+						client.open(method, uri);
+						
+						if (method === 'POST' || method === 'PUT') {
+							client.setRequestHeader("accept", "application/json");
+							client.setRequestHeader("content-type", "application/json");
+						}
+						for (var keyh in headers) {
+							if (headers.hasOwnProperty(keyh)) {
+								client.setRequestHeader(keyh, headers[keyh]);
+							}
+						}
+						if (data) {
+							client.send(JSON.stringify(data));
+						} else {
+							client.send();
+						}
+						client.onload = function () {
+							if (this.status == 200) {
+								resolve(this.response);
+							} else {
+								reject(this.statusText);
+							}
+						};
+						client.onerror = function () {
+							reject(this.statusText);
+						};
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (headers, args) {
+					return core.ajax('GET', url, headers, args);
+				},
+				'post': function (headers, args) {
+					return core.ajax('POST', url, headers, args);
+				},
+				'put': function (headers, args) {
+					return core.ajax('PUT', url, headers, args);
+				},
+				'delete': function (headers, args) {
+					return core.ajax('DELETE', url, headers, args);
+				}
+			};
+		}
+	});
+});
+
+
+
+app/psbomflushandfillui/webapp/state/BOMFlushFillState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    BOM Flush And Fill 
+// WRICEF No        :    
+// Release          :    M2 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    30.05.2024
+// Description      :    BOM Flush And Fill
+//-----------------------------------------------------------------------------------*
+//Descriptions: BOM Flush And Fill State file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "../state/BaseState",
+], function (BaseState) {
+    "use strict";
+    var BOMFlushFillState = BaseState.extend("pumorips.bomdisplay.psbomflushandfillui.state.BOMFlushFillState", {
+        constructor: function (oService) {
+            this.data = {
+                display: true,
+                busy: true                
+            };
+            this.FlushFillService = oService;
+            BaseState.call(this);
+        }
+       
+
+    });
+    return BOMFlushFillState;
+});
+
+
+
+app/psbomflushandfillui/webapp/state/BaseState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    BOM Flush And Fill 
+// WRICEF No        :    
+// Release          :    M2 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    30.05.2024
+// Description      :    BOM Flush And Fill
+//-----------------------------------------------------------------------------------*
+//Descriptions: Base State file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object",
+	"sap/ui/model/json/JSONModel"
+], function(Object, JSONModel) {
+	"use strict";
+	return Object.extend("pumorips.bomdisplay.psbomflushandfillui.state.BaseState", {
+        //method to getmodel
+		getModel: function() {
+			if (!this.model) {
+				this.model = new JSONModel(this.data, true);
+			}
+			return this.model;
+		},
+        //method to update model
+		updateModel: function(bHardRefresh) {
+			if (this.model) {
+				this.model.refresh(bHardRefresh ? true : false);
+			}
+		}
+	});
+});
+
+
+
+app/psbomflushandfillui/webapp/manifest.json
+
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.bomdisplay.psbomflushandfillui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.13.5",
+      "toolsId": "12ad50c8-da1a-479a-b618-00301c993548"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/bomdisplay/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "psbomflushandfill-display": {
+          "semanticObject": "psbomflushandfill",
+          "action": "display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.124.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.bomdisplay.psbomflushandfillui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.bomdisplay.psbomflushandfillui.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "RouteBOMFlushAndFill",
+          "pattern": ":?query:",
+          "target": [
+            "TargetBOMFlushAndFill"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetBOMFlushAndFill": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "BOMFlushAndFill",
+          "viewName": "BOMFlushAndFill"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "pumorips.bomdisplay.psbomflushandfillui.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSBOMDISP"
+  }
+}
+
+
+
+app/psbomflushandfillui/xs-app.json
+
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumorips_bomdisp-srv-api",
+      "csrfProtection": false
+
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa"
+
+    }
+  ]
+}
+
+
+app/services.cds
+
+
+using from './psbomdispui/annotations';
+using from './psbomwhereusedui/annotations';
+using from './psbomflushandfillui/annotations';
+using from './psmassuploadui/annotations';
+
+
+annotate BOMDisplayService.BOMHeaderView with {
+    zbtpComp          @(title: '{i18n>genHPPNParent}');
+    zmpaPartno        @(title: '{i18n>MPA_FPN_P}');
+    factoryNumber     @(title: '{i18n>facCode}');
+    alternativeBom    @(title: '{i18n>alternativeBom}');
+    prodDesc          @(title: '{i18n>MPA_PN_DESC}');
+    zhpPartno         @(title: '{i18n>p_MAT_NUM_HPPN}');
+    baseQuantity      @(title: '{i18n>BOM_BaseUOM}');
+    baseunitofMeasure @(title: '{i18n>unitOfMeasure}');
+    bomVersion        @(title: '{i18n>BOM_VERSION}');
+    @UI.HiddenFilter
+    bomValidFrom      @(title: '{i18n>BOM_VALID_FRM}');
+    bomValidTo        @(title: '{i18n>BOM_VALID_TO}');
+    planningDiv       @(title: '{i18n>busType}');
+    yield             @(title: '{i18n>yield}');
+    markedForDeletion @(title: '{i18n>MARKED_FOR_DEL}');
+    bomImportDate     @(title: '{i18n>bomImpDate}');
+    @UI.Hidden markedForDeletion;
+    @UI.HiddenFilter markedForDeletion;
+    @UI.HiddenFilter bomValidTo;
+}
+
+annotate BOMDisplayService.materialNumberValueHelp with {
+    zmpaPartno @(title: '{i18n>MPA_FPN_P}');
+}
+
+annotate BOMDisplayService.factoryCodeValueHelp with {
+    factoryNumber @(title: '{i18n>facCode}');
+}
+
+annotate BOMDisplayService.alternativeBomValueHelp with {
+    alternativeBom @(title: '{i18n>alternativeBom}');
+}
+
+annotate BOMDisplayService.prodDescValueHelp with {
+    prodDesc @(title: '{i18n>MPA_PN_DESC}');
+}
+
+annotate BOMDisplayService.zhpPartnoValueHelp with {
+    zhpPartno @(title: '{i18n>p_MAT_NUM_HPPN}');
+}
+
+annotate BOMDisplayService.baseunitofMeasureValueHelp with {
+    baseunitofMeasure @(title: '{i18n>unitOfMeasure}');
+}
+
+annotate BOMDisplayService.planningDivValueHelp with {
+    planningDiv @(title: '{i18n>busType}');
+}
+
+annotate BOMDisplayService.bomVersionValueHelp with {
+    bomVersion @(title: '{i18n>BOM_VERSION}');
+}
+
+annotate BOMDisplayService.pumoriPnValueHelpDisplayBom with {
+    zbtpComp  @(title: '{i18n>genHPPNParent}');
+};
+
+
+
+annotate BOMDisplayService.BOMHeaderView with @(UI: {
+    SelectionFields: [
+        zmpaPartno,
+        factoryNumber,
+        bomVersion
+    ],
+    LineItem       : [
+        {
+            Value: zmpaPartno,
+            Label: '{i18n>MPA_FPN_P}',
+        },
+        {
+            Value: prodDesc,
+            Label: '{i18n>MPA_PN_DESC}',
+        },
+        
+        {
+            Value: zbtpComp,
+            Label: '{i18n>genHPPNParent}'
+        },
+        {
+            Value: zhpPartno,
+            Label: '{i18n>p_MAT_NUM_HPPN}',
+        },
+        {
+            Value: factoryNumber,
+            Label: '{i18n>facCode}',
+        },
+        {
+            Value: baseQuantity,
+            Label: '{i18n>BOM_BaseUOM}',
+        },
+        {
+            Value: bomValidFrom,
+            Label: '{i18n>BOM_VALID_FRM}',
+        },
+        {
+            Value: bomValidTo,
+            Label: '{i18n>BOM_VALID_TO}',
+        },
+        {
+            Value: bomVersion,
+            Label: '{i18n>BOM_VERSION}'
+        },
+        {
+            Value: planningDiv,
+            Label: '{i18n>busType}',
+        },
+    ],
+},
+ Capabilities: {FilterRestrictions: {FilterExpressionRestrictions: [
+        {
+            $Type             : 'Capabilities.FilterExpressionRestrictionType',
+            Property          : bomValidFrom,
+            AllowedExpressions: 'SingleRange'
+        },
+        {
+            $Type             : 'Capabilities.FilterExpressionRestrictionType',
+            Property          : bomValidTo,
+            AllowedExpressions: 'SingleRange'
+        }
+    ]}}
+);
+
+annotate BOMDisplayService.BOMHeaderView {
+    zmpaPartno        @(Common: {
+        Text     : {
+            $value                : zmpaPartno,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : zmpaPartno,
+            CollectionPath : 'materialNumberValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: zmpaPartno,
+                ValueListProperty: 'zmpaPartno'
+            }]
+        }
+    });
+    factoryNumber     @(Common: {
+        Text     : {
+            $value                : factoryNumber,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : factoryNumber,
+            CollectionPath : 'factoryCodeValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: factoryNumber,
+                ValueListProperty: 'factoryNumber'
+            }]
+        }
+    });
+    alternativeBom    @(Common: {
+        Text     : {
+            $value                : alternativeBom,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : alternativeBom,
+            CollectionPath : 'alternativeBomValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: alternativeBom,
+                ValueListProperty: 'alternativeBom'
+            }]
+        }
+    });
+    prodDesc          @(Common: {
+        Text     : {
+            $value                : prodDesc,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : prodDesc,
+            CollectionPath : 'prodDescValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: prodDesc,
+                ValueListProperty: 'prodDesc'
+            }]
+        }
+    });
+    zhpPartno         @(Common: {
+        Text     : {
+            $value                : zhpPartno,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : zhpPartno,
+            CollectionPath : 'zhpPartnoValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: zhpPartno,
+                ValueListProperty: 'zhpPartno'
+            }]
+        }
+    });
+    baseunitofMeasure @(Common: {
+        Text     : {
+            $value                : baseunitofMeasure,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : baseunitofMeasure,
+            CollectionPath : 'baseunitofMeasureValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: baseunitofMeasure,
+                ValueListProperty: 'baseunitofMeasure'
+            }]
+        }
+    });
+    planningDiv       @(Common: {
+        Text     : {
+            $value                : planningDiv,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : planningDiv,
+            CollectionPath : 'planningDivValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: planningDiv,
+                ValueListProperty: 'planningDiv'
+            }]
+        }
+    });
+    bomVersion        @(Common: {
+        Text     : {
+            $value                : bomVersion,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : '{i18n>BOM_VERSION}',
+            CollectionPath : 'bomVersionValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: bomVersion,
+                ValueListProperty: 'bomVersion'
+            }]
+        }
+    });
+    zbtpComp         @(Common: {
+        Text     : {
+            $value                : zbtpComp,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : zbtpComp,
+            CollectionPath : 'pumoriPnValueHelpDisplayBom',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: zbtpComp,
+                ValueListProperty: 'zbtpComp'
+            }]
+        }
+    });
+};
+
+annotate BOMDisplayService.BOMHeaderHistoryView {
+    zmpaPartno        @(title: '{i18n>MPA_FPN_P}');
+    factoryNumber     @(title: '{i18n>facCode}');
+    alternativeBom    @(title: '{i18n>alternativeBom}');
+    prodDesc          @(title: '{i18n>MPA_PN_DESC}');
+    zhpPartno         @(title: '{i18n>MAT_NUM_HPPN}');
+    baseQuantity      @(title: '{i18n>BOM_BaseUOM}');
+    baseunitofMeasure @(title: '{i18n>unitOfMeasure}');
+    @UI.HiddenFilter
+    bomValidFrom      @(title: '{i18n>BOM_VALID_FRM}');
+    @UI.HiddenFilter
+    bomValidTo        @(title: '{i18n>BOM_VALID_TO}');
+    bomVersion        @(title: '{i18n>BOM_VERSION}');
+    planningDiv       @(title: '{i18n>busType}');
+    yield             @(title: '{i18n>yield}');
+    @UI.Hidden
+    @UI.HiddenFilter
+    markedForDeletion @(title: '{i18n>MARKED_FOR_DEL}');
+    bomImportDate     @(title: '{i18n>bomImpDate}');
+};
+
+annotate BOMDisplayService.factoryCodeFillValueHelp {
+    factoryNumber @(title: '{i18n>facCode}');
+}
+
+annotate BOMDisplayService.materialNumberFillValueHelp with {
+    zmpaPartno @(title: '{i18n>MPA_FPN_P}');
+}
+
+annotate BOMDisplayService.alternativeBomFillValueHelp with {
+    alternativeBom @(title: '{i18n>alternativeBom}');
+}
+
+annotate BOMDisplayService.prodDescFillValueHelp with {
+    prodDesc @(title: '{i18n>MPA_PN_DESC}');
+}
+
+annotate BOMDisplayService.zhpPartnoFillValueHelp with {
+    zhpPartno @(title: '{i18n>MAT_NUM_HPPN}');
+}
+
+annotate BOMDisplayService.baseunitofMeasureFillValueHelp with {
+    baseunitofMeasure @(title: '{i18n>unitOfMeasure}');
+}
+
+annotate BOMDisplayService.planningDivFillValueHelp with {
+    planningDiv @(title: '{i18n>busType}');
+}
+
+annotate BOMDisplayService.BOMHeaderHistoryView with @(
+    UI          : {LineItem: [
+        {
+            Value: zmpaPartno,
+            Label: '{i18n>MPA_FPN_P}',
+        },
+        {
+            Value: factoryNumber,
+            Label: '{i18n>facCode}',
+        },
+        {
+            Value: alternativeBom,
+            Label: '{i18n>alternativeBom}'
+        },
+        {
+            Value: prodDesc,
+            Label: '{i18n>MPA_PN_DESC}',
+        },
+        {
+            Value: zhpPartno,
+            Label: '{i18n>MAT_NUM_HPPN}',
+        },
+
+        {
+            Value: baseQuantity,
+            Label: '{i18n>BOM_BaseUOM}',
+        },
+        {
+            Value: baseunitofMeasure,
+            Label: '{i18n>unitOfMeasure}'
+        },
+        {
+            Value: bomValidFrom,
+            Label: '{i18n>BOM_VALID_FRM}',
+        },
+        {
+            Value: bomValidTo,
+            Label: '{i18n>BOM_VALID_TO}',
+        },
+        {
+            Value: bomVersion,
+            Label: '{i18n>BOM_VERSION}'
+        },
+        {
+            Value: planningDiv,
+            Label: '{i18n>busType}',
+        },
+        {
+            Value: yield,
+            Label: '{i18n>yield}'
+        },
+        {
+            Value: bomImportDate,
+            Label: '{i18n>bomImpDate}'
+        }
+    ], },
+    Capabilities: {FilterRestrictions: {
+        $Type             : 'Capabilities.FilterRestrictionsType',
+        RequiredProperties: [factoryNumber]
+    }}
+) {
+    factoryNumber @(Common: {
+        Text     : {
+            $value                : factoryNumber,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : factoryNumber,
+            CollectionPath : 'factoryCodeFillValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: factoryNumber,
+                ValueListProperty: 'factoryNumber'
+            }]
+        }
+    });
+    zmpaPartno        @(Common: {
+        Text     : {
+            $value                : zmpaPartno,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : zmpaPartno,
+            CollectionPath : 'materialNumberFillValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: zmpaPartno,
+                ValueListProperty: 'zmpaPartno'
+            }]
+        }
+    });
+    alternativeBom    @(Common: {
+        Text     : {
+            $value                : alternativeBom,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : alternativeBom,
+            CollectionPath : 'alternativeBomFillValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: alternativeBom,
+                ValueListProperty: 'alternativeBom'
+            }]
+        }
+    });
+    prodDesc          @(Common: {
+        Text     : {
+            $value                : prodDesc,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : prodDesc,
+            CollectionPath : 'prodDescFillValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: prodDesc,
+                ValueListProperty: 'prodDesc'
+            }]
+        }
+    });
+    zhpPartno         @(Common: {
+        Text     : {
+            $value                : zhpPartno,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : zhpPartno,
+            CollectionPath : 'zhpPartnoFillValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: zhpPartno,
+                ValueListProperty: 'zhpPartno'
+            }]
+        }
+    });
+    baseunitofMeasure @(Common: {
+        Text     : {
+            $value                : baseunitofMeasure,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : baseunitofMeasure,
+            CollectionPath : 'baseunitofMeasureFillValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: baseunitofMeasure,
+                ValueListProperty: 'baseunitofMeasure'
+            }]
+        }
+    });
+    planningDiv       @(Common: {
+        Text     : {
+            $value                : planningDiv,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : planningDiv,
+            CollectionPath : 'planningDivFillValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: planningDiv,
+                ValueListProperty: 'planningDiv'
+            }]
+        }
+    })
+
+};
+
+annotate BOMDisplayService.BOMHeaderFlushView with {
+    zmpaPartno     @(title: '{i18n>MPA_FPN_P}');
+    factoryNumber  @(title: '{i18n>facCode}');
+    bomVersion     @(title: '{i18n>BOM_VERSION}');
+    @UI.HiddenFilter
+    bomValidFrom   @(title: '{i18n>BOM_VALID_FRM}');
+    @UI.HiddenFilter
+    bomValidTo     @(title: '{i18n>BOM_VALID_TO}');
+    yield             @(title: '{i18n>yield}');
+    @UI.HiddenFilter
+    @UI.Hidden
+    markedForDeletion;
+    planningDiv    @(title: '{i18n>busType}');
+    prodDesc       @(title: '{i18n>MPA_PN_DESC}');
+    baseQuantity   @(title: '{i18n>BOM_BaseUOM}');
+    alternativeBom @(title: '{i18n>alternativeBom}');
+    bomImportDate  @(title: '{i18n>bomImpDate}');
+    zhpPartno      @(title: '{i18n>MAT_NUM_HPPN}');
+}
+
+annotate BOMDisplayService.factoryCodeFlushValueHelp with {
+    factoryNumber @(title: '{i18n>facCode}');
+}
+
+annotate BOMDisplayService.materialNumberFlushValueHelp with {
+    zmpaPartno @(title: '{i18n>MPA_FPN_P}');
+}
+
+annotate BOMDisplayService.alternativeBomFlushValueHelp with {
+    alternativeBom @(title: '{i18n>alternativeBom}');
+}
+
+annotate BOMDisplayService.prodDescFlushValueHelp with {
+    prodDesc @(title: '{i18n>MPA_PN_DESC}');
+}
+
+annotate BOMDisplayService.zhpPartnoFlushValueHelp with {
+    zhpPartno @(title: '{i18n>MAT_NUM_HPPN}');
+}
+
+annotate BOMDisplayService.planningDivFlushValueHelp with {
+    planningDiv @(title: '{i18n>busType}');
+}
+
+annotate BOMDisplayService.BOMHeaderFlushView with @(
+    UI          : {
+        SelectionFields: [factoryNumber],
+        LineItem       : [
+            {
+                Value: zmpaPartno,
+                Label: '{i18n>MPA_FPN_P}',
+            },
+            {
+                Value: prodDesc,
+                Label: '{i18n>MPA_PN_DESC}',
+            },
+            {
+                Value: baseQuantity,
+                Label: '{i18n>BOM_BaseUOM}',
+            },
+            {
+                Value: factoryNumber,
+                Label: '{i18n>facCode}',
+            },
+            {
+                Value: alternativeBom,
+                Label: '{i18n>alternativeBom}'
+            },
+            {
+                Value: bomValidFrom,
+                Label: '{i18n>BOM_VALID_FRM}',
+            },
+            {
+                Value: bomValidTo,
+                Label: '{i18n>BOM_VALID_TO}',
+            },
+            {
+                Value: planningDiv,
+                Label: '{i18n>busType}',
+            },
+            {
+                Value: zhpPartno,
+                Label: '{i18n>MAT_NUM_HPPN}',
+            },
+            {
+                Value: yield,
+                Label: '{i18n>yield}'
+            },
+            {
+                Value: bomVersion,
+                Label: '{i18n>BOM_VERSION}'
+            },
+            {
+                Value: bomImportDate,
+                Label: '{i18n>bomImpDate}'
+            }
+        ]
+    },
+    Capabilities: {FilterRestrictions: {
+        $Type             : 'Capabilities.FilterRestrictionsType',
+        RequiredProperties: [factoryNumber]
+    }}
+
+) {
+    factoryNumber @(Common: {
+        Text     : {
+            $value                : factoryNumber,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : factoryNumber,
+            CollectionPath : 'factoryCodeFlushValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: factoryNumber,
+                ValueListProperty: 'factoryNumber'
+            }]
+        }
+    });
+    zmpaPartno        @(Common: {
+        Text     : {
+            $value                : zmpaPartno,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : zmpaPartno,
+            CollectionPath : 'materialNumberFlushValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: zmpaPartno,
+                ValueListProperty: 'zmpaPartno'
+            }]
+        }
+    });
+    alternativeBom    @(Common: {
+        Text     : {
+            $value                : alternativeBom,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : alternativeBom,
+            CollectionPath : 'alternativeBomFlushValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: alternativeBom,
+                ValueListProperty: 'alternativeBom'
+            }]
+        }
+    });
+    prodDesc          @(Common: {
+        Text     : {
+            $value                : prodDesc,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : prodDesc,
+            CollectionPath : 'prodDescFlushValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: prodDesc,
+                ValueListProperty: 'prodDesc'
+            }]
+        }
+    });
+    zhpPartno         @(Common: {
+        Text     : {
+            $value                : zhpPartno,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : zhpPartno,
+            CollectionPath : 'zhpPartnoFlushValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: zhpPartno,
+                ValueListProperty: 'zhpPartno'
+            }]
+        }
+    });
+    planningDiv       @(Common: {
+        Text     : {
+            $value                : planningDiv,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : planningDiv,
+            CollectionPath : 'planningDivFlushValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: planningDiv,
+                ValueListProperty: 'planningDiv'
+            }]
+        }
+    })
+};
+
+annotate BOMDisplayService.SingleLevelBomWhereUseView {
+    @UI.HiddenFilter
+    hppnChildPn                  @(title: '{i18n>hppnChildPn}');
+    factoryChildPn               @(title: '{i18n>factoryChildPn}');
+    mpnChildPn                   @(title: '{i18n>mpnChildPn}');
+    factoryNumber                @(title: '{i18n>factoryNumber}');
+    @UI.HiddenFilter
+    levelNo                      @(title: '{i18n>lvlno}');
+    generatedHppn                @(title: '{i18n>genHPPN}');
+    @UI.HiddenFilter
+    singleLevelParent            @(title: '{i18n>singleLevelParent}');
+    @UI.HiddenFilter
+    zmpaPartno                   @(title: '{i18n>zmpaPartnosngllvl}');
+    @UI.HiddenFilter
+    uomAlt                       @(title: '{i18n>uomAlt}');
+    @UI.HiddenFilter
+    singleLevelQuantity          @(title: '{i18n>singleLevelQuantity}');
+    @UI.HiddenFilter
+    singleLevelresultingQuantity @(title: '{i18n>singleLevelresultingQuantity}');
+    @UI.HiddenFilter
+    marketShare                  @(title: '{i18n>marketShare}');
+    @UI.HiddenFilter
+    sortString                   @(title: '{i18n>sortStr}');
+    @UI.HiddenFilter
+    componentValidFrom           @(title: '{i18n>validFrom}');
+    @UI.HiddenFilter
+    componentValidTo             @(title: '{i18n>validTo}');
+};
+
+annotate BOMDisplayService.SingleLevelFacNumValueHelp with {
+    factoryNumber @(title: '{i18n>factoryNumber}');
+}
+
+annotate BOMDisplayService.SingleLevelfactoryChildPnValueHelp with {
+    factoryChildPn @(title: '{i18n>factoryChildPn}');
+}
+
+annotate BOMDisplayService.SingleLevelmpnChildPnValueHelp with {
+    mpnChildPn @(title: '{i18n>mpnChildPn}');
+}
+
+annotate BOMDisplayService.SingleLevelgeneratedHppnValueHelp with {
+    generatedHppn @(title: 'Pumori PN for Child');
+}
+
+annotate BOMDisplayService.SingleLevelfactoryPnforParentValueHelp with {
+    zmpaPartno @(title: '{i18n>zmpaPartnosngllvl}');
+}
+
+annotate BOMDisplayService.SingleLevelmaterialNumberforChildValueHelp with {
+    hppnChildPn @(title: '{i18n>hppnChildPn}');
+}
+
+annotate BOMDisplayService.SingleLevelidentifierforAlternateProductValueHelp with {
+    sortString @(title: '{i18n>sortStr}');
+}
+
+annotate BOMDisplayService.SingleLevelUOMAlternateValueHelp with {
+    uomAlt @(title: '{i18n>uomAlt}');
+}
+
+annotate BOMDisplayService.SingleLevelParentPartValueHelp with {
+    singleLevelParent @(title: '{i18n>singleLevelParent}');
+}
+
+
+annotate BOMDisplayService.SingleLevelBomWhereUseView with @(
+    UI          : {
+        SelectionFields: [
+            factoryNumber,
+            factoryChildPn,
+            mpnChildPn,
+            generatedHppn
+        ],
+        LineItem       : [
+            {
+                Value: generatedHppn,
+                Label: 'Pumori PN for Child',
+            },
+            {
+                Value: factoryNumber,
+                Label: '{i18n>factoryNumber}',
+            },
+            {
+                Value: factoryChildPn,
+                Label: '{i18n>factoryChildPn}',
+            },
+            {
+                Value: mpnChildPn,
+                Label: '{i18n>mpnChildPn}',
+            },
+            {
+                Value: hppnChildPn,
+                Label: '{i18n>hppnChildPn}'
+            },
+            {
+                Value: singleLevelParent,
+                Label: '{i18n>singleLevelParent}'
+            },
+            {
+                Value: zmpaPartno,
+                Label: '{i18n>zmpaPartnosngllvl}'
+            },
+            {
+                Value: singleLevelQuantity,
+                Label: '{i18n>singleLevelQuantity}'
+            },
+            {
+                Value: singleLevelresultingQuantity,
+                Label: '{i18n>singleLevelresultingQuantity}'
+            },
+            {
+                Value: marketShare,
+                Label: '{i18n>marketShare}'
+            },
+            {
+                Value: sortString,
+                Label: '{i18n>sortStr}'
+            },
+            {
+                Value: componentValidFrom,
+                Label: '{i18n>validFrom}'
+            },
+            {
+                Value: componentValidTo,
+                Label: '{i18n>validTo}'
+            }
+        ]
+
+    }
+
+) {
+    generatedHppn  @(Common: {
+        Text     : {
+            $value                : generatedHppn,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : generatedHppn,
+            CollectionPath : 'SingleLevelgeneratedHppnValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: generatedHppn,
+                ValueListProperty: 'generatedHppn'
+            }]
+        }
+    });
+    factoryNumber  @(Common: {
+        Text     : {
+            $value                : factoryNumber,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : factoryNumber,
+            CollectionPath : 'SingleLevelFacNumValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: factoryNumber,
+                ValueListProperty: 'factoryNumber'
+            }]
+        }
+    });
+    factoryChildPn @(Common: {
+        Text     : {
+            $value                : factoryChildPn,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : factoryChildPn,
+            CollectionPath : 'SingleLevelfactoryChildPnValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: factoryChildPn,
+                ValueListProperty: 'factoryChildPn'
+            }]
+        }
+    });
+    mpnChildPn     @(Common: {
+        Text     : {
+            $value                : mpnChildPn,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : mpnChildPn,
+            CollectionPath : 'SingleLevelmpnChildPnValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: mpnChildPn,
+                ValueListProperty: 'mpnChildPn'
+            }]
+        }
+    });
+    zmpaPartno     @(Common: {
+        Text     : {
+            $value                : zmpaPartno,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : zmpaPartno,
+            CollectionPath : 'SingleLevelfactoryPnforParentValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: zmpaPartno,
+                ValueListProperty: 'zmpaPartno'
+            }]
+        }
+    });
+    hppnChildPn     @(Common: {
+        Text     : {
+            $value                : hppnChildPn,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : hppnChildPn,
+            CollectionPath : 'SingleLevelmaterialNumberforChildValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: hppnChildPn,
+                ValueListProperty: 'hppnChildPn'
+            }]
+        }
+    });
+    sortString     @(Common: {
+        Text     : {
+            $value                : sortString,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : sortString,
+            CollectionPath : 'SingleLevelidentifierforAlternateProductValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: sortString,
+                ValueListProperty: 'sortString'
+            }]
+        }
+    });
+    uomAlt     @(Common: {
+        Text     : {
+            $value                : uomAlt,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : uomAlt,
+            CollectionPath : 'SingleLevelUOMAlternateValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: uomAlt,
+                ValueListProperty: 'uomAlt'
+            }]
+        }
+    });
+    singleLevelParent     @(Common: {
+        Text     : {
+            $value                : singleLevelParent,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : singleLevelParent,
+            CollectionPath : 'SingleLevelParentPartValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: singleLevelParent,
+                ValueListProperty: 'singleLevelParent'
+            }]
+        }
+    });
+};
+
+annotate BOMDisplayService.topLevelBomWhereUseView {
+    @UI.HiddenFilter
+    hppnChildPn               @(title: '{i18n>hppnChildPn}');
+    factoryChildPn            @(title: '{i18n>factoryChildPn}');
+    mpnChildPn                @(title: '{i18n>mpnChildPn}');
+    factoryNumber             @(title: '{i18n>factoryNumber}');
+    @UI.HiddenFilter
+    levelNo                   @(title: '{i18n>lvl}');
+    generatedHppn             @(title: 'Pumori PN for Child');
+    @UI.HiddenFilter
+    topLevelParent            @(title: '{i18n>topLevelParent}');
+    @UI.HiddenFilter
+    zmpaPartno                @(title: '{i18n>zmpaPartnoToplvl}');
+    @UI.HiddenFilter
+    uomAlt                    @(title: '{i18n>uomAlt}');
+    @UI.HiddenFilter
+    topLevelQuantity          @(title: '{i18n>topLevelQuantity}');
+    @UI.HiddenFilter
+    topLevelresultingQuantity @(title: '{i18n>topLevelresultingQuantity}');
+    @UI.HiddenFilter
+    marketShare               @(title: '{i18n>marketShare}');
+    @UI.HiddenFilter
+    sortString                @(title: '{i18n>sortStr}');
+    @UI.HiddenFilter
+    componentValidFrom        @(title: '{i18n>validFrom}');
+    @UI.HiddenFilter
+    componentValidTo          @(title: '{i18n>validTo}');
+};
+
+annotate BOMDisplayService.topLevelFacNumValueHelp with {
+    factoryNumber @(title: '{i18n>factoryNumber}');
+}
+
+annotate BOMDisplayService.topLevelfactoryChildPnValueHelp with {
+    factoryChildPn @(title: '{i18n>factoryChildPn}');
+}
+
+annotate BOMDisplayService.topLevelmpnChildPnValueHelp with {
+    mpnChildPn @(title: '{i18n>mpnChildPn}');
+}
+
+annotate BOMDisplayService.topLevelgeneratedHppnValueHelp with {
+    generatedHppn @(title: 'Pumori PN for Child');
+}
+
+annotate BOMDisplayService.topLevelfactoryPnforParentValueHelp with {
+    zmpaPartno @(title: '{i18n>zmpaPartnoToplvl}');
+}
+
+annotate BOMDisplayService.topLevelmaterialNumberforChildValueHelp with {
+    hppnChildPn @(title: '{i18n>hppnChildPn}');
+}
+
+annotate BOMDisplayService.topLevelidentifierforAlternateProductValueHelp with {
+    sortString @(title: '{i18n>sortStr}');
+}
+
+annotate BOMDisplayService.topLevelUOMAlternateValueHelp with {
+    uomAlt @(title: '{i18n>uomAlt}');
+}
+
+annotate BOMDisplayService.topLevelParentPartValueHelp with {
+    topLevelParent @(title: '{i18n>topLevelParent}');
+}
+
+annotate BOMDisplayService.topLevelBomWhereUseView with @(
+    UI          : {
+        SelectionFields: [
+            factoryNumber,
+            factoryChildPn,
+            mpnChildPn,
+            generatedHppn
+        ],
+        LineItem       : [
+            {
+                Value: generatedHppn,
+                Label: 'Pumori PN for Child',
+            },
+            {
+                Value: factoryNumber,
+                Label: '{i18n>factoryNumber}',
+            },
+            {
+                Value: factoryChildPn,
+                Label: '{i18n>factoryChildPn}',
+            },
+            {
+                Value: mpnChildPn,
+                Label: '{i18n>mpnChildPn}',
+            },
+            {
+                Value: hppnChildPn,
+                Label: '{i18n>hppnChildPn}'
+            },
+            {
+                Value: zmpaPartno,
+                Label: '{i18n>zmpaPartnoToplvl}'
+            },
+            {
+                Value: topLevelQuantity,
+                Label: '{i18n>topLevelQuantity}'
+            },
+            {
+                Value: topLevelresultingQuantity,
+                Label: '{i18n>topLevelresultingQuantity}'
+            },
+            {
+                Value: marketShare,
+                Label: '{i18n>marketShare}'
+            },
+            {
+                Value: sortString,
+                Label: '{i18n>sortStr}'
+            },
+            {
+                Value: componentValidFrom,
+                Label: '{i18n>validFrom}'
+            },
+            {
+                Value: componentValidTo,
+                Label: '{i18n>validTo}'
+            }
+
+        ]
+
+    }
+
+) {
+    generatedHppn  @(Common: {
+        Text     : {
+            $value                : generatedHppn,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : generatedHppn,
+            CollectionPath : 'topLevelgeneratedHppnValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: generatedHppn,
+                ValueListProperty: 'generatedHppn'
+            }]
+        }
+    });
+    factoryNumber  @(Common: {
+        Text     : {
+            $value                : factoryNumber,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : factoryNumber,
+            CollectionPath : 'topLevelFacNumValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: factoryNumber,
+                ValueListProperty: 'factoryNumber'
+            }]
+        }
+    });
+    factoryChildPn @(Common: {
+        Text     : {
+            $value                : factoryChildPn,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : factoryChildPn,
+            CollectionPath : 'topLevelfactoryChildPnValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: factoryChildPn,
+                ValueListProperty: 'factoryChildPn'
+            }]
+        }
+    });
+    mpnChildPn     @(Common: {
+        Text     : {
+            $value                : mpnChildPn,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : mpnChildPn,
+            CollectionPath : 'topLevelmpnChildPnValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: mpnChildPn,
+                ValueListProperty: 'mpnChildPn'
+            }]
+        }
+    });
+    zmpaPartno     @(Common: {
+        Text     : {
+            $value                : zmpaPartno,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : zmpaPartno,
+            CollectionPath : 'topLevelfactoryPnforParentValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: zmpaPartno,
+                ValueListProperty: 'zmpaPartno'
+            }]
+        }
+    });
+    hppnChildPn     @(Common: {
+        Text     : {
+            $value                : hppnChildPn,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : hppnChildPn,
+            CollectionPath : 'topLevelmaterialNumberforChildValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: hppnChildPn,
+                ValueListProperty: 'hppnChildPn'
+            }]
+        }
+    });
+    sortString     @(Common: {
+        Text     : {
+            $value                : sortString,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : sortString,
+            CollectionPath : 'topLevelidentifierforAlternateProductValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: sortString,
+                ValueListProperty: 'sortString'
+            }]
+        }
+    });
+    uomAlt     @(Common: {
+        Text     : {
+            $value                : uomAlt,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : uomAlt,
+            CollectionPath : 'topLevelUOMAlternateValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: uomAlt,
+                ValueListProperty: 'uomAlt'
+            }]
+        }
+    });
+    topLevelParent     @(Common: {
+        Text     : {
+            $value                : topLevelParent,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : topLevelParent,
+            CollectionPath : 'topLevelParentPartValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: topLevelParent,
+                ValueListProperty: 'topLevelParent'
+            }]
+        }
+    });
+};
+
+annotate BOMDisplayService.zmpaPartnoValueHelp with {
+    zmpaPartno @(title:'{i18n>zmpaPartno}')
+} ;
+
+
+annotate BOMDisplayService.factoryNumberValueHelp with {
+    factoryNumber @(title: '{i18n>facCode}');
+}
+
+annotate BOMDisplayService.mpnchilpnValueHelp with {
+    mpnChildPn @(title: '{i18n>mpnChild}');
+}
+
+annotate BOMDisplayService.fpnchildpnValueHelp with {
+    factoryChildPn @(title: '{i18n>fpnChild}');
+}
+
+annotate BOMDisplayService.pumoripnValueHelp with {
+    generatedHppn @(title: '{i18n>genHPPN}');
+}
+
+annotate BOMDisplayService.BOMStructureMultiLevelView with {
+    zmpaPartno @(title: '{i18n>fpnParent}');
+    factoryNumber;
+    @UI.HiddenFilter
+    lineNo;
+    @UI.HiddenFilter
+    levelNo;
+    factoryChildPn;
+    mpnChildPn;
+    @UI.HiddenFilter
+    description;
+    @UI.HiddenFilter
+    hppnChildPn;
+    generatedHppn;
+    @UI.HiddenFilter
+    bomVersion;
+    @UI.HiddenFilter
+    untUsg;
+    @UI.HiddenFilter
+    uomAlt;
+    @UI.HiddenFilter
+    materialType;
+    @UI.HiddenFilter
+    manufName;
+    @UI.HiddenFilter
+    vendorId;
+    @UI.HiddenFilter
+    sortString;
+    @UI.HiddenFilter
+    marketShare;
+    @UI.HiddenFilter
+    componentValidFrom;
+    @UI.HiddenFilter
+    componentValidTo;
+    @UI.HiddenFilter
+    altItemGroup;
+    @UI.HiddenFilter
+    scrap;
+    @UI.HiddenFilter
+    alternativeItem;
+    @UI.HiddenFilter
+    phantomBOM;
+    @UI.HiddenFilter
+    manufacturingOverhead;
+    @UI.HiddenFilter
+    costOfComponents;
+    @UI.HiddenFilter
+    rollUpCost;
+    @UI.HiddenFilter
+    bomImportDate;
+    @UI.HiddenFilter
+    parentGeneratedHppn;
+    @UI.HiddenFilter
+    requiredQuantity;
+    @UI.HiddenFilter
+    resultingQuantity;
+    @UI.HiddenFilter
+    parentmaterialtype;
+}
+
+annotate BOMDisplayService.BOMStructureMultiLevelView with @(
+    UI          : {
+        SelectionFields: [
+            generatedHppn,
+            factoryNumber,
+            factoryChildPn,
+            mpnChildPn,
+            zmpaPartno,
+        ],
+        LineItem       : [
+
+            {
+                Value: parentGeneratedHppn,
+                Label: '{i18n>parent}',
+            },
+            {
+                Value: zmpaPartno,
+                Label: '{i18n>fpnParent}'
+            },
+            {
+                Value: factoryNumber,
+                Label: '{i18n>factry}',
+            },
+            {
+                Value: levelNo,
+                Label: '{i18n>lvl}',
+            },
+            {
+                Value: generatedHppn,
+                Label: '{i18n>hpParent}',
+            },
+            {
+                Value: requiredQuantity,
+                Label: '{i18n>reqQnty}',
+            },
+            {
+                Value: uomAlt,
+                Label: '{i18n>Uom}',
+            },
+            {
+                Value: resultingQuantity,
+                Label: '{i18n>resQnty}',
+            }
+        ]
+    }  
+) {
+    zmpaPartno  @(Common: {
+        Text     : {
+            $value                : zmpaPartno,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : zmpaPartno,
+            CollectionPath : 'zmpaPartnoValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: zmpaPartno,
+                ValueListProperty: 'zmpaPartno'
+            }]
+        }
+    });
+    factoryNumber  @(Common: {
+        Text     : {
+            $value                : factoryNumber,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : factoryNumber,
+            CollectionPath : 'factoryNumberValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: factoryNumber,
+                ValueListProperty: 'factoryNumber'
+            }]
+        }
+    });
+    factoryChildPn @(Common: {
+        Text     : {
+            $value                : factoryChildPn,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : factoryChildPn,
+            CollectionPath : 'fpnchildpnValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: factoryChildPn,
+                ValueListProperty: 'factoryChildPn'
+            }]
+        }
+    });
+    mpnChildPn     @(Common: {
+        Text     : {
+            $value                : mpnChildPn,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : mpnChildPn,
+            CollectionPath : 'mpnchilpnValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: mpnChildPn,
+                ValueListProperty: 'mpnChildPn'
+            }]
+        }
+    });
+    generatedHppn  @(Common: {
+        Text     : {
+            $value                : generatedHppn,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : generatedHppn,
+            CollectionPath : 'pumoripnValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: generatedHppn,
+                ValueListProperty: 'generatedHppn'
+            }]
+        }
+    });
+};
