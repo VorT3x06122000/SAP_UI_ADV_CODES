@@ -1,0 +1,1038 @@
+app/psfacprodui/webapp/view/FacPrdList.view.xml
+
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Display Factory Product
+ RICEFW No                : 
+ Release                  :   M1 Release  
+ Author                   :   Samudrala, Sreenivas
+ Date                     :   09.02.2024
+ Description              :   Display Factory Product
+ *Descriptions: Display Factory Product main Screen view  
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<mvc:View
+    controllerName="pumorips.factoryproduct.psfacprodui.controller.FacPrdList"
+    xmlns:mvc="sap.ui.core.mvc"
+    displayBlock="true"
+    xmlns="sap.m"
+    xmlns:ui="sap.ui.table"
+    xmlns:core="sap.ui.core"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+    xmlns:smartTable="sap.ui.comp.smarttable"
+>
+    <Page
+        id="page"
+        title="{i18n>title}"
+        showHeader="false"
+    >
+        <content>
+            <VBox id="vBoxId" fitContainer="true">
+                <smartFilterBar:SmartFilterBar id="smartFilterBar" persistencyKey="SmartFilterPKey" showMessages="true" showClearOnFB="true" clear="onClearPress" entitySet="FactoryProductsView">
+   
+                </smartFilterBar:SmartFilterBar>
+                <smartTable:SmartTable
+                    id="idPMSmrtTable"
+                    smartFilterId="smartFilterBar"
+                    tableType="Table"
+                    editable="false"
+                    entitySet="FactoryProductsView"
+                    useVariantManagement="true"
+                    showVariantManagement="true"
+                    header="{i18n>res}"
+                    showRowCount="true"
+                    enableExport="true"
+                    requestAtLeastFields="factoryNumber"
+                    ignoredFields="markedforDeletion"
+                    enableAutoBinding="false"
+                    placeToolbarInTable="true"
+                    beforeRebindTable="onBeforeRebindTable"
+                    persistencyKey="SmartTablePersistencyKey"
+                    demandPopin="true"
+                    enableAutoColumnWidth="true"
+                >
+                    <smartTable:customToolbar>
+                        <OverflowToolbar id="idOverflow">
+                            <ToolbarSpacer id="toolbarSpaceId"/>
+                            <Button id="idDelete" enabled="false" visible="false" icon="sap-icon://delete" tooltip="{i18n>delete}" class="sapUiSmallMargin" press=".onActionPress" ariaHasPopup="Menu" />
+                        </OverflowToolbar>
+                    </smartTable:customToolbar>
+
+                    <ui:Table
+                        id="idPMtable"
+                        enableColumnFreeze="false"
+                        selectionMode="MultiToggle"
+                        enableColumnReordering="false"
+                        rowActionCount="1"
+                        threshold="20"
+                        rowSelectionChange="onItemSelect"
+                    >
+                        <ui:rowMode>
+                            <rowmodes:Auto
+                                id="idRowM"
+                                xmlns:rowmodes="sap.ui.table.rowmodes"
+                                minRowCount="5"
+                                maxRowCount="5"
+                            />
+                        </ui:rowMode>
+                        <ui:rowActionTemplate>
+                            <ui:RowAction id="rowActn">
+                                <ui:items>
+                                    <ui:RowActionItem
+                                        id="idColList"
+                                        press="handlePress"
+                                        type="Navigation"
+                                    />
+                                </ui:items>
+                            </ui:RowAction>
+                        </ui:rowActionTemplate>
+                    </ui:Table>
+                </smartTable:SmartTable>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>
+
+
+
+app/psfacprodui/webapp/view/FacPrdDetails.view.xml
+
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Display Factory Product
+ RICEFW No                : 
+ Release                  :   M1 Release  
+ Author                   :   Samudrala, Sreenivas
+ Date                     :   09.02.2024
+ Description              :   Display Factory Product
+ *Descriptions: Display Factory Product In-Detailed Screen view  
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<mvc:View controllerName="pumorips.factoryproduct.psfacprodui.controller.FacPrdDetails"
+   xmlns:mvc="sap.ui.core.mvc"
+    displayBlock="true"
+    xmlns="sap.m" 
+    xmlns:uxap="sap.uxap"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar" xmlns:core="sap.ui.core"
+	xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:smartForm="sap.ui.comp.smartform"
+    xmlns:smartField="sap.ui.comp.smartfield" 	xmlns:l="sap.ui.layout"
+    height="100%">
+    <uxap:ObjectPageLayout id="ObjectPageLayout" useIconTabBar="false">
+        <uxap:sections>
+            <uxap:ObjectPageSection id="ObjectionPageSectionForBasicDetails" titleUppercase="true"  title="{i18n>bscDtl}" showTitle="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="ObjectionPageSubSectionForDisplayValues">
+                        <smartForm:SmartForm id="smartForm" editTogglable="false" editToggled="handleEditToggled">
+                                <smartForm:Group id="smartFormGroup1">
+                                    <smartForm:GroupElement id="GroupElement1" label="{i18n>facNum}">
+                                        <smartField:SmartField id="Field1" value="{factoryNumber}"  enabled="false"/>
+                                    </smartForm:GroupElement>
+                                    <smartForm:GroupElement id="GroupElement2" label="{i18n>mpn}">
+                                        <smartField:SmartField id="Field2" value="{prodId}"  enabled="false"/>
+                                    </smartForm:GroupElement>
+                                    <smartForm:GroupElement id="GroupElement3" label="{i18n>prdDesc}">
+                                        <smartField:SmartField id="Field3" value="{prodDesc}"  enabled="false"/>
+                                    </smartForm:GroupElement>
+                                    <smartForm:GroupElement id="GroupElement4" label="{i18n>facPrtNum}">
+                                        <smartField:SmartField id="Field4" value="{zmpaPartno}"  enabled="false"/>
+                                    </smartForm:GroupElement>
+                                    <smartForm:GroupElement id="GroupElement5" label="{i18n>hpPartNum}">
+                                        <smartField:SmartField id="Field5" value="{zHpPartno}"  enabled="false"/>
+                                    </smartForm:GroupElement>
+                                    <smartForm:GroupElement id="GroupElement6" label="{i18n>intrdate}">
+                                        <smartField:SmartField id="Field6" value="{zintroDate}"  enabled="false"/>
+                                    </smartForm:GroupElement>
+                                    <smartForm:GroupElement id="GroupElement12" label="{i18n>mtrGrp}">
+                                        <smartField:SmartField id="Field12" value="{materialGroup}"  enabled="false"/>
+                                    </smartForm:GroupElement>
+                                    <smartForm:GroupElement id="gatAttrL" label="{i18n>gtrAtrr}">
+                                        <smartField:SmartField id="gatAttrV" value="{gatingAttribute}"  enabled="false"/>
+                                    </smartForm:GroupElement>
+                                </smartForm:Group>
+
+                                 <smartForm:Group id="smartFormGroup2">
+                                    <smartForm:GroupElement id="GroupElement7" label="{i18n>buom}">
+                                        <smartField:SmartField id="Field7" value="{baseunitofMeasure}"  enabled="false"/>
+                                    </smartForm:GroupElement>
+                                    <smartForm:GroupElement id="GroupElement8" label="{i18n>matType}">
+                                        <smartField:SmartField id="Field8" value="{materialTypeText}"  enabled="false"/>
+                                    </smartForm:GroupElement>
+                                    <smartForm:GroupElement id="GroupElement9" label="{i18n>status}">
+                                        <smartField:SmartField id="Field9" value="{zplcStatus}"  enabled="false"/>
+                                    </smartForm:GroupElement>
+                                    <smartForm:GroupElement id="GroupElement10" label="{i18n>unpsc}">
+                                        <smartField:SmartField id="Field10" value="{unspscCode}"  enabled="false"/>
+                                    </smartForm:GroupElement>
+                                    <smartForm:GroupElement id="GroupElement11" label="{i18n>mtrCategory}">
+                                        <smartField:SmartField id="Field11" value="{category}"  enabled="false"/>
+                                    </smartForm:GroupElement>
+                                    <smartForm:GroupElement id="GroupElement13" label="{i18n>featureType}">
+                                        <smartField:SmartField id="Field13" value="{zhfvType}"  enabled="false"/>
+                                    </smartForm:GroupElement>
+                                    <smartForm:GroupElement id="GroupElement14" label="{i18n>featureValue}">
+                                        <smartField:SmartField id="Field14" value="{zhfvValue}"  enabled="false"/>
+                                    </smartForm:GroupElement>
+                                </smartForm:Group>
+                        </smartForm:SmartForm>
+                    </uxap:ObjectPageSubSection >
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <uxap:ObjectPageSection id="ObjectPageSectionForUOM" titleUppercase="false"  title="{i18n>uom}" showTitle="false">
+				<uxap:subSections>
+					<uxap:ObjectPageSubSection id="ObjectPageSubSectionForDisplayValues">
+						<smartTable:SmartTable id="idPMSmrtUomTbl" demandPopin="true" smartFilterId="smartFilterBar" tableType="ResponsiveTable"  entitySet="UOMView" useVariantManagement="true"  
+                            header="{i18n>uom}" showRowCount="true" enableExport="true"  ignoredFields="custAttr1,custAttr2,custAttr3,custAttr4,custAttr5,custAttr6,custAttr7,custAttr8,custAttr9,custAttr10"
+                            enableAutoBinding="true" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindUomTable"   >
+                            <Table id="idPMUomTab" mode="None"  sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="5" >					
+                            </Table>
+			            </smartTable:SmartTable>
+					</uxap:ObjectPageSubSection>
+				</uxap:subSections>
+			</uxap:ObjectPageSection>
+        </uxap:sections>
+    </uxap:ObjectPageLayout>
+</mvc:View>
+
+
+
+app/psfacprodui/webapp/controller/BaseController.js
+
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Factory Product 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    09.02.2024
+// Description      :    Display Factory Product
+//-----------------------------------------------------------------------------------*
+//Descriptions: Contains all the re-usable functions
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/core/UIComponent",
+    "sap/m/MessageBox"
+], function (Controller, UIComponent, MessageBox) {
+    "use strict";
+
+    return Controller.extend("pumori.factoryproduct.psfacprodui.controller.BaseController", {
+		/**
+		 * Convenience method for accessing the router.
+		 * @public
+		 * @returns {sap.ui.core.routing.Router} the router for this component
+		 */
+
+        getRouter: function () {
+            return UIComponent.getRouterFor(this);
+        },
+
+		/**
+		 * Convenience method for getting the view model by name.
+		 * @public
+		 * @param {string} [sName] the model name
+		 * @returns {sap.ui.model.Model} the model instance
+		 */
+        getModel: function (sName) {
+            return this.getView().getModel(sName);
+        },
+
+		/**
+		 * Convenience method for setting the view model.
+		 * @public
+		 * @param {sap.ui.model.Model} oModel the model instance
+		 * @param {string} sName the model name
+		 * @returns {sap.ui.mvc.View} the view instance
+		 */
+        setModel: function (oModel, sName) {
+            return this.getView().setModel(oModel, sName);
+        },
+
+		/**
+		 * Getter for the resource bundle.
+		 * @public
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundle: function () {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
+        },
+        /**
+		 * Getter for the resource bundle text.
+		 * @public
+         * @param 
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundleText: function (sTextProperty) {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle().getText(sTextProperty);
+        },
+		/**
+		 * Convenience method for displaying error messages
+		 * @public
+		 */
+        //method to show the error message
+        showMsgBoxError: function (message) {
+            var title = this.getResourceBundle().getText("ErrorDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.ERROR,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+
+        },
+        //method to show the success message
+        showMsgBoxSuccess: function (message) {
+            var title = this.getResourceBundle().getText("SuccessDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.SUCCESS,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show the warning message
+        showMsgBoxWarning: function (message) {
+            var title = this.getResourceBundle().getText("WarningDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.WARNING,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show the information message
+        showMsgBoxInformation: function (message) {
+            var title = "Information"
+            var title = this.getResourceBundle().getText("InformationDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.INFORMATION,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        /**            * 
+          * function to fetch the logged in user details             *  
+          **/
+        _getUserInfoService: function () {
+            return new Promise(resolve => sap.ui.require([
+                "sap/ushell/library"
+            ], oSapUshellLib => {
+                const oContainer = oSapUshellLib.Container;
+                const pService = (oContainer) ? oContainer.getServiceAsync("UserInfo") : ""; // .getService is deprecated!
+                resolve(pService);
+            }));
+        },
+
+    });
+
+});
+
+
+
+app/psfacprodui/webapp/controller/FacPrdList.controller.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Factory Product 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    09.02.2024
+// Description      :    Display Factory Product
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for display of inital page of app
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "sap/m/MessageBox",
+    "sap/m/MessageToast"
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (BaseController,Filter,FilterOperator,MessageBox,MessageToast) {
+        "use strict";
+
+        return BaseController.extend("pumorips.factoryproduct.psfacprodui.controller.FacPrdList", {
+            onInit: function () {
+                this.FacPrdService = this.getOwnerComponent().getService('FacPrd');
+                this.getRouter().getRoute("FacPrdList").attachPatternMatched(this._onObjectMatched, this);
+            },
+
+            getZoomLevel: function () {
+
+
+                let currentWidth = window.innerWidth;   // Width of the current window
+                let currentHeight = window.innerHeight; // Height of the current window
+                
+            
+                let totalWidth = screen.width;   // Total screen width
+                let totalHeight = screen.height; // Total screen height
+                
+                // Calculate the resolution percentage
+                let resolutionPercentage = ((currentWidth * currentHeight) / (totalWidth * totalHeight)) * 100;
+            
+                resolutionPercentage=resolutionPercentage/4.1;
+            
+                return resolutionPercentage;
+            
+            },
+            /* =========================================================== */
+            /* internal methods                                            */
+            /* =========================================================== */
+            /**
+            * This method used here to load, initialize home screen 
+            * **/
+            _onObjectMatched: function () {
+                let row = this.getView().byId("idRowM");
+                row.setMinRowCount(parseInt(this.getZoomLevel()));
+                row.setMaxRowCount(parseInt(this.getZoomLevel()));
+                this._fetchAuthorizationScopes();
+            },
+            /**
+            * This private method is called inside _onObjectMatched
+            * This method is used to set the security scope to action buttons in the app
+            * **/
+            _fetchAuthorizationScopes: function () {
+                var that = this;
+                this.getView().setBusy(true);
+                this.FacPrdService.fetchSecurityAuthScopes().then(
+                    function (oResponse) {
+                        var oSecurityScope = (oResponse.data.value) ? JSON.parse(oResponse.data.value) : JSON.parse(oResponse.data.SecurityAction);
+                        if (oSecurityScope.WithCost) {
+
+                            that.getView().byId("idDelete").setVisible(true);
+                        } 
+                        else if (oSecurityScope.WithoutCost) {
+
+                            that.getView().byId("idDelete").setVisible(true);
+                        }
+                        else if (oSecurityScope.WithCostview) {
+                            that.getView().byId("idDelete").setVisible(false);
+                        }
+                        else if (oSecurityScope.WithoutCostview) {
+
+                            that.getView().byId("idDelete").setVisible(false);
+                        }
+                        that.getView().setBusy(false);
+                        
+                    },
+                    function (error) {
+                        that.showMsgBoxError(JSON.parse(error.responseText).error.message.value);
+                        that.getView().setBusy(false);
+                    });
+            },
+            /* =========================================================== */
+            /* event handlers                                              */
+            /* =========================================================== */
+
+            /**
+             * triggers once user clicks on line item in the table
+             */
+            handlePress: function (oEve) {
+                var oSelObj = oEve.getSource().getBindingContext().getObject();
+                var oPayload = {};
+                oPayload.prdId = encodeURIComponent(oSelObj.prodId);
+                oPayload.factoryNumber = encodeURIComponent(oSelObj.factoryNumber);
+                oPayload.zmpaPartno = encodeURIComponent(oSelObj.zmpaPartno);
+                oPayload.withCost = this.withCost;
+                this.getOwnerComponent().getRouter().navTo("FacPrdDetails", { obj: JSON.stringify(oPayload) });
+            },
+
+            /**
+             * triggers before data rebind table
+            */
+            onBeforeRebindTable: function (oEvent) {
+                let row = this.getView().byId("idRowM");
+                row.setMinRowCount(parseInt(this.getZoomLevel()));
+                row.setMaxRowCount(parseInt(this.getZoomLevel()));
+                var oSmartTable = oEvent.getSource();
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (oSmartTable) {
+                    var aORFilters = [];
+                    var aANDFilters = [];
+                    var aOtherFiltr=[];
+
+                    aORFilters.push(new Filter("markedforDeletion", FilterOperator.EQ, null));
+                    aORFilters.push(new Filter("markedforDeletion", FilterOperator.NE, "X"));
+                   
+                    
+                    
+                    // var sReqType = this.getView().byId("idMatType").getSelectedKey();
+
+                    // if (sReqType != "") {
+
+                    //     var sreText = this.getView().byId("idMatType").getSelectedItem().getText();
+
+                    //     aOtherFiltr.push(new Filter("materialType", FilterOperator.EQ, sreText));
+
+                    // }
+                    aANDFilters.push(new sap.ui.model.Filter(aORFilters, false));
+                    if(aOtherFiltr.length > 0){
+                    aANDFilters.push(new sap.ui.model.Filter(aOtherFiltr, true));
+                    }
+                    if (aANDFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aANDFilters, true));
+                    }
+                }
+            },
+            /**
+            * triggers once user select line item from table
+            * **/
+            onItemSelect: function (oEvent) {
+                if ((oEvent.getSource().getSelectedIndices().length > 0) ) {
+                    this.getView().byId("idDelete").setEnabled(true);
+                }
+                else {
+                    this.getView().byId("idDelete").setEnabled(false);
+                }
+            },
+            /**
+           * triggers after user clicks on any of the action items
+           * **/
+            onActionPress: function (oEvent) {
+                this.iMsgCountr = 0;
+                var aPayload = [];
+                var that = this;
+                this.aSelData = this.getView().byId("idPMtable").getSelectedIndices();
+                    
+                if (oEvent.getSource().sId.split("--")[2] === "idDelete") {
+                    var aSelData = this.getView().byId("idPMtable").getSelectedIndices(); 
+                    for (var i = 0; i < aSelData.length; i++) {
+                        var oDelDataPayload = {};
+                        var oDelData = this.getView().byId("idPMtable").getContextByIndex(aSelData[i]).getObject();
+                        
+                        oDelDataPayload.factoryNumber = oDelData.factoryNumber;
+                        oDelDataPayload.prodId = oDelData.prodId;
+                        oDelDataPayload.zmpaPartno = oDelData.zmpaPartno;
+                        aPayload.push(oDelDataPayload);   
+                    }
+                }
+                MessageBox.confirm(this.getResourceBundleText("delConfirm"), {
+                    icon: "QUESTION",
+                    title: "Confirm",
+                    actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+                    onClose: function (oAction) {
+                        if (oAction === "OK") {
+                            that._DeleteSelectedData(aPayload);
+                        }
+                        else {
+                            return;
+                        }
+                    }
+                });
+            },
+            /***  Method to perform the delete action* **/
+            _DeleteSelectedData: async function (aPriorityData) {
+                var oView = this.getView();
+                var oUserInfo = await this._getUserInfoService();
+                var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                var oDeleteData = { ProdDelData: aPriorityData, UserEmail: sModifiedBy };
+                oView.setBusy(true);
+
+                return this.FacPrdService.updateRespData(oDeleteData).then(
+                    function (success) {
+                        this.iMsgCountr++;
+                        oView.setBusy(false);
+                        this.showMsgBoxSuccess(JSON.parse(success.data.ProdDeletionData)[0].message); 
+                        this.getView().byId("idPMSmrtTable").rebindTable(true);
+                        this.getView().byId("idDelete").setEnabled(false);
+                    }.bind(this),
+                    function (error) {
+                        this.showMsgBoxError(this.getResourceBundleText("delError"));
+                        oView.setBusy(false);
+                    }.bind(this));
+
+            },
+
+            /**
+             * triggers when clear button clicked
+             */
+            onClearPress:function(){
+                this.getView().byId("idMatType").setSelectedKey();
+            },
+        });
+    });
+
+
+
+    app/psfacprodui/webapp/controller/FacPrdDetails.controller.js
+
+
+
+    //-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Factory Product 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    09.02.2024
+// Description      :    Display Factory Product
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for display of In-Detailed page of app
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (BaseController,Filter,FilterOperator) {
+        "use strict";
+        return BaseController.extend("pumorips.factoryproduct.psfacprodui.controller.FacPrdDetails", {
+            
+            /* =========================================================== */
+            /* lifecycle methods                                           */
+            /* =========================================================== */
+            /**
+            * This method will trigger once during app initialization
+            * **/
+            onInit: function () {
+                this.PrdMasterService = this.getOwnerComponent().getService('FacPrd');
+                this.oFPMState = this.getOwnerComponent().getState('FacPrd');
+                this.getRouter().getRoute("FacPrdDetails").attachPatternMatched(this._onObjectMatched, this);
+            },
+
+            /* =========================================================== */
+            /* internal methods                                            */
+            /* =========================================================== */
+            /**
+            * App view routing pattern change event handler
+            * this method will trigger each time user navigate between views
+            * This method used here to load, initialize home screen 
+            * **/
+            _onObjectMatched: function (oEve) {
+                this.oSelData = JSON.parse(oEve.getParameters().arguments.obj);
+                this.getView().byId("smartForm").bindElement("/FactoryProductsView(prodId='" + this.oSelData.prdId + "',factoryNumber='" + this.oSelData.factoryNumber + "',zmpaPartno='" + this.oSelData.zmpaPartno + "')");
+                var oUomSmartTable = this.getView().byId("idPMSmrtUomTbl");
+                if (oUomSmartTable) {
+                    oUomSmartTable.rebindTable(true);
+                }
+                this.getView().byId("ObjectPageLayout").setShowFooter(false);
+                if (this.oSelData.withCost) {
+                    this.getView().byId("gatAttrV").setVisible(true);
+                } else {
+                    this.getView().byId("gatAttrV").setVisible(false);
+                }
+            },
+
+            /* =========================================================== */
+            /* event handlers                                              */
+            /* =========================================================== */
+
+            /**
+             * triggers before UOM table data rebind table
+             */
+            onBeforeRebindUomTable: function (oEvent) {
+                var oSmartTable = oEvent.getSource();
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (oSmartTable) {
+                    var aFilters = [];
+                    aFilters.push(new Filter("prodId", FilterOperator.EQ, decodeURIComponent(this.oSelData.prdId)));
+                    aFilters.push(new Filter("factoryNumber",FilterOperator.EQ, decodeURIComponent(this.oSelData.factoryNumber)));
+                    if (aFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aFilters, true));
+                    }
+                }
+            }
+        });
+    });
+
+
+
+    app/psfacprodui/webapp/service/FacPrdService.js
+
+
+
+    //-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Factory Product 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    09.02.2024
+// Description      :    Display Factory Product
+//-----------------------------------------------------------------------------------*
+//Descriptions: Factory Product service of app
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./CoreService",
+], function (CoreService) {
+    "use strict";
+
+    var FLMService = CoreService.extend("pumori.factoryproduct.psfacprodui.service.FacprdService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        },
+        /**
+        *  method for Security service call
+        */
+        fetchSecurityAuthScopes: function () {
+            return this.odata("/SecurityAction").get({});
+        },
+        /**
+        * Odata service to delete location product
+        * **/
+        updateRespData: function (oDelData) {
+            return this.odata("/ProdDeletionData").post(oDelData);
+        },
+        
+    });
+    return FLMService;
+});
+
+
+
+app/psfacprodui/webapp/state/FacPrdState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Factory Product 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    09.02.2024
+// Description      :    Display Factory Product
+//-----------------------------------------------------------------------------------*
+//Descriptions: Factory Product state of app
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "../state/BaseState",
+], function (BaseState) {
+    "use strict";
+    var FacPrdState = BaseState.extend("pumori.factoryproduct.psfacprodui.state.FacPrdState", {
+        constructor: function (oService) {
+            this.data = {
+                display: true,
+                busy: true                
+            };
+            this.FacPrdService = oService;
+            BaseState.call(this);
+        }
+       
+
+    });
+    return FacPrdState;
+});
+
+
+
+app/psfacprodui/webapp/Component.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Pumori Product 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    09.02.2024
+// Description      :    Manage Pumori Product 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for model instantiation
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+
+sap.ui.define([
+    "sap/ui/core/UIComponent",
+    "sap/ui/Device",
+    "pumorips/factoryproduct/psfacprodui/model/models",
+    "./service/FacPrdService",
+    "./state/FacPrdState"
+],
+    function (UIComponent, Device, models, FacPrdService, FacPrdState) {
+        "use strict";
+
+        return UIComponent.extend("pumorips.factoryproduct.psfacprodui.Component", {
+            metadata: {
+                manifest: "json"
+            },
+
+            /**
+             * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
+             * @public
+             * @override
+             */
+            init: function () {
+                // call the base component's init function
+                UIComponent.prototype.init.apply(this, arguments);
+
+                // enable routing
+                this.getRouter().initialize();
+
+                //Create globle object for etag
+                this.metadataForEtag;
+                // initialize receive service with the component
+                this._oFacPrdService = new FacPrdService(this.getModel());
+                // initialize receive state with the component
+                this._oFacPrdState = new FacPrdState(this._oFacPrdService);
+
+                // set the device model
+                this.setModel(models.createDeviceModel(), "device");
+                // set the JOSN model
+                this.setModel(this._oFacPrdState.getModel(), "oJSONModel");
+            },
+            // Return the service name as per parameter
+            getService: function (sService) {
+                return this["_o" + sService + "Service"];
+            },
+            // Return the state name as per parameter
+            getState: function (sState) {
+                return this["_o" + sState + "State"];
+            }
+        });
+    }
+);
+
+
+
+app/psfacprodui/webapp/manifest.json
+
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.factoryproduct.psfacprodui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.12.3",
+      "toolsId": "f56c10c2-890d-48e6-8e67-9baea8c4fb38"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/factory-product/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "psfacprod-display": {
+          "semanticObject": "psfacprod",
+          "action": "display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.120.6",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.factoryproduct.psfacprodui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.factoryproduct.psfacprodui.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "FacPrdList",
+          "pattern": "",
+          "target": [
+            "TargetFacProdList"
+          ]
+        },
+        {
+            "name": "FacPrdDetails",
+            "pattern": "FacPrdDetails/{obj}",
+            "target": [
+              "TargetFacProdDetails"
+            ]
+        }
+      ],
+      "targets": {
+        "TargetFacProdList": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "FacProdList",
+          "viewName": "FacPrdList"
+        },
+        "TargetFacProdDetails": {
+            "viewType": "XML",
+            "transition": "slide",
+            "clearControlAggregation": false,
+            "viewId": "FacPrdDetails",
+            "viewName": "FacPrdDetails"
+          }
+  }
+    },
+    "rootView": {
+      "viewName": "pumorips.factoryproduct.psfacprodui.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSFACPROD"
+  }
+}
+
+
+
+app/psfacprodui/xs-app.json
+
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumoripsfacprod-srv-api",
+      "csrfProtection": false
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa"
+    }
+  ]
+}
+
+

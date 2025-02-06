@@ -1,0 +1,1382 @@
+app/psmassuploadui/webapp/view/MassUpload.view.xml
+
+
+
+<mvc:View xmlns:cards="sap.f.cards"
+    xmlns:form="sap.ui.layout.form"
+    controllerName="pumorips.factoryproduct.psmassuploadui.controller.MassUpload"
+    xmlns:mvc="sap.ui.core.mvc"
+    displayBlock="true"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:ui="sap.ui.table"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+    xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:u="sap.ui.unified"
+>
+    <Page
+        id="page"
+        title="{i18n>title}"
+        showHeader="false"
+    >
+        <content>
+            <VBox
+                id="vBoxId"
+                fitContainer="true"
+            >
+                <smartFilterBar:SmartFilterBar
+                    id="smartFilterBar"
+                    persistencyKey="SmartFilterPKey"
+                    showMessages="true"
+                    showClearOnFB="true"
+                    entitySet="TemplateList"
+                    search="onSearch"
+                    clear="onClear"
+                >
+                    <smartFilterBar:controlConfiguration>
+                        <smartFilterBar:ControlConfiguration
+                            id="_IDGenControlConfiguration1"
+                            index="0"
+                            key="TemplateList"
+                            filterType="auto"
+                            displayBehaviour="descriptionOnly"
+                            controlType="dropDownList"
+                            visibleInAdvancedArea="true"
+                            hasValueHelpDialog="false"
+                            label="Table"
+                            
+                        >
+                            <smartFilterBar:customControl>
+                                <ComboBox
+                                    id="idDropdown"
+                                    items="{oJsonModel>/DropdownValues}"
+                                    required="true"
+                                    change="onchangeDropdown"
+                                >
+                                    <core:Item
+                                        id="_IDGenItem1"
+                                        key="{oJsonModel>ID}"
+                                        text="{oJsonModel>value}"
+                                    />
+                                </ComboBox>
+                            </smartFilterBar:customControl>
+                        </smartFilterBar:ControlConfiguration>
+                    </smartFilterBar:controlConfiguration>
+                </smartFilterBar:SmartFilterBar>
+
+                <OverflowToolbar
+                    id="_IDGenOverflowToolbar1"
+                    style="Standard"
+                    design="Transparent"
+                >
+                    <content>
+                        <cards:Header id="head1id" title="{i18n>title}"></cards:Header>
+                        <ToolbarSpacer id="_IDGenToolbarSpacer1" />
+
+                        <Button
+                            id="UploadHistoryId"
+                            text="{i18n>UpldHistroy}"
+                            press="onStatusClk"
+                            enabled="false"
+                        />
+                        <Text
+                            id="_IDGenText1"
+                            text="{i18n>actionText}"
+                        />
+                        <Button
+                            id="ExcelButton"
+                            enabled="{oJsonModel>/BtnEnable}"
+                            text="{oJsonModel>/BtnName}"
+                            press="onPressDownloadTemplate"
+                            type="Default"
+                        />
+                    </content>
+                </OverflowToolbar>
+
+                <form:SimpleForm
+                    id="SimpleformId"
+                    editable="true"
+                    layout="ResponsiveGridLayout"
+                    labelSpanXL="1"
+                    labelSpanL="1"
+                    labelSpanM="1"
+                    labelSpanS="1"
+                    adjustLabelSpan="false"
+                    emptySpanXL="8"
+                    emptySpanL="8"
+                    emptySpanM="8"
+                    emptySpanS="0"
+                    columnsXL="1"
+                    columnsL="1"
+                    columnsM="1"
+                    singleContainerFullSize="false"
+                >
+                    <form:content>
+                        <Title
+                            id="title"
+                            text="{i18n>uploadTitle}"
+                        />
+                        <Label
+                            id="idlabel"
+                            text=""
+                        />
+                        <u:FileUploader
+                            id="fuV1000FileUploaderId"
+                            name="myFileUpload"
+                            uploadUrl="upload/"
+                            typeMissmatch="handleTypeMissmatch"
+                            uploadComplete="handleUploadComplete"
+                            change="handleValueChange"
+                            fileType="xlsx,csv"
+                            style="Emphasized"
+                        />
+                    </form:content>
+                </form:SimpleForm>
+            </VBox>
+        </content>
+        <footer>
+            <Toolbar id="tolbrid">
+                <Button
+                    id="messagePopover"
+                    icon="sap-icon://alert"
+                    text="{= ${message>/}.length }"
+                    visible="{= ${message>/}.length > 0 }"
+                    type="Emphasized"
+                    press="onMessagePopoverPress"
+                />
+            </Toolbar>
+        </footer>
+    </Page>
+</mvc:View>
+
+
+
+app/psmassuploadui/webapp/view/fragments/MassUploadStatus.fragment.xml
+
+
+
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:table="sap.ui.table">
+	<Dialog stretch="true" verticalScrolling="true" horizontalScrolling="true" title="{i18n>frgTtl}"
+		class="sapUiSizeCompact"  titleAlignment="Center" id="idDialog">
+		<content>
+
+			<table:Table visibleRowCount="Auto" id="id_Loc_history" rows="{ path:'oBasicDataModel>/aBckOriginalData', sorter: { path: 'modifiedAt',descending:true}}" alternateRowColors="true" selectionMode="None"
+				class="sapUiMediumMarginTop">
+                <table:extension>
+					<OverflowToolbar style="Clear" id="idTool">
+						<ToolbarSpacer id="idToolSp"/>
+						<ToolbarSeparator id="idToolSptr"/>
+						<SearchField
+							placeholder="Filter"
+							value="{oBasicDataModel>/sHistorySearch}"
+							search="filterGlobally"
+							width="30%" id="idSrch"/>
+					</OverflowToolbar>
+				</table:extension>
+
+				<table:columns>
+					<table:Column hAlign="Center" id="idPrcessCol">
+						<Label text="{i18n>PROCESS_ID}" textAlign="Center" id="idPrcessL"/>
+						<table:template>
+							<Text text="{oBasicDataModel>processId}" id="idPrcessT"/>
+						</table:template>
+					</table:Column>
+					<table:Column hAlign="Center" id="idStatCol">
+						<Label text="{i18n>STATUS}" textAlign="Center" id="idStatL"/>
+						<table:template>
+							<Text text="{oBasicDataModel>status}" id="idStatT"/>
+						</table:template>
+					</table:Column>
+					<table:Column hAlign="Center" id="idResCol">
+						<Label text="{i18n>RESPONCE}" textAlign="Center" id="idResL"/>
+						<table:template>
+							<Text text="{oBasicDataModel>records}" id="idResT"/>
+						</table:template>
+					</table:Column>
+                    <table:Column hAlign="Center" id="idUplCol">
+						<Label text="{i18n>UPLOAD_BY}" textAlign="Center" id="idUplL"/>
+						<table:template>
+							<Text text="{oBasicDataModel>modifiedBy}" id="idUplT"/>
+						</table:template>
+					</table:Column>
+                    <table:Column hAlign="Center" id="idUplTmeCol">
+						<Label text="{i18n>UPLOAD_TIME}" textAlign="Center" id="idUplTmeL"/>
+						<table:template>
+							<Text text="{path:'oBasicDataModel>modifiedAt',type:'sap.ui.model.type.Date',formatOptions:{pattern:'MMM dd, yyyy hh:mm'}}" id="idUplTmeT"/>
+						</table:template>
+					</table:Column>
+                    <table:Column hAlign="Center" id="idErrCol">
+						<Label text="{i18n>ERROR_LOG}" textAlign="Center" id="idErrL"/>
+						<table:template>
+							<Button icon="sap-icon://download" visible="{oBasicDataModel>errorVisible}" press="onPressDownloadError" id="idErrBtn"/>
+						</table:template>
+					</table:Column>
+				</table:columns>
+			</table:Table>
+		</content>
+		<beginButton>
+			<Button text="{i18n>CLOSE}" press="oncloseUploadStatus" id="idCloseUpld"/>
+		</beginButton>
+	</Dialog>
+</core:FragmentDefinition>
+
+
+
+app/psmassuploadui/webapp/view/fragments/MessagePopover.fragment.xml
+
+
+
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <MessagePopover
+        items="{message>/}"
+        initiallyExpanded="true">
+        <MessageItem
+            type="{message>type}"
+            title="{message>message}"
+            subtitle="{message>additionalText}"
+            description="{message>description}"/>
+    </MessagePopover>
+</core:FragmentDefinition>
+
+
+
+app/psmassuploadui/webapp/controller/MassUpload.controller.js
+
+
+
+
+
+sap.ui.define([
+  "./BaseController",
+  "sap/ui/core/BusyIndicator",
+  "sap/ui/model/json/JSONModel",
+  "sap/m/MessageBox",
+  "sap/ui/core/Fragment",
+  "sap/ui/core/message/Message",
+  "sap/ui/core/library",
+  "sap/ui/core/message/MessageManager",
+  "sap/m/MessageToast",
+  "sap/ui/export/Spreadsheet",
+  "sap/ui/core/UIComponent"
+],
+  /**
+     * @class
+     * @param {object} BaseController : typeof sap.ui.core.mvc.BaseController
+     * @param {object} BusyIndicator : typeof sap.ui.core.BusyIndicator
+     * @param {object} JSONModel : typeof sap.ui.model.json.JSONModel
+     * @param {object} MessageBox : typeof sap.m.MessageBox
+     * @param {object} Fragment : typeof sap.ui.core.Fragment
+     * @param {object} Message : typeof sap.ui.core.message.Message
+     * @param {object} library : typeof sap.ui.core.library
+     * @param {object} MessageManager : typeof sap.ui.core.message.MessageManager
+     * @param {object} MessageToast : typeof sap.m.MessageToast
+     * @public
+     */
+  function (BaseController, BusyIndicator, JSONModel, MessageBox, Fragment, Message, CoreLibrary, MessageManager, MessageToast, Spreadsheet, UIComponent) {
+    "use strict";
+    var oSecurityScope;
+    const MessageType = CoreLibrary.MessageType;
+    return BaseController.extend("pumorips.factoryproduct.psmassuploadui.controller.MassUpload", {
+      /**
+     * Initialises resource bundle
+     * Initialises state and service components for the application.
+     * Initialises the download template button name
+     * Initially Disable the download template button
+     * Initialises MessageManager for messagepopover
+     * @public
+     * @name onInit
+     */
+      onInit: function () {
+        this.MassUpdState = this.getOwnerComponent().getState('MassUpd');
+        this.MassUpdService = this.getOwnerComponent().getService('MassUpd');
+        this.component = this.getOwnerComponent();
+        this.oModel = this.component.getModel("oJsonModel");
+        this.oBundle = this.component.getModel('i18n').getResourceBundle();
+        this.oModel.setProperty("/BtnName", this.oBundle.getText("Download"));
+        this.oModel.setProperty("/BtnEnable", false);
+
+        const oView = this.getView();
+        const oMessageManager = sap.ui.getCore().getMessageManager();
+        oView.setModel(oMessageManager.getMessageModel(), 'message');
+        oMessageManager.registerObject(oView, true);
+        this.dropdownValues();
+        this.getRouter().getRoute("RouteMassUpload").attachPatternMatched(this._onObjectMatched, this);
+      },
+
+      getRouter: function () {
+        return UIComponent.getRouterFor(this);
+      },
+
+      _onObjectMatched: function (oEve) {
+        this._fetchAuthorizationScopes();
+      },
+
+      _fetchAuthorizationScopes: function () {
+        var that = this;
+        this.getView().setBusy(true);
+        this.MassUpdService.fetchSecurityAuthScopes().then(
+          function (oResponse) {
+            oSecurityScope = (oResponse.data.value) ? JSON.parse(oResponse.data.value) : JSON.parse(oResponse.data.SecurityAction);            
+
+            if (oSecurityScope.WithCost) {
+
+              that.getView().byId("UploadHistoryId").setEnabled(true);
+            } 
+            else if (oSecurityScope.WithoutCost) {
+
+              that.getView().byId("UploadHistoryId").setEnabled(true);
+            }
+            else if (oSecurityScope.WithCostview) {
+
+              that.getView().byId("UploadHistoryId").setEnabled(false);
+            }
+            else if (oSecurityScope.WithoutCostview) {
+
+              that.getView().byId("UploadHistoryId").setEnabled(false);
+            }
+
+
+            that.getView().setBusy(false);
+          },
+          function (error) {
+            that.showMsgBoxError(JSON.parse(error.responseText).error.message.value);
+            that.getView().setBusy(false);
+          });
+      },
+
+      /**
+      * Setting dropdown values using a service call
+      * @public
+      * @name dropdownValues
+      */
+      dropdownValues: function () {
+        BusyIndicator.show(0);
+        const that = this;
+        const dropdownValue = Promise.resolve(this.MassUpdService.dropdown());
+        dropdownValue.then((data) => {
+          BusyIndicator.hide(0);
+          const result = data.data.results;
+          const values = result.map(function (item) {
+            return item;
+          })
+          that.oModel.setProperty('/DropdownValues', values);
+        }, (oError) => {
+          BusyIndicator.hide(0);
+          MessageBox.error(this.oBundle.getText("odataFailed"));
+          return;
+        });
+      },
+      /**
+      * Triggerd when clicked on start button
+      * Set download template button name  according to the dropdown users selects.
+      * @public
+      * @name onSearch
+      */
+      onSearch: function () {
+        // var that = this;
+        // this.MassUpdService.fetchSecurityAuthScopes().then(
+        //   function (oResponse) {
+        //     oSecurityScope = (oResponse.data.value) ? JSON.parse(oResponse.data.value) : JSON.parse(oResponse.data.SecurityAction);            
+
+        //     if (oSecurityScope.WithCost) {
+        //       that.getView().byId("ExcelButton").setEnabled(true);
+        //       // that.oModel.setProperty("/BtnEnable", true);
+        //     } 
+        //     else if (oSecurityScope.WithoutCost) {
+        //       that.getView().byId("ExcelButton").setEnabled(true);
+        //     }
+        //     else if (oSecurityScope.WithCostview) {
+        //       that.getView().byId("ExcelButton").setEnabled(false);
+        //     }
+        //     else if (oSecurityScope.WithoutCostview) {
+        //       that.getView().byId("ExcelButton").setEnabled(false);
+        //     }
+        //   },
+        //   function (error) {
+        //     that.showMsgBoxError(JSON.parse(error.responseText).error.message.value);
+        //     // that.getView().setBusy(false);
+        //   });
+        this.oModel.setProperty("/BtnName", this.oBundle.getText("Download"));
+        let value = this.getView().byId("idDropdown").getSelectedKey();
+        if ((value && oSecurityScope.WithCost) || (value && oSecurityScope.WithoutCost)) {
+          this.oModel.setProperty("/BtnEnable", true);
+        }
+        if (value === "Factory_Product") {
+          this.oModel.setProperty('/BtnName', this.oBundle.getText("DownloadFactoryProduct"));
+        } else if (value === "Factory_Location") {
+          this.oModel.setProperty('/BtnName', this.oBundle.getText("DownloadFactoryLocation"));
+        } else if (value === "Product_Location") {
+          this.oModel.setProperty('/BtnName', this.oBundle.getText("DownloadProductLocation"));
+        } else if (value === "UOM") {
+          this.oModel.setProperty('/BtnName', this.oBundle.getText("DownloadUOM"));
+        } else if (value === "T_Lane") {
+          this.oModel.setProperty('/BtnName', this.oBundle.getText("DownloadTLane"));
+        } else {
+          this.oModel.setProperty("/BtnEnable", false);
+          MessageBox.error(this.oBundle.getText("MandatoryError"));
+        }
+        var fileUploader = this.getView().byId("fuV1000FileUploaderId");
+        fileUploader.clear();
+        const oMessageManager = sap.ui.getCore().getMessageManager();
+        oMessageManager.removeAllMessages();
+
+      },
+      /**
+      * Triggerd on change of dropdown
+      * Set download template button name and disable it.
+      * @public
+      * @name onchangeDropdown
+      */
+      onchangeDropdown: function () {
+        this.oModel.setProperty("/BtnName", this.oBundle.getText("Download"));
+      },
+      /**
+      * Triggerd when click of downalod template file button
+      * Downloads template file according to the dropdown value.
+      * @public
+      * @name onPressDownloadTemplate
+      */
+      onPressDownloadTemplate: function () {
+        const that = this;
+        const DropdownValue = that.getView().byId("idDropdown").getSelectedKey();
+        const ServiceURL = `/factory-product/downloadTemplate(templateName='${DropdownValue}')`;
+        BusyIndicator.show(0);
+        that.MassUpdService.downloadTemp(DropdownValue).then(
+          function (res) {
+            const { csvData, fileName } = res.data.downloadTemplate;
+            var uri = 'data:text/csv;charset=utf-8,' + escape(csvData);
+            var link = document.createElement("a");
+            link.href = uri;
+            link.style = "visibility:hidden";
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            BusyIndicator.hide();
+          },
+          function (oError) {
+            BusyIndicator.hide();
+            MessageBox.error(oError.statusText);
+          });
+      },
+      /**
+      * Triggerd on change of FileUploader
+      * Calls _doExecute() function
+      * @public
+      * @name handleValueChange
+      */
+      handleValueChange: function () {
+        this._doExecute();
+        const oMessageManager = sap.ui.getCore().getMessageManager();
+        oMessageManager.removeAllMessages();
+      },
+      /**
+      * Calls _chkFile() function
+      * @public
+      * @name _doExecute
+      */
+      _doExecute: function () {
+        const that = this;
+        that._chkFile()
+          .then(function () {
+            return that._uploadFileExecute();
+          });
+      },
+      /**
+      * Gets the file in the fileuploader
+      * @public
+      * @name _getFileUploader
+      */
+      _getFileUploader: function () {
+        return this.getView().byId('fuV1000FileUploaderId');
+      },
+      /**
+      * checks the file which is been uploaded
+      * @public
+      * @name _chkFile
+      */
+      _chkFile: function () {
+        const that = this;
+        return new Promise(function (resolve, reject) {
+          const oFile = that._getFileUploader().oFileUpload.files[0];
+          if (typeof oFile === 'undefined') {
+            return reject();
+          } else {
+            resolve();
+          }
+        });
+      },
+      /**
+      * Reads the file, filename, filetype and calls base64conversionMethod() function
+      * @public
+      * @name _uploadFileExecute
+      */
+      _uploadFileExecute: function () {
+        const that = this;
+        BusyIndicator.show(0);
+        return new Promise(function (resolve, reject) {
+          const oFileUploader = that._getFileUploader();
+          const oFile = oFileUploader.oFileUpload.files[0];
+          const oFileName = oFile.name;
+          const fileType = oFileUploader.getValue().split(".")[1];
+          sap.ui.getCore().fileUploadArr = [];
+
+          var mimeDet = oFile.type;
+          that.base64conversionMethod(mimeDet, oFileName, oFile);
+        });
+      },
+      /**
+      * Converts it to the base64 format and send the payload to _sendPayload() function
+      * @public
+      * @name base64conversionMethod
+      */
+      base64conversionMethod: function (fileMime, fileName, fileDetails, DocNum) {
+        var that = this;
+        if (!FileReader.prototype.readAsBinaryString) {
+          FileReader.prototype.readAsBinaryString = function (fileData) {
+            var binary = "";
+            var reader = new FileReader();
+            reader.onload = function (e) {
+              var bytes = new Uint8Array(reader.result);
+              var length = bytes.byteLength;
+              for (var i = 0; i < length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+              }
+              that.base64ConversionRes = btoa(binary);
+              sap.ui.getCore().fileUploadArr.push({
+                "DocumentType": DocNum,
+                "MimeType": fileMime,
+                "FileName": fileName,
+                "Content": that.base64ConversionRes,
+              });
+            };
+            reader.readAsArrayBuffer(fileData);
+          };
+        }
+        var reader = new FileReader();
+        var excelpayload;
+        reader.onload = function (readerEvt) {
+          var binaryString = readerEvt.target.result;
+          that.base64ConversionRes = btoa(binaryString);
+          sap.ui.getCore().fileUploadArr.push({
+            "DocumentType": DocNum,
+            "MimeType": fileMime,
+            "FileName": fileName,
+            "Content": that.base64ConversionRes,
+
+          });
+          excelpayload = sap.ui.getCore().fileUploadArr[0].Content;
+          const DropdownValue = that.getView().byId("idDropdown").getSelectedKey();
+          that._sendPayload(excelpayload, DropdownValue);
+        };
+        reader.readAsBinaryString(fileDetails);
+      },
+      /**
+      * Service call is made and success or error message is handled.
+      * @public
+      * @name _sendPayload
+      */
+      _sendPayload: async function (payload, TemplateName) {
+        var that = this;
+        const sLoggedInUser = sap.ushell.Container.getService('UserInfo').getEmail();
+        // var sLoggedInUser="mahalaxmi.palanivelan@hp.com";
+        BusyIndicator.show(0);
+        return this.MassUpdService.uploadData({ 'UserEmail': sLoggedInUser, 'payload': payload, 'templateName': TemplateName }).then(
+          function (data) {
+            BusyIndicator.hide();
+            let oMessage;
+            if (data.data.results[0].error) {
+              let length = data.data.results[0].error.errorFields.length;
+              if (length >= 0) {
+                MessageBox.error(that.oBundle.getText('openMsgPopover'));
+                for (let i = 0; i < length; i++) {
+                  if (data.data.results[0].error.errorFields[i].ERRORDETAILS) {
+                    oMessage = new Message({
+                      message: data.data.results[0].error.errorFields[i].ERRORDETAILS,
+                      type: MessageType.Error,
+                    });
+                    sap.ui.getCore().getMessageManager().addMessages(oMessage);
+                  }
+                }
+              }
+            } else {
+              // data.data.results[0].success
+              MessageBox.success(that.oBundle.getText("SuccessMSG"), {
+                onClose: function () {
+                  that.resetFields();
+                }
+              });
+            }
+          }.bind(this),
+          function (error) {
+            BusyIndicator.hide();
+            var oerrMsg = JSON.parse(error.responseText).error.message.value;
+            MessageBox.error(oerrMsg, {
+              onClose: function () {
+                that.resetFileuploader();
+              }
+            });
+          }.bind(this));
+      },
+      /**
+      * Called when ok button is pressed on the MessageBox
+      * Clears the fileuploader, changes the name and makes the download button disable
+      * Clears the MessagePopover
+      * @public
+      * @name resetFileuploader
+      */
+      resetFileuploader: function () {
+        var fileUploader = this.getView().byId("fuV1000FileUploaderId");
+        fileUploader.clear();
+        this.oModel.setProperty("/BtnEnable", false);
+        this.oModel.setProperty("/BtnName", this.oBundle.getText("Download"));
+      },
+      /**
+      * Called when ok button is pressed on the MessageBox
+      * Clears the fileuploader and dropdown 
+      * Changes the name and makes the download button disable
+      * @public
+      * @name resetFields
+      */
+      resetFields: function () {
+        var dropdown = this.getView().byId("idDropdown");
+        var fileUploader = this.getView().byId("fuV1000FileUploaderId");
+
+        // dropdown.setSelectedKey("");
+        if (dropdown) {
+          dropdown.setSelectedKey(""); // Set dropdown value to empty
+        } else {
+          // If not initialized, wait for it to be rendered and then reset
+          this.getView().attachAfterRendering(function () {
+            dropdown = that.getView().byId("idDropdown");
+            if (dropdown) {
+              dropdown.setSelectedKey("");
+            }
+          });
+        }
+        fileUploader.clear();
+
+        this.oModel.setProperty("/BtnEnable", false);
+        this.oModel.setProperty("/BtnName", this.oBundle.getText("Download"));
+        const oMessageManager = sap.ui.getCore().getMessageManager();
+        oMessageManager.removeAllMessages();
+      },
+      /**
+     * Called when messagepopover is clicked
+     * @public
+     * @name onMessagePopoverPress
+     */
+      onMessagePopoverPress: function (oEvent) {
+        const oSourceControl = oEvent.getSource();
+        this._getMessagePopover().then(function (oMessagePopover) {
+          oMessagePopover.openBy(oSourceControl);
+        });
+      },
+      /**
+     * Loads the fragment 
+     * @public
+     * @name _getMessagePopover
+     */
+      _getMessagePopover: function () {
+        const oView = this.getView();
+        if (!this._pMessagePopover) {
+          this._pMessagePopover = Fragment.load({
+            id: oView.getId(),
+            name: "pumorips.factoryproduct.psmassuploadui.view.fragments.MessagePopover",
+          }).then(function (oMessagePopover) {
+            oView.addDependent(oMessagePopover);
+            return oMessagePopover;
+          });
+        }
+        return this._pMessagePopover;
+      },
+      /**
+      *  method for validate the uploaded excel
+      */
+      _setHistoryData: function (aHistory) {
+
+        var oBasicDataModel = this.getOwnerComponent().getModel("oBasicDataModel");
+        aHistory.forEach(function (rowIndexObj) {
+          var records = rowIndexObj.records;
+          if (records) {
+            var n = records.lastIndexOf(':');
+            var error = records.substring(n + 2);
+
+            if (error == '0') {
+
+              rowIndexObj.errorVisible = false;
+            }
+            else {
+              rowIndexObj.errorVisible = true;
+            }
+
+          } else {
+            rowIndexObj.errorVisible = false;
+
+          }
+        });
+        oBasicDataModel.setProperty("/oBasicDataModel", aHistory);
+      },
+      /**
+      *  method for creating columns for Factory product excel download
+      */
+      _createColumnConfigFacProd: function (oEvent) {
+
+        return [
+          {
+            label: this.getResourceBundleText("appname"),
+            property: 'appName'
+          },
+          {
+            label: this.getResourceBundleText("ProcessID"),
+            property: 'processId'
+          },
+          {
+            label: this.getResourceBundleText("ProductID"),
+            property: 'prodId'
+          },
+          {
+            label: this.getResourceBundleText("FactoryNo"),
+            property: 'factoryNumber'
+          },
+          {
+            label: this.getResourceBundleText("zmpaPartno"),
+            property: 'zmpaPartno'
+          },
+          {
+            label: this.getResourceBundleText("errdtls"),
+            property: 'errordetails'
+          }
+        ];
+      },
+      /**
+      *  method for creating columns for Factory Location excel download
+      */
+      _createColumnConfigFacLoc: function (oEvent) {
+
+        return [
+          {
+            label: this.getResourceBundleText("appname"),
+            property: 'appName'
+          },
+          {
+            label: this.getResourceBundleText("ProcessID"),
+            property: 'processId'
+          },
+          {
+            label: this.getResourceBundleText("FactoryNo"),
+            property: 'factoryNumber'
+          },
+          {
+            label: this.getResourceBundleText("locType"),
+            property: 'locType'
+          },
+          {
+            label: this.getResourceBundleText("locId"),
+            property: 'locId'
+          },
+          {
+            label: this.getResourceBundleText("errdtls"),
+            property: 'errordetails'
+          }
+        ];
+      },
+      /**
+      *  method for creating columns for Product Location excel download
+      */
+      _createColumnConfigProLoc: function (oEvent) {
+
+        return [
+          {
+            label: this.getResourceBundleText("appname"),
+            property: 'appName'
+          },
+          {
+            label: this.getResourceBundleText("ProcessID"),
+            property: 'processId'
+          },
+          {
+            label: this.getResourceBundleText("FactoryNo"),
+            property: 'factoryNumber'
+          },
+          {
+            label: this.getResourceBundleText("ProductID"),
+            property: 'prodId'
+          },
+          {
+            label: this.getResourceBundleText("locId"),
+            property: 'locId'
+          },
+          {
+            label: this.getResourceBundleText("errdtls"),
+            property: 'errordetails'
+          }
+        ];
+      },
+      /**
+      *  method for creating columns for UOM excel download
+      */
+      _createColumnConfigUOM: function (oEvent) {
+
+        return [
+          {
+            label: this.getResourceBundleText("appname"),
+            property: 'appName'
+          },
+          {
+            label: this.getResourceBundleText("ProcessID"),
+            property: 'processId'
+          },
+          {
+            label: this.getResourceBundleText("FactoryNo"),
+            property: 'factoryNumber'
+          },
+          {
+            label: this.getResourceBundleText("ProductID"),
+            property: 'prodId'
+          },
+          {
+            label: this.getResourceBundleText("uomAlt"),
+            property: 'uomAlt'
+          },
+          {
+            label: this.getResourceBundleText("errdtls"),
+            property: 'errordetails'
+          }
+        ];
+      },
+      /**
+      *  method for creating columns for TLane excel download
+      */
+      _createColumnConfigTLane: function (oEvent) {
+
+        return [
+          {
+            label: this.getResourceBundleText("appname"),
+            property: 'appName'
+          },
+          {
+            label: this.getResourceBundleText("ProcessID"),
+            property: 'processId'
+          },
+          {
+            label: this.getResourceBundleText("FactoryNo"),
+            property: 'factoryNumber'
+          },
+          {
+            label: this.getResourceBundleText("ProductID"),
+            property: 'prodId'
+          },
+          {
+            label: this.getResourceBundleText("locFr"),
+            property: 'locFr'
+          },
+          {
+            label: this.getResourceBundleText("locfrType"),
+            property: 'locfrType'
+          },
+          {
+            label: this.getResourceBundleText("locTo"),
+            property: 'locTo'
+          },
+          {
+            label: this.getResourceBundleText("loctoType"),
+            property: 'loctoType'
+          },
+          {
+            label: this.getResourceBundleText("locType"),
+            property: 'locType'
+          },
+          {
+            label: this.getResourceBundleText("errdtls"),
+            property: 'errordetails'
+          }
+        ];
+      },
+      /**
+      *  method for downloading the excel file
+      */
+      _exportData: function (data) {
+        let appName = this.getView().byId("idDropdown").getSelectedKey();
+        if (appName === 'Factory_Product') {
+          var aCols = this._createColumnConfigFacProd();
+        } else if (appName === 'Factory_Location') {
+          var aCols = this._createColumnConfigFacLoc();
+        } else if (appName === 'Product_Location') {
+          var aCols = this._createColumnConfigProLoc();
+        } else if (appName === 'UOM') {
+          var aCols = this._createColumnConfigUOM();
+        } else {
+          var aCols = this._createColumnConfigTLane();
+        }
+
+        var sName = appName + "_" + this._formatDate(new Date());
+        var oModel = new JSONModel(data);
+        var aData = oModel.getProperty('/');
+        var oSettings = {
+          workbook: { columns: aCols },
+          dataSource: aData,
+          fileName: sName,
+        };
+        var oSheet = new Spreadsheet(oSettings);
+        oSheet.build()
+          .then(function () {
+            MessageToast.show(this.getResourceBundleText("EXPORTED"));
+          })
+          .finally(oSheet.destroy);
+      },
+
+      /**
+       * convert date into specfic format
+       * @param {object} date - date type
+       * @name _formatDate
+       * @private
+       */
+      _formatDate: function (date) {
+        const year = date.getFullYear();
+        const shortYear = year.toString().slice(-2);
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${shortYear}${month}${day}${hours}${minutes}`;
+      },
+      /**
+      * triggers when clicked on Upload History to open Upload History Fragment
+      */
+      onStatusClk: function () {
+        var oView = this.getView();
+        oView.setBusy(true);
+        var oThisController = this;
+        var oBasicDataModel = this.getOwnerComponent().getModel("oBasicDataModel");
+        oBasicDataModel.setProperty("/sHistorySearch", "");
+
+        if (!oThisController.UploadFragmentOpen) {
+          oThisController.UploadFragmentOpen = sap.ui.xmlfragment("pumorips.factoryproduct.psmassuploadui.view.fragments.MassUploadStatus", oThisController);
+        }
+        let value = this.getView().byId("idDropdown").getSelectedKey();
+        if (value === "" || value === "undefined") {
+          MessageBox.error(this.getResourceBundleText("selectanyvalue"));
+          oView.setBusy(false);
+        } else {
+          this.MassUpdService.UploadHistory(value).then(
+            function (data) {
+              oView.setBusy(false);
+              oThisController._setHistoryData(data.data.results);
+              oBasicDataModel.setProperty("/aBckOriginalData", data.data.results);
+              oBasicDataModel.setProperty("/aBckServiceData", data.data.results);
+              oThisController.getView().addDependent(oThisController.UploadFragmentOpen);
+              var list = sap.ui.getCore().byId("id_Loc_history");
+              var binding = list.getBinding("rows");
+              binding.filter([]);
+              oThisController.UploadFragmentOpen.open();
+            }.bind(this),
+            function (error) {
+              oView.setBusy(false);
+            }.bind(this));
+        }
+      },
+      /**
+       * triggers when Upload History Dialog is closed
+       */
+      oncloseUploadStatus: function () {
+        var oThisController = this;
+        oThisController.UploadFragmentOpen.close();
+      },
+
+      /**
+      * triggers when Mass upload history table is filtered through smart filter
+      */
+      filterGlobally: function (oEvent) {
+        var sQuery = oEvent.getParameter("query");
+        var list = sap.ui.getCore().byId("id_Loc_history")
+        var binding = list.getBinding("rows");
+        if (!sQuery) {
+          binding.filter([]);
+        }
+        else {
+          binding.filter([new sap.ui.model.Filter([
+            new sap.ui.model.Filter("processId", sap.ui.model.FilterOperator.Contains, sQuery),
+            new sap.ui.model.Filter("status", sap.ui.model.FilterOperator.Contains, sQuery),
+            new sap.ui.model.Filter("modifiedBy", sap.ui.model.FilterOperator.Contains, sQuery),
+            new sap.ui.model.Filter("modifiedAt", sap.ui.model.FilterOperator.Contains, sQuery)
+
+          ], false)
+          ])
+        };
+      },
+      /**
+       * triggers when error History download button is clicked
+       */
+      onPressDownloadError: function (oEvent) {
+        var oThisController = this;
+        var oView = this.getView();
+        oView.setBusy(true);
+        var oSelItem = oEvent.getSource().getBindingContext("oBasicDataModel").getObject();
+        oSelItem.processId;
+        this.MassUpdService.DownloadErrHistory(oSelItem.processId, oSelItem.appName).then(
+          function (data) {
+            oView.setBusy(false);
+            oThisController._exportData(data.data.results);
+          }.bind(this),
+          function (error) {
+            oView.setBusy(false);
+          }.bind(this));
+      },
+      onClear: function(){
+        this.getView().byId("idDropdown").setSelectedKey();
+        this.oModel.setProperty("/BtnName", this.oBundle.getText("Download"));
+        this.getView().byId("ExcelButton").setEnabled(false);
+      }
+    });
+  });
+
+
+
+  app/psmassuploadui/webapp/service/MassUpdService.js
+
+
+
+  sap.ui.define([
+    "./CoreService",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
+], function (CoreService, Filter, FilterOperator) {
+    "use strict";
+
+    var MassUpdService = CoreService.extend("pumorips.pumoriproduct.psmassuploadui.service.MassUpdService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        },
+         /**
+        * Odata service for dropdown value
+        * **/
+        dropdown: function(){
+            return this.odata("/TemplateList").get();
+        },
+        /**
+        * Odata service for data upload
+        * **/
+        uploadData: function (oUpdatedata) {
+            return this.odata("/customMasterUpload").post(oUpdatedata);
+        },
+        /**
+       * Odata service for Download template
+       * **/
+        downloadTemp: function (DropdownValue) {
+            const param = {
+                urlParameters: {
+                    templateName: DropdownValue
+                }
+            };
+            return this.odata("/downloadTemplate").get(param);
+        },
+        /**
+       * Odata service for read operation
+       * **/
+        UploadHistory: function (tempName) {
+            var aFilters = [];
+            aFilters.push(new Filter("appName", FilterOperator.EQ, tempName));
+            var mParameters = {
+                filters: aFilters
+            };
+            return this.odata("/UploadHistoryView").get(mParameters);
+        },
+        /**
+            * Odata service for read operation
+            * **/
+        DownloadErrHistory: function (prcId, appName) {
+            var aFilters = [];
+            aFilters.push(new Filter("appName", FilterOperator.EQ, appName));
+            aFilters.push(new Filter("processId", FilterOperator.EQ, prcId));
+            var mParameters = {
+                filters: aFilters
+            };
+            if (appName === 'Factory_Product') {
+                return this.odata("/ProductErrorResponse").get(mParameters);
+            } else if (appName === 'Factory_Location') {
+                return this.odata("/LocationErrorResponse").get(mParameters);
+            } else if (appName === 'Product_Location') {
+                return this.odata("/ProdLocErrorResponse").get(mParameters);
+            } else if (appName === 'UOM') {
+                return this.odata("/UOMErrorResponse").get(mParameters);
+            } else {
+                return this.odata("/TlaneErrorResponse").get(mParameters);
+            }
+        },
+        fetchSecurityAuthScopes: function () {
+            return this.odata("/SecurityAction").get({});
+        }
+    });
+    return MassUpdService;
+});
+
+
+
+app/psmassuploadui/webapp/state/MassUpdState.js
+
+
+
+sap.ui.define([
+    "../state/BaseState",
+], function (BaseState) {
+    "use strict";
+    var MassUpdState = BaseState.extend("pumorips.pumoriconfig.pumoriconfig.state.MassUpdState", {
+        constructor: function (oService) {
+            this.data = {
+                display: true,
+                busy: true                
+            };
+            this.MassUpdService = oService;
+            BaseState.call(this);
+        }
+       
+
+    });
+    return MassUpdState;
+});
+
+
+
+app/psmassuploadui/webapp/Component.js
+
+
+
+/**
+ * eslint-disable @sap/ui5-jsdocs/no-jsdoc
+ */
+
+sap.ui.define([
+        "sap/ui/core/UIComponent",
+        "sap/ui/Device",
+        "pumorips/factoryproduct/psmassuploadui/model/models",
+        './service/MassUpdService',
+        './state/MassUpdState',
+        'sap/ui/model/json/JSONModel'
+    ],
+    function (UIComponent, Device, models, MassUpdService, MassUpdState,JSONModel ) {
+        "use strict";
+
+        return UIComponent.extend("pumorips.factoryproduct.psmassuploadui.Component", {
+            metadata: {
+                manifest: "json"
+            },
+
+            /**
+             * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
+             * @public
+             * @override
+             */
+            init: function () {
+                // call the base component's init function
+                UIComponent.prototype.init.apply(this, arguments);
+
+                // enable routing
+                this.getRouter().initialize();
+
+                // set the device model
+                this.setModel(models.createDeviceModel(), "device");
+
+                var jsonModel = new JSONModel();
+                this.setModel(jsonModel, "oJsonModel");
+
+                this._oMassUpdService = new MassUpdService(this.getModel());
+                this._oMassUpdState = new MassUpdState(this._oMassUpdService);
+                this.setModel(this._oMassUpdState.getModel(), 'oModel');
+                
+            },
+            getService: function (sService) {
+                return this["_o" + sService + "Service"];
+            }, 
+            getState: function (sState) {
+                return this["_o" + sState + "State"];
+            }
+        });
+    }
+);
+
+
+
+app/psmassuploadui/webapp/manifest.json
+
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.factoryproduct.psmassuploadui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.13.0",
+      "toolsId": "04b03b8e-cb26-4e10-ac3d-30efddc30dd7"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/factory-product/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "psmassupload-display": {
+          "semanticObject": "psmassupload",
+          "action": "display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.121.2",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.factoryproduct.psmassuploadui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "oBasicDataModel":{
+        "type":"sap.ui.model.json.JSONModel"
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.factoryproduct.psmassuploadui.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "RouteMassUpload",
+          "pattern": "",
+          "target": [
+            "TargetMassUpload"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetMassUpload": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "MassUpload",
+          "viewName": "MassUpload"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "pumorips.factoryproduct.psmassuploadui.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSFACPROD"
+  }
+}
+
+
+
+app/psmassuploadui/xs-app.json
+
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumoripsfacprod-srv-api",
+      "csrfProtection": false,
+      "scope": ["$XSAPPNAME.WithCost","$XSAPPNAME.WithoutCost","$XSAPPNAME.WithCostview","$XSAPPNAME.WithoutCostview"]
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa",
+      "scope": ["$XSAPPNAME.WithCost","$XSAPPNAME.WithoutCost","$XSAPPNAME.WithCostview","$XSAPPNAME.WithoutCostview"]
+    }
+  ]
+}
+
+
+

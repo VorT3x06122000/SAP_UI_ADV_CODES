@@ -1,0 +1,92 @@
+{
+  "xsappname": "pumorips_facprod",
+  "tenant-mode": "dedicated",
+  "description": "Security profile of called application",
+  "scopes": [
+    {
+      "name": "uaa.user",
+      "description": "UAA"
+    },
+    {
+      "name": "$XSAPPNAME.scopeformyapp",
+      "description": "Users of Factory Product app Master need this special role",
+      "grant-as-authority-to-apps": [
+          "$XSSERVICENAME(pumori_job-scheduling-service)"
+      ]
+  },
+  {
+    "name": "$XSAPPNAME.WithCost",
+    "description": "WithCostField Authorization"
+  },
+  {
+    "name": "$XSAPPNAME.WithoutCost",
+    "description": "WithoutCostField Authorization"
+  },
+  {
+    "name": "$XSAPPNAME.WithCostview",
+    "description": "WithCostviewField Authorization"
+  },
+  {
+    "name": "$XSAPPNAME.WithoutCostview",
+    "description": "WithoutCostviewField Authorization"
+  }
+  ],
+  "role-templates": [
+    {
+      "name": "Token_Exchange",
+      "description": "UAA",
+      "scope-references": [
+        "uaa.user"
+      ]
+    },
+    {
+        "name": "RoleTemplateForFactoryProductMasterApp",
+        "description": "Users of Factory Product Master need this special role",
+        "default-role-name": "Factory Product Master Role",
+        "scope-references": [
+            "$XSAPPNAME.scopeformyapp"
+        ]
+    },
+    {
+      "name": "Pumori_PS_Display_WithCost",
+      "description": "WithCost Role",
+      "scope-references": [
+        "uaa.user",
+        "$XSAPPNAME.WithCost"
+      ]
+    },
+    {
+      "name": "Pumori_PS_Display_WithoutCost",
+      "description": "WithoutCost Role",
+      "scope-references": [
+        "uaa.user",
+        "$XSAPPNAME.WithoutCost"
+      ]
+    },
+    {
+      "name": "Pumori_PS_Display_WithCostview",
+      "description": "WithCostview Role",
+      "scope-references": [
+        "uaa.user",
+        "$XSAPPNAME.WithCostview"
+      ]
+    },
+    {
+      "name": "Pumori_PS_Display_WithoutCostview",
+      "description": "WithoutCostview Role",
+      "scope-references": [
+        "uaa.user",
+        "$XSAPPNAME.WithoutCostview"
+      ]
+    }
+  ],
+  "role-collections": [
+    {
+        "name": "app_job_schedular_ps_factory_product_master_app",
+        "description": "job schedular",
+        "role-template-references": [
+            "$XSAPPNAME.scopeformyapp"
+        ]
+    }
+  ]
+}

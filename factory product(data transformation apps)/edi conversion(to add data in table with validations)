@@ -1,0 +1,728 @@
+app/psediconversionui/webapp/view/FacPrdEDIConversion.view.xml
+
+
+
+<mvc:View controllerName="pumorips.factoryproduct.psediconversionui.controller.FacPrdEDIConversion"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m" xmlns:smarttable="sap.ui.comp.smarttable">
+    <Page id="page" title="{i18n>title}" showHeader="false">
+        <content >
+        
+        <smarttable:SmartTable id="ediSmartTable" header="{i18n>res}"  entitySet="EDIConversion" tableType="ResponsiveTable" showRowCount="true"  demandPopin="true"
+                enableAutoBinding="true" ignoredFields="modifiedBy,modifiedAt">
+                <smarttable:customToolbar>
+                    <OverflowToolbar id="IDovrflwtoolbr">
+                        <ToolbarSpacer id="IDtoolbrspcr"/>
+                        <Button id="idAdd" visible="false" text="{i18n>add}"  press="onPressAdd"/>
+                        <Button id="idDelete" visible="false" text="{i18n>delete}" press="onPressDelete"/>
+                    </OverflowToolbar>
+                </smarttable:customToolbar>
+                <Table id="ediTable" mode="SingleSelectLeft" sticky="ColumnHeaders,HeaderToolbar" growing="true" 
+                    growingScrollToLoad="true" growingThreshold="20" selectionChange="onItemSelect">
+    
+                </Table>
+            </smarttable:SmartTable>
+
+        </content>
+    </Page>
+</mvc:View>
+
+
+
+app/psediconversionui/webapp/fragments/Add.fragment.xml
+
+
+
+<core:FragmentDefinition  xmlns="sap.m" xmlns:core="sap.ui.core"  xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form">
+   <Dialog  id="IDdialogfrag" title="{i18n>addItem}" class="sapUiSizeCompact"  titleAlignment="Center"  >
+        <content>
+            <f:SimpleForm id="ediSimpleForm" editable="true"
+            layout="ResponsiveGridLayout"
+            labelSpanXL="3"
+            labelSpanL="1"
+            labelSpanM="1"
+            labelSpanS="6"
+            emptySpanXL="4"
+            emptySpanL="1"
+            emptySpanM="1"
+            emptySpanS="0"
+            columnsXL="1"
+            columnsL="1"
+            columnsM="1" >
+               <Label id="idfacnum" text="{i18n>facNum}" required="true">
+               </Label>
+               <Input id="idfacnumV" value="{/factoryNumber}"  maxLength="20">
+               </Input>
+               <Label id="idtduom" text="{i18n>tdUOM}" required="true"/>
+               <Input id="idtduomV" value="{/tdUOM}"  maxLength="2" valueState="{/tdUomValueState}" valueStateText="{/tdUomValueStateText}" />
+               <Label id="idmduom" text="{i18n>mdUOM}"  required="true"/>
+               <Input id="idmduomV" value="{/mdUOM}"  maxLength="3" valueState="{/mdUomValueState}" valueStateText="{/mdUomValueStateText}"/>
+            </f:SimpleForm>
+        </content>
+        <beginButton>
+           <Button type="Emphasized" id="btnsave" text="{i18n>saveButton}" press="onPressSave"/>
+        </beginButton>
+        <endButton>
+           <Button type="Emphasized" id="btncancel" text="{i18n>cancelButton}" press="onPressCancel"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
+
+
+
+app/psediconversionui/webapp/controller/FacPrdEDIConversion.controller.js
+
+
+
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/m/MessageBox",
+    "sap/ui/core/UIComponent"
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (Controller, MessageBox,UIComponent) {
+        "use strict";
+
+        return Controller.extend("pumorips.factoryproduct.psediconversionui.controller.FacPrdEDIConversion", {
+            onInit: function () {
+
+                this.getView().byId("idDelete").setEnabled(false);
+                this.EdiConvSrv = this.getOwnerComponent().getService('EdiConv');
+                this.EdiConvState = this.getOwnerComponent().getService('EdiConv');
+                this.getRouter().getRoute("FacPrdEDIConversion").attachPatternMatched(this._onObjectMatched, this);
+
+            },
+            getRouter: function () {
+                return UIComponent.getRouterFor(this);
+            },
+
+            _onObjectMatched: function (oEve) {
+                this._fetchAuthorizationScopes();
+
+            },
+
+            _getUserInfoService: function () {
+                return new Promise(resolve => sap.ui.require([
+                    "sap/ushell/library"
+                ], oSapUshellLib => {
+                    const oContainer = oSapUshellLib.Container;
+                    const pService = (oContainer) ? oContainer.getServiceAsync("UserInfo") : ""; // .getService is deprecated!
+                    resolve(pService);
+                }));
+            },
+
+
+
+
+            _fetchAuthorizationScopes: function () {
+                var that = this;
+                this.getView().setBusy(true);
+                this.EdiConvSrv.fetchSecurityAuthScopes().then(
+                    function (oResponse) {
+                        var oSecurityScope = (oResponse.data.value) ? JSON.parse(oResponse.data.value) : JSON.parse(oResponse.data.SecurityAction);
+                        if (oSecurityScope.WithCost) {
+
+                            that.getView().byId("idAdd").setVisible(true);
+                            that.getView().byId("idDelete").setVisible(true);
+                        } 
+                        else if (oSecurityScope.WithoutCost) {
+
+                            that.getView().byId("idAdd").setVisible(true);
+                            that.getView().byId("idDelete").setVisible(true);
+                        }
+                        else if (oSecurityScope.WithCostview) {
+
+                            that.getView().byId("idAdd").setVisible(false);
+                            that.getView().byId("idDelete").setVisible(false);
+                        }
+                        else if (oSecurityScope.WithoutCostview) {
+
+                            that.getView().byId("idAdd").setVisible(false);
+                            that.getView().byId("idDelete").setVisible(false);
+                        }
+
+
+
+                        that.getView().setBusy(false);
+                    },
+                    function (error) {
+                        that.showMsgBoxError(JSON.parse(error.responseText).error.message.value);
+                        that.getView().setBusy(false);
+                    });
+
+            },
+
+
+
+
+            onItemSelect: function (oEvent) {
+                if (oEvent.getSource().getSelectedItems().length > 0) {
+                    this.getView().byId("idDelete").setEnabled(true);
+                } else {
+                    this.getView().byId("idDelete").setEnabled(false);
+                }
+            },
+
+            onPressAdd: function () {
+                var oModel = this.getOwnerComponent().getModel("oBasicDataModel");
+                var obj = { factoryNumber: "", tdUOM: "", mdUOM: "" ,tdUomValueState:"None",tdUomValueStateText:"",mdUomValueState:"None",mdUomValueStateText:""};
+                oModel.setData(obj);
+                if (!this.fragmentOpen) {
+                    this.fragmentOpen = sap.ui.xmlfragment("pumorips.factoryproduct.psediconversionui.fragments.Add", this);
+                }
+                this.getView().addDependent(this.fragmentOpen);
+                this.fragmentOpen.setModel(oModel);
+                this.fragmentOpen.open();
+            },
+            onPressCancel: function () {
+                this.fragmentOpen.close();
+            },
+            onPressSave: async function (oEvent) {
+                var sCreate = this.getView().getModel("i18n").getResourceBundle().getText("createOP");
+                var sTestUser = this.getView().getModel("i18n").getResourceBundle().getText("testUser");
+                var sFacNum = this.fragmentOpen.getModel().oData.factoryNumber;
+                var sTdUom = this.fragmentOpen.getModel().oData.tdUOM;
+                var sMdUom = this.fragmentOpen.getModel().oData.mdUOM;
+                var oPayload = {};
+                oPayload.factoryNumber = sFacNum;
+                oPayload.tdUOM = sTdUom;
+                oPayload.mdUOM = sMdUom;
+                var sError = this.getView().getModel("i18n").getResourceBundle().getText("addError");
+                var oUserInfo = await this._getUserInfoService();
+                oPayload.createdBy = (oUserInfo === "") ? sTestUser : oUserInfo.getEmail();
+                if ((oPayload.factoryNumber != "") && (oPayload.tdUOM != "") && (oPayload.mdUOM != "")) {
+                    if(oPayload.tdUOM.match(/^[A-Z]+$/)){
+                        this.fragmentOpen.getModel().oData.tdUomValueState = "None";
+                        this.fragmentOpen.getModel().oData.tdUomValueStateText = "";
+                        this.fragmentOpen.getModel().refresh(true);
+                    }else{
+                        this.fragmentOpen.getModel().oData.tdUomValueState = "Error";
+                        this.fragmentOpen.getModel().oData.tdUomValueStateText = sError;
+                        this.fragmentOpen.getModel().refresh(true);
+                    }
+                    if(oPayload.mdUOM.match(/^[A-Z]+$/)){
+                        this.fragmentOpen.getModel().oData.mdUomValueState = "None";
+                        this.fragmentOpen.getModel().oData.mdUomValueStateText = "";
+                        this.fragmentOpen.getModel().refresh(true);
+                    }else{
+                        this.fragmentOpen.getModel().oData.mdUomValueState = "Error";
+                        this.fragmentOpen.getModel().oData.mdUomValueStateText = sError;
+                        this.fragmentOpen.getModel().refresh(true);
+                    }
+                if(oPayload.tdUOM.match(/^[A-Z]+$/) && oPayload.mdUOM.match(/^[A-Z]+$/)){
+                    var oView = this.getView();
+                    oView.setBusy(true);
+                    return this.EdiConvSrv.triggerPosting({ PostingData: JSON.stringify(oPayload), Operation: sCreate }).then(
+                        function () {
+                            this.getView().byId("ediSmartTable").rebindTable(true);
+                            oView.setBusy(false);
+                            this.fragmentOpen.close();
+                            MessageBox.success(this.getView().getModel("i18n").getResourceBundle().getText("Save Success!!!"));
+                        }.bind(this),
+                        function (error) {
+                            oView.setBusy(false);
+                        }.bind(this));   
+                } 
+                }else{
+                    MessageBox.error(this.getView().getModel("i18n").getResourceBundle().getText("InValid Input"));
+                    return;
+                }
+            },
+
+            onPressDelete: function () {
+                var sDelete = this.getView().getModel("i18n").getResourceBundle().getText("deleteOP")
+                var oDeleteData = this.getView().byId("ediTable").getSelectedItems()[0].getBindingContext().getObject();
+                var oView = this.getView();
+                oView.setBusy(true);
+                return this.EdiConvSrv.triggerPosting({ PostingData: JSON.stringify(oDeleteData), Operation: sDelete }).then(
+                    function () {
+                        this.getView().byId("ediSmartTable").rebindTable(true);
+                        oView.setBusy(false);
+                        MessageBox.success(this.getView().getModel("i18n").getResourceBundle().getText("deleteSucc"));
+                    }.bind(this),
+                    function (error) {
+                        oView.setBusy(false);
+                    }.bind(this));
+            }
+        });
+    });
+
+
+
+app/psediconversionui/webapp/service/CoreService.js
+
+
+
+sap.ui.define([
+	"sap/ui/base/Object"
+], function (Object) {
+	"use strict";
+
+	return Object.extend("pumorips.factoryproduct.psediconversionui.service.CoreService", {
+		constructor: function (model) {
+			Object.call(this);
+			if (model) {
+				this.setModel(model);
+			}
+		},
+		setModel: function (model) {
+			this.model = model;
+		},
+		odata: function (url) {
+			var me = this;
+			var core = {
+				ajax: function (type, url, data, parameters) {
+					var promise = new Promise(function (resolve, reject) {
+						var args = [];
+						var params = {};
+						args.push(url);
+						if (data) {
+							args.push(data);
+						}
+						if (parameters) {
+							params = parameters;
+						}
+						params.success = function (result, response) {
+							resolve({
+								data: result,
+								response: response
+							});
+						};
+						params.error = function (error) {
+							reject(error);
+						};
+						args.push(params);
+						me.model[type].apply(me.model, args);
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (params) {
+					return core.ajax('read', url, false, params);
+				},
+				'post': function (data, params) {
+					return core.ajax('create', url, data, params);
+				},
+				'put': function (data, params) {
+					return core.ajax('update', url, data, params);
+				},
+				'delete': function (params) {
+					return core.ajax('remove', url, false, params);
+				}
+			};
+		},
+		http: function (url) {
+			var core = {
+				ajax: function (method, url, headers, args) {
+					var promise = new Promise(function (resolve, reject) {
+						var client = new XMLHttpRequest();
+						var uri = url;
+						if (args && method === 'GET') {
+							uri += '?';
+							var argcount = 0;
+							for (var key in args) {
+								if (args.hasOwnProperty(key)) {
+									if (argcount++) {
+										uri += '&';
+									}
+									uri += encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+								}
+							}
+						}
+						if (args && (method === 'POST' || method === 'PUT')) {
+							var data = {};
+							for (var keyp in args) {
+								if (args.hasOwnProperty(keyp)) {
+									data[keyp] = args[keyp];
+								}
+							}
+						}
+						client.open(method, uri);
+						
+						if (method === 'POST' || method === 'PUT') {
+							client.setRequestHeader("accept", "application/json");
+							client.setRequestHeader("content-type", "application/json");
+						}
+						for (var keyh in headers) {
+							if (headers.hasOwnProperty(keyh)) {
+								client.setRequestHeader(keyh, headers[keyh]);
+							}
+						}
+						if (data) {
+							client.send(JSON.stringify(data));
+						} else {
+							client.send();
+						}
+						client.onload = function () {
+							if (this.status == 200) {
+								resolve(this.response);
+							} else {
+								reject(this.statusText);
+							}
+						};
+						client.onerror = function () {
+							reject(this.statusText);
+						};
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (headers, args) {
+					return core.ajax('GET', url, headers, args);
+				},
+				'post': function (headers, args) {
+					return core.ajax('POST', url, headers, args);
+				},
+				'put': function (headers, args) {
+					return core.ajax('PUT', url, headers, args);
+				},
+				'delete': function (headers, args) {
+					return core.ajax('DELETE', url, headers, args);
+				}
+			};
+		}
+	});
+});
+
+
+
+app/psediconversionui/webapp/service/EdiConvService.js
+
+
+
+sap.ui.define([
+    "./CoreService",
+], function (CoreService) {
+    "use strict";
+
+    var EdiConvService = CoreService.extend("pumorips.factoryproduct.psediconversionui.service.EdiConvService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        },
+
+        triggerPosting: function (oSaveData) {
+            return this.odata("/EDIConversionPosting").post(oSaveData);
+        },
+
+        /**
+        * Odata service for Create operation
+        * **/
+        createData: function (oSaveData) {
+            return this.odata("/EDIConversion").post(oSaveData);
+        },
+        /**
+       * Odata service for Delete operation
+       * **/
+        deleteData: function (oDeleteData) {
+            var sObjectPath = this.model.createKey("/EDIConversion", {
+                factoryNumber: oDeleteData.factoryNumber,
+                tdUOM: oDeleteData.tdUOM
+            });
+            return this.odata(sObjectPath).delete(oDeleteData);
+        },
+        fetchSecurityAuthScopes: function () {
+            return this.odata("/SecurityAction").get({});
+        }
+
+    });
+    return EdiConvService;
+});
+
+
+
+app/psediconversionui/webapp/state/BaseState.js
+
+
+
+sap.ui.define([
+	"sap/ui/base/Object",
+	"sap/ui/model/json/JSONModel"
+], function(Object, JSONModel) {
+	"use strict";
+	return Object.extend("pumorips.factoryproduct.psediconversionui.state.BaseState", {
+       
+		getModel: function() {
+			if (!this.model) {
+				this.model = new JSONModel(this.data, true);
+			}
+			return this.model;
+		},
+		updateModel: function(bHardRefresh) {
+			if (this.model) {
+				this.model.refresh(bHardRefresh ? true : false);
+			}
+		}
+	});
+});
+
+
+
+app/psediconversionui/webapp/state/EdiConvState.js
+
+
+
+sap.ui.define([
+    "../state/BaseState",
+], function (BaseState) {
+    "use strict";
+    var EdiConvState = BaseState.extend("pumorips.factoryproduct.psediconversionui.state.EdiConvState", {
+        constructor: function (oService) {
+            this.data = {
+                display: true,
+                busy: true                
+            };
+            this.EdiConvService = oService;
+            BaseState.call(this);
+        }
+       
+
+    });
+    return EdiConvState;
+});
+
+
+
+app/psediconversionui/webapp/Component.js
+
+
+
+/**
+ * eslint-disable @sap/ui5-jsdocs/no-jsdoc
+ */
+
+sap.ui.define([
+        "sap/ui/core/UIComponent",
+        "sap/ui/Device",
+        "pumorips/factoryproduct/psediconversionui/model/models",
+        "./service/EdiConvService",
+        "./state/EdiConvState"
+    ],
+    function (UIComponent, Device, models,EdiConvService,EdiConvState) {
+        "use strict";
+
+        return UIComponent.extend("pumorips.factoryproduct.psediconversionui.Component", {
+            metadata: {
+                manifest: "json"
+            },
+
+            /**
+             * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
+             * @public
+             * @override
+             */
+            init: function () {
+                // call the base component's init function
+                UIComponent.prototype.init.apply(this, arguments);
+
+                this._oEdiConvService = new EdiConvService(this.getModel());
+
+                this._oEdiConvState = new EdiConvState(this._oEdiConvService);
+
+                // enable routing
+                this.getRouter().initialize();
+
+                // set the device model
+                this.setModel(models.createDeviceModel(), "device");
+            },
+
+            getService: function (sService) {
+                return this["_o" + sService + "Service"];
+            },
+             
+
+             getState: function (sState) {
+                return this["_o" + sState + "State"];
+            }
+        });
+    }
+);
+
+
+
+
+app/psediconversionui/webapp/manifest.json
+
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.factoryproduct.psediconversionui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.12.5",
+      "toolsId": "dc3e2ec9-9f38-401f-aa46-954fa37b1383"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/factory-product/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "psediconv-Display": {
+          "semanticObject": "psediconv",
+          "action": "Display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.121.1",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.factoryproduct.psediconversionui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "oBasicDataModel":{
+        "type": "sap.ui.model.json.JSONModel"
+    }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.factoryproduct.psediconversionui.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "FacPrdEDIConversion",
+          "pattern": "",
+          "target": [
+            "TargetFacPrdEDIConversion"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetFacPrdEDIConversion": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "FacPrdEDIConversion",
+          "viewName": "FacPrdEDIConversion"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "pumorips.factoryproduct.psediconversionui.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSFACPROD"
+  }
+}
+
+
+
+app/psediconversionui/xs-app.json
+
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumoripsfacprod-srv-api",
+      "csrfProtection": false,
+      "scope": ["$XSAPPNAME.WithCost","$XSAPPNAME.WithoutCost","$XSAPPNAME.WithCostview","$XSAPPNAME.WithoutCostview"]
+      
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa",
+      "scope": ["$XSAPPNAME.WithCost","$XSAPPNAME.WithoutCost","$XSAPPNAME.WithCostview","$XSAPPNAME.WithoutCostview"]
+    }
+  ]
+}
+
+

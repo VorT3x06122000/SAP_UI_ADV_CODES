@@ -1,0 +1,898 @@
+app/psmanagepartmappingui/webapp/view/ManagePartMapping.view.xml
+
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Manage Part Mapping 
+ RICEFW No                : 
+ Release                  :   M1 Release  
+ Author                   :   Samudrala, Sreenivas
+ Date                     :   01.04.2024
+ Description              :   Manage Part Mapping
+ *Descriptions: Manage Part Mapping main screen view  
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<mvc:View controllerName="pumorips.factoryproduct.psmanagepartmappingui.controller.ManagePartMapping"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+	xmlns:smartTable="sap.ui.comp.smarttable">
+    <Page id="page" title="{i18n>title}" showHeader="false">
+        <content>
+            <VBox id="vBoxId" fitContainer="true">
+                <smartFilterBar:SmartFilterBar id="smartFilterBar" persistencyKey="SmartFilterPKey" showMessages="true" showClearOnFB="true" clear="onClearPress" entitySet="BTPCompSequence" search=".onSFBSearch">
+                </smartFilterBar:SmartFilterBar>
+
+                <smartTable:SmartTable id="idSmartTable"  smartFilterId="smartFilterBar" tableType="ResponsiveTable" editable="false" entitySet="BTPCompSequence" useVariantManagement="true" showVariantManagement="true" 
+                        header="{i18n>res}" showRowCount="true" useExportToExcel="true"  requestAtLeastFields="factoryNumber" ignoredFields="entity" demandPopin="true"
+                        enableAutoBinding="false" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindTable"   persistencyKey="SmartTablePersistencyKey" 
+                >
+                    <smartTable:customToolbar>
+                        <OverflowToolbar id="overflowtoolbarId">
+                            <ToolbarSpacer id="toolbarSpaceId"/>
+                            <Button id="idmasterPart" visible="false" enabled="false" text="{i18n>masterPart}" class="sapUiSmallMargin" press=".onButtonPressManagePart" ariaHasPopup="Menu">
+                                <dependents>
+                                    <ActionSheet id="actionSheetManagePart" title="{i18n>acttit1}" showCancelButton="true" placement="Bottom">
+                                        <Button id="idStrtFlg" text="Flag" press="onActionPress" />
+										<Button id="idStrtunFlg" text="UnFlag" press="onActionPress" />
+                                    </ActionSheet>
+                                </dependents>
+                            </Button>
+                            <Button id="idactionbtn" visible="false" enabled="false" text="{i18n>actionsht1}" class="sapUiSmallMargin" press=".onButtonPressSplitMerge" ariaHasPopup="Menu">
+                                <dependents>
+                                    <ActionSheet id="actionSheetSplitMerge" title="{i18n>acttit1}" showCancelButton="true" placement="Bottom">
+                                        <Button id="idSplit" text="{i18n>split}" press="onActionPress"/>
+										<Button id="idMerge" text="{i18n>merge}" press="onActionPress" />
+                                    </ActionSheet>
+                                </dependents>
+                            </Button>
+                        </OverflowToolbar>
+                        
+                    </smartTable:customToolbar>
+                    <Table id="idTable" mode="MultiSelect" selectionChange="onItemSelect" sticky="ColumnHeaders,HeaderToolbar" growing="true" growingScrollToLoad="true" growingThreshold="20">
+                    </Table>
+
+                </smartTable:SmartTable>
+
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>
+
+
+
+app/psmanagepartmappingui/webapp/controller/BaseController.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Part Mapping 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    01.04.2024
+// Description      :    Manage Part Mapping
+//-----------------------------------------------------------------------------------*
+//Descriptions: Contains all the re-usable functions
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/core/UIComponent",
+    "sap/m/MessageBox"
+], function (Controller, UIComponent, MessageBox) {
+    "use strict";
+
+    return Controller.extend("pumorips.factoryproduct.psmanagepartmappingui.controller.BaseController", {
+		/**
+		 * Convenience method for accessing the router.
+		 * @public
+		 * @returns {sap.ui.core.routing.Router} the router for this component
+		 */
+
+        getRouter: function () {
+            return UIComponent.getRouterFor(this);
+        },
+
+		/**
+		 * Convenience method for getting the view model by name.
+		 * @public
+		 * @param {string} [sName] the model name
+		 * @returns {sap.ui.model.Model} the model instance
+		 */
+        getModel: function (sName) {
+            return this.getView().getModel(sName);
+        },
+
+		/**
+		 * Convenience method for setting the view model.
+		 * @public
+		 * @param {sap.ui.model.Model} oModel the model instance
+		 * @param {string} sName the model name
+		 * @returns {sap.ui.mvc.View} the view instance
+		 */
+        setModel: function (oModel, sName) {
+            return this.getView().setModel(oModel, sName);
+        },
+
+		/**
+		 * Getter for the resource bundle.
+		 * @public
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundle: function () {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
+        },
+        /**
+		 * Getter for the resource bundle text.
+		 * @public
+         * @param 
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundleText: function (sTextProperty) {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle().getText(sTextProperty);
+        },
+		/**
+		 * Convenience method for displaying error messages
+		 * @public
+		 */
+        //method to show error message
+        showMsgBoxError: function (message) {
+            var title = this.getResourceBundle().getText("ErrorDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.ERROR,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+
+        },
+        //method to show success message
+        showMsgBoxSuccess: function (message) {
+            var title = this.getResourceBundle().getText("SuccessDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.SUCCESS,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show warning message
+        showMsgBoxWarning: function (message) {
+            var title = this.getResourceBundle().getText("WarningDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.WARNING,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show information message
+        showMsgBoxInformation: function (message) {
+            var title = "Information"
+            var title = this.getResourceBundle().getText("InformationDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.INFORMATION,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        /**            * 
+          * function to fetch the logged in user details             *  
+          **/
+         _getUserInfoService: function () {
+            return new Promise(resolve => sap.ui.require([
+                "sap/ushell/library"
+            ], oSapUshellLib => {
+                const oContainer = oSapUshellLib.Container;
+                const pService = (oContainer) ? oContainer.getServiceAsync("UserInfo") : ""; // .getService is deprecated!
+                resolve(pService);
+            }));
+        },
+		
+
+    });
+
+});
+
+
+
+app/psmanagepartmappingui/webapp/controller/ManagePartMapping.controller.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Part Mapping 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    01.04.2024
+// Description      :    Manage Part Mapping
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for display of inital page of app
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "sap/ui/core/Fragment",
+    "sap/m/MessageToast"
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (BaseController,Fragment,MessageToast) {
+        "use strict";
+
+        return BaseController.extend("pumorips.factoryproduct.psmanagepartmappingui.controller.ManagePartMapping", {
+            onInit: function () {
+                this.ManagePartMapSrv = this.getOwnerComponent().getService('ManagePartMap');
+                this.ManagePartMapState = this.getOwnerComponent().getState('ManagePartMap');
+                this.getRouter().getRoute("RouteManagePartMapping").attachPatternMatched(this._onObjectMatched, this);
+            },
+            onSFBSearch: function(){
+                this.getView().byId("idSmartTable").rebindTable();
+            },
+
+            _onObjectMatched: function (oEve) {
+                this._fetchAuthorizationScopes();
+
+            },
+
+
+            _fetchAuthorizationScopes: function () {
+                var that = this;
+                this.getView().setBusy(true);
+                this.ManagePartMapSrv.fetchSecurityAuthScopes().then(
+                    function (oResponse) {
+                        var oSecurityScope = (oResponse.data.value) ? JSON.parse(oResponse.data.value) : JSON.parse(oResponse.data.SecurityAction);
+                       
+                        if (oSecurityScope.WithCost) {
+
+                            that.getView().byId("idmasterPart").setVisible(true);
+                            that.getView().byId("idactionbtn").setVisible(true);
+                        } 
+                        else if (oSecurityScope.WithoutCost) {
+
+                            that.getView().byId("idmasterPart").setVisible(true);
+                            that.getView().byId("idactionbtn").setVisible(true);
+                        }
+                        else if (oSecurityScope.WithCostview) {
+
+                            that.getView().byId("idmasterPart").setVisible(false);
+                            that.getView().byId("idactionbtn").setVisible(false);
+                        }
+                        else if (oSecurityScope.WithoutCostview) {
+
+                            that.getView().byId("idmasterPart").setVisible(false);
+                            that.getView().byId("idactionbtn").setVisible(false);
+                        }
+
+
+
+                        that.getView().setBusy(false);
+                    },
+                    function (error) {
+                        that.showMsgBoxError(JSON.parse(error.responseText).error.message.value);
+                        that.getView().setBusy(false);
+                    });
+
+            },
+
+
+
+            /**
+            * triggers after user clicks on flag/unflag button
+            * **/
+            onButtonPressManagePart: function (oEvent) {
+                var oButton = oEvent.getSource();
+                this.byId("actionSheetManagePart").openBy(oButton);
+            },
+            /**
+            * triggers after user clicks on Split/Merge button
+            * **/
+            onButtonPressSplitMerge: function (oEvent) {
+                var oButton = oEvent.getSource();
+                this.byId("actionSheetSplitMerge").openBy(oButton);
+            },
+            /**
+            * triggers once user select line item from table
+            * **/
+            onItemSelect: function (oEvent) {
+                if ((oEvent.getSource().getSelectedItems().length > 0) || (oEvent.mParameters.selectAll === true)) {
+                    this.getView().byId("idactionbtn").setEnabled(true);
+                    this.getView().byId("idmasterPart").setEnabled(true);
+                }
+                else {
+                    this.getView().byId("idactionbtn").setEnabled(false);
+                    this.getView().byId("idmasterPart").setEnabled(false);
+                }
+            },
+
+            /**
+            * triggers after user clicks on any of the action items
+            * **/
+            onActionPress: function (oEvent) {
+                this.iMsgCountr = 0;
+                var aPayload = [];
+
+                this.aSelData = this.getView().byId("idTable").getSelectedItems();
+                if (oEvent.getSource().sId.split("--")[2] === "idSplit") {
+                    if (this.aSelData.length === 2) {
+                        // Validation for same zbtpComp values
+                        if (this.aSelData[0].getBindingContext().getObject().zbtpComp === this.aSelData[1].getBindingContext().getObject().zbtpComp) {
+                            for (var i = 0; i < this.aSelData.length; i++) {
+                                var oSaveData = {};
+                                var oContext = this.aSelData[i].getBindingContext().getObject();
+                                oSaveData.factoryNumber = oContext.factoryNumber;
+                                oSaveData.prodId = oContext.prodId;
+                                oSaveData.zbtpComp = oContext.zbtpComp;
+                                oSaveData.zmpaPartno = oContext.zmpaPartno;
+                                this.operation = "SPLIT";
+                                this.mergeValue="";
+                                aPayload.push(oSaveData);
+                            }
+                        } else {
+                            this.showMsgBoxError(this.getResourceBundleText("sel2rowsWithSamePN"));
+                            return;
+                        }
+                    } else {
+                        this.showMsgBoxError(this.getResourceBundleText("sel2rows"));
+                        return;
+                    }
+                    this._MergeSplitData(aPayload, this.operation, this.mergeValue);
+                }
+                
+                else if (oEvent.getSource().sId.split("--")[2] === "idMerge") {
+                    if (this.aSelData.length === 2) {
+                        var zbtpComp1 = this.aSelData[0].getBindingContext().getObject().zbtpComp;
+                        var master1 = this.aSelData[0].getBindingContext().getObject().master;
+                        var zbtpComp2 = this.aSelData[1].getBindingContext().getObject().zbtpComp;
+                        var master2 = this.aSelData[1].getBindingContext().getObject().master;
+
+                        // Function to check if a string starts with "PUM"
+                        function startsWithPUM(str) {
+                            return str.startsWith("PUM");
+                        }
+
+
+                        Fragment.load({ name: "pumorips.factoryproduct.psmanagepartmappingui.Fragments.ConfirmMergeValue", controller: this }).then(function(oFragment) {
+                            this.oDialogConfirmMergeValue = oFragment;
+                            var selectZbtpComp = sap.ui.getCore().byId("selectZbtpComp");
+
+                            
+                            if(!startsWithPUM(zbtpComp1) || !startsWithPUM(zbtpComp2)){
+                                if(!startsWithPUM(zbtpComp1)){
+                                    var newItem1 = new sap.ui.core.Item({ key: zbtpComp1, text: zbtpComp1 });
+                                    selectZbtpComp.addItem(newItem1);
+                                }
+                                else{
+                                    var newItem2 = new sap.ui.core.Item({ key: zbtpComp2, text: zbtpComp2 });
+                                    selectZbtpComp.addItem(newItem2);
+                                }
+                            }
+                            else{
+                                if(master1 === 'X' || master2 === 'X'){
+                                    if(master1 === 'X'){
+                                        var newItem1 = new sap.ui.core.Item({ key: zbtpComp1, text: zbtpComp1 });
+                                        selectZbtpComp.addItem(newItem1);
+                                        
+                                    }
+                                    else{
+                                        var newItem2 = new sap.ui.core.Item({ key: zbtpComp2, text: zbtpComp2 });
+                                        selectZbtpComp.addItem(newItem2);
+                                    }
+                                }
+                                else{
+                                    var newItem1 = new sap.ui.core.Item({ key: zbtpComp1, text: zbtpComp1 });
+                                    var newItem2 = new sap.ui.core.Item({ key: zbtpComp2, text: zbtpComp2 });
+                                    selectZbtpComp.addItem(newItem1);
+                                    selectZbtpComp.addItem(newItem2);
+                                }
+                            }
+
+                            this.getView().addDependent(this.oDialogConfirmMergeValue);
+                            this.oDialogConfirmMergeValue.open();
+                        }.bind(this));
+
+                        
+                    } else {
+                        this.showMsgBoxError(this.getResourceBundleText("sel2rows"));
+                        return;
+                    }
+                }
+                else if (oEvent.getSource().sId.split("--")[2] === "idStrtFlg") {
+
+                    var aSelData = this.getView().byId("idTable").getSelectedItems();
+                    var hpFlag = false;
+                    for (var i = 0; i < aSelData.length; i++) {
+                        var oSaveData = {};
+                        
+                        aSelData[i].getBindingContext().getObject();
+                        oSaveData.factoryNumber = aSelData[i].getBindingContext().getObject().factoryNumber;
+                        oSaveData.prodId = aSelData[i].getBindingContext().getObject().prodId;
+                        oSaveData.zbtpComp = aSelData[i].getBindingContext().getObject().zbtpComp;
+                        oSaveData.master = aSelData[i].getBindingContext().getObject().master;
+                        if(oSaveData.master === "HP"){
+                            hpFlag = true; 
+                            oSaveData.master  = "HP";
+                        }else{
+                            oSaveData.master  = "X";
+                        }
+                        
+                        aPayload.push(oSaveData);
+                    }
+                    if(hpFlag == true){
+                        MessageToast.show(this.getResourceBundleText("msgeToast"));
+                    }
+                    this._UpdateData(aPayload);
+                }
+                else if (oEvent.getSource().sId.split("--")[2] === "idStrtunFlg") {
+
+                    var aSelData = this.getView().byId("idTable").getSelectedItems();
+                    for (var i = 0; i < aSelData.length; i++) {
+                        var oSaveData = {};
+                        aSelData[i].getBindingContext().getObject();
+                        oSaveData.factoryNumber = aSelData[i].getBindingContext().getObject().factoryNumber;
+                        oSaveData.prodId = aSelData[i].getBindingContext().getObject().prodId;
+                        oSaveData.zbtpComp = aSelData[i].getBindingContext().getObject().zbtpComp;
+                        oSaveData.master = aSelData[i].getBindingContext().getObject().master;
+                        if(oSaveData.master === "HP"){
+                            hpFlag = true; 
+                            oSaveData.master  = "HP";
+                        }
+                        else{
+                            oSaveData.master  = "";
+                        }
+                        
+                        aPayload.push(oSaveData);
+                    }
+                    if(hpFlag == true){
+                        // MessageToast.show("HP Master Values can't be modified!");
+                        MessageToast.show(this.getResourceBundleText("msgeToast"));
+                    }
+                    this._UpdateData(aPayload);
+                }
+                
+                
+            },
+
+            onCloseDialog:function(){
+                this.oDialogConfirmMergeValue.close();
+            },
+            onAfterDialogClose:function(){
+                this.oDialogConfirmMergeValue.destroy();
+            },
+            onConfirmMergeValueAccept:function(){
+                var aPayload = [];
+                var mergeValue = sap.ui.getCore().byId("selectZbtpComp").getSelectedKey();
+                for (var i = 0; i < this.aSelData.length; i++) {
+                    var oSaveData = {};
+                    var oContext = this.aSelData[i].getBindingContext().getObject();
+                    oSaveData.factoryNumber = oContext.factoryNumber;
+                    oSaveData.prodId = oContext.prodId;
+                    oSaveData.zbtpComp = oContext.zbtpComp;
+                    oSaveData.zmpaPartno = oContext.zmpaPartno;
+                    this.operation = "MERGE";
+                    this.mergeValue=mergeValue;
+                    aPayload.push(oSaveData);
+                }
+                this.onCloseDialog();
+                this._MergeSplitData(aPayload, this.operation, this.mergeValue);
+            },
+            /***  Method to perform the update action* **/
+            _MergeSplitData: async function (aPriorityData, operation, mergeValue) {
+                var oView = this.getView();
+                var oUserInfo = await this._getUserInfoService();
+                var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                var oSaveData = {UserEmail: sModifiedBy, PostingData: aPriorityData, Operation: operation, MergeValue: mergeValue };
+                oView.setBusy(true);
+
+                return this.ManagePartMapSrv.mergeSplitData(oSaveData).then(
+                    function (data) {
+                        this.iMsgCountr++;
+                        oView.setBusy(false);
+                        this.showMsgBoxSuccess(JSON.parse(data.data.merge_split)[0].message);
+                        this.getView().byId("idSmartTable").rebindTable(true);
+                        this.getView().byId("idactionbtn").setEnabled(false);
+                        this.getView().byId("idmasterPart").setEnabled(false);
+                    }.bind(this),
+                    function (error) {
+                        this.showMsgBoxError(this.getResourceBundleText("actionError"));
+                        oView.setBusy(false);
+                    }.bind(this));
+
+            },
+            _UpdateData: async function (aMasterPartData) {
+                var oView = this.getView();
+                var oUserInfo = await this._getUserInfoService();
+                var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                var oSaveData = {UserEmail: sModifiedBy, PostingData: aMasterPartData };
+                oView.setBusy(true);
+
+                return this.ManagePartMapSrv.updateData(oSaveData).then(
+                    function (data) {
+                        this.iMsgCountr++;
+                        oView.setBusy(false);
+                        this.showMsgBoxSuccess(JSON.parse(data.data.MasterFlag)[0].message);
+                        this.getView().byId("idSmartTable").rebindTable(true);
+                        this.getView().byId("idmasterPart").setEnabled(false);
+                        this.getView().byId("idactionbtn").setEnabled(false);
+                    }.bind(this),
+                    function (error) {
+                        this.showMsgBoxError(this.getResourceBundleText("actionError"));
+                        oView.setBusy(false);
+                    }.bind(this));
+
+            },
+
+             /**
+             * triggers when clear button clicked
+             */
+            onClearPress:function(){
+                this.getView().byId("entityNameId").setSelectedKey();
+            }
+        });
+    });
+
+
+
+    app/psmanagepartmappingui/webapp/service/ManagePartMapService.js
+
+
+
+    //-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Part Mapping 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    01.04.2024
+// Description      :    Manage Part Mapping
+//-----------------------------------------------------------------------------------*
+//Descriptions: Manage Part Mapping service 
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./CoreService",
+], function (CoreService) {
+    "use strict";
+
+    var ManagePartMapService = CoreService.extend("pumorips.factoryproduct.psmanagepartmappingui.service.ManagePartMapService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        },
+
+        /**
+        * Odata service for MS4/Fatory update
+        * **/
+        mergeSplitData: function (oSaveData) {
+            return this.odata("/merge_split").post(oSaveData);
+        },  
+         /**
+        * Odata service for Master Part update
+        * **/
+         updateData: function (oSaveData) {
+            return this.odata("/MasterFlag").post(oSaveData);
+        },  
+        fetchSecurityAuthScopes: function () {
+            return this.odata("/SecurityAction").get({});
+        }
+
+    });
+    return ManagePartMapService;
+});
+
+
+
+app/psmanagepartmappingui/webapp/state/ManagePartMapState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Part Mapping 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    01.04.2024
+// Description      :    Manage Part Mapping
+//-----------------------------------------------------------------------------------*
+//Descriptions: Manage Part Mapping state
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "../state/BaseState",
+], function (BaseState) {
+    "use strict";
+    var ManagePartMapState = BaseState.extend("pumorips.factoryproduct.psmanagepartmappingui.state.ManagePartMapState", {
+        constructor: function (oService) {
+            this.data = {
+                display: true,
+                busy: true                
+            };
+            this.ManagePartMapService = oService;
+            BaseState.call(this);
+        }
+       
+
+    });
+    return ManagePartMapState;
+});
+
+
+
+app/psmanagepartmappingui/webapp/Component.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Part Mapping 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    01.04.2024
+// Description      :    Manage Part Mapping
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for model instantiation
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+        "sap/ui/core/UIComponent",
+        "sap/ui/Device",
+        "pumorips/factoryproduct/psmanagepartmappingui/model/models",
+        "./service/ManagePartMapService",
+        "./state/ManagePartMapState"
+    ],
+    function (UIComponent, Device, models,ManagePartMapService,ManagePartMapState) {
+        "use strict";
+
+        return UIComponent.extend("pumorips.factoryproduct.psmanagepartmappingui.Component", {
+            metadata: {
+                manifest: "json"
+            },
+
+            /**
+             * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
+             * @public
+             * @override
+             */
+            init: function () {
+                // call the base component's init function
+                UIComponent.prototype.init.apply(this, arguments);
+
+                //Cretae globle object for etag
+                this.metadataForEtag;
+                // initialize receive service with the component
+                this._oManagePartMapService = new ManagePartMapService(this.getModel());
+                // initialize receive state with the component
+                this._oManagePartMapState = new ManagePartMapState(this._oManagePartMapService);
+
+                // enable routing
+                this.getRouter().initialize();
+
+                // set the device model
+                this.setModel(models.createDeviceModel(), "device");
+            },
+
+            // Return the service name as per parameter
+            getService: function (sService) {
+                return this["_o" + sService + "Service"];
+            },
+             // Return the state name as per parameter
+             getState: function (sState) {
+                return this["_o" + sState + "State"];
+            },
+        });
+    }
+);
+
+
+
+app/psmanagepartmappingui/webapp/manifest.json
+
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.factoryproduct.psmanagepartmappingui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.13.1",
+      "toolsId": "74477bc8-1b3e-47c2-ba7a-5e5019d58e73"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/factory-product/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "psmanagepartmapping-display": {
+          "semanticObject": "psmanagepartmapping",
+          "action": "display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.122.1",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.factoryproduct.psmanagepartmappingui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.factoryproduct.psmanagepartmappingui.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "RouteManagePartMapping",
+          "pattern": ":?query:",
+          "target": [
+            "TargetManagePartMapping"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetManagePartMapping": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "ManagePartMapping",
+          "viewName": "ManagePartMapping"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "pumorips.factoryproduct.psmanagepartmappingui.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSFACPROD"
+  }
+}
+
+
+
+app/psmanagepartmappingui/xs-app.json
+
+
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumoripsfacprod-srv-api",
+      "csrfProtection": false,
+      "scope": ["$XSAPPNAME.WithCost","$XSAPPNAME.WithoutCost","$XSAPPNAME.WithCostview","$XSAPPNAME.WithoutCostview"]
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa",
+      "scope": ["$XSAPPNAME.WithCost","$XSAPPNAME.WithoutCost","$XSAPPNAME.WithCostview","$XSAPPNAME.WithoutCostview"]
+    }
+  ]
+}
