@@ -1,0 +1,3383 @@
+app/psshortageui/webapp/view/ShortageList.view.xml
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Display Delta Application 
+ RICEFW No                : 
+ Release                  :   M1 Release  
+ Author                   :   Chowdhary,Mamtha
+ Date                     :   18.04.2024
+ Description              :   Display Delta Application
+ *Descriptions: Displays master data list filter bar and table  
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      	|   Defect/Incident   |   Change Description
+ //  05/08/2024    Chowdhary,Mamtha   	INC8637903        	Delta Caculation Incorrect    
+****************************************************************-->
+<mvc:View controllerName="pumorips.displayshortage.psshortageui.controller.ShortageList"
+	xmlns:mvc="sap.ui.core.mvc"
+    displayBlock="true"
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	xmlns:table="sap.ui.table"
+	xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+	xmlns:smartTable="sap.ui.comp.smarttable">
+	<Page id="page" title="{i18n>title}" showHeader="false">
+		<content>
+			<VBox fitContainer="true" id="idVboxShrt">
+				<smartFilterBar:SmartFilterBar id="smartFilterBar" showMessages="true" showClearOnFB="true" 
+                clear="onClearPress" persistencyKey="SmartFilterPKey" entitySet="HPShortageView" search="onSearch" filterChange="onFilterChange">
+					<smartFilterBar:controlConfiguration>
+                        <smartFilterBar:ControlConfiguration key="factoryNumber" label="{i18n>factory}" mandatory="mandatory" filterType="single" index="0" id="facid">
+                        </smartFilterBar:ControlConfiguration>
+                        <smartFilterBar:ControlConfiguration key="prodId" label="{i18n>hppn}" filterType="single" index="2" id="hppnid" >
+                        </smartFilterBar:ControlConfiguration>
+						<smartFilterBar:ControlConfiguration id="shrtAlrt"  key="shortageAlert" index="6" label="{i18n>shrtAlrt}" width="300px">
+							<smartFilterBar:customControl>
+								<ComboBox id="shortAlrtType">
+									<core:Item key="Y" text="{i18n>y}" id="shrtY"/>
+									<core:Item key="N" text="{i18n>n}" id="shrtN"/>
+								</ComboBox>
+							</smartFilterBar:customControl>
+						</smartFilterBar:ControlConfiguration>			
+                    </smartFilterBar:controlConfiguration>  
+				</smartFilterBar:SmartFilterBar>
+				<smartTable:SmartTable id="idshrtsmrttable"  smartFilterId="smartFilterBar" tableType="Table" editable="false" 
+                    entitySet="HPShortageView" useVariantManagement="true" showVariantManagement="true" 
+                    showRowCount="false" enableExport="false"   persistencyKey="SmartTablePersistencyKey" showTablePersonalisation="false"
+                    enableAutoColumnWidth="true" useTablePersonalisation="false" ignoreFromPersonalisation="fromDate,toDate,forecastQty,LOC_LIFNR,projectedDelta,totalQty"
+                    enableAutoBinding="false" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindTable" >
+					<smartTable:customToolbar>
+						<OverflowToolbar design="Transparent" id="ovFlw">
+							<ToolbarSpacer id="tlSp"/>
+							<Button press="onDownloadPress" icon="sap-icon://excel-attachment" id="excelBtn"  enabled="false"/>
+						</OverflowToolbar>
+					</smartTable:customToolbar>
+					<table:Table id="idShrttable"   selectionMode="None" 
+                     enableColumnFreeze="false" width="auto" fixedColumnCount="6" enableColumnReordering="false" 
+						 threshold="0" 
+				  >
+						<table:rowMode>
+							<rowmodes:Auto id="idRowM"
+								xmlns:rowmodes="sap.ui.table.rowmodes" minRowCount="18"/>
+							</table:rowMode>
+							<table:columns>
+								<table:Column id="factry" visible="true" width="5rem">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "factoryNumber", "leadingProperty": "factoryNumber", "columnIndex": 0}' />
+									</table:customData>
+									<Label text="{i18n>factory}" id="factryT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>factoryNumber}"  id="factryV"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="pumoriPN" visible="true" width="6rem">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "prodId", "leadingProperty": "prodId", "columnIndex": 1}' />
+									</table:customData>
+									<Label text="{i18n>hppn}" id="pumoriPNT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>prodId}"  id="pumoriPNV"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="leadTm" visible="true" width="9rem">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "leadTime", "leadingProperty": "leadTime", "columnIndex": 3}' />
+									</table:customData>
+									<Label text="{i18n>leadTme}" id="leadTmT" />
+									<table:template>
+										<ObjectStatus text="{oUIModel>leadTime}"  id="leadTmV"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="mrpDC" visible="true" width="6rem">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "mrpDate", "leadingProperty": "mrpDate", "columnIndex": 4}' />
+									</table:customData>
+									<Label text="{i18n>mrpDte}" id="mrpT"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>mrpDate}"  id="mrpV"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="keyFig" visible="true" width="10rem">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "keyFigure", "leadingProperty": "keyFigure", "columnIndex": 5}' />
+									</table:customData>
+									<Label text="{i18n>keyFig}" id="keyFigT"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>keyFigure}"  id="keyFigV"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="shrt" visible="true" width="6rem">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "shortageAlert", "leadingProperty": "shortageAlert", "columnIndex": 7}' />
+									</table:customData>
+									<Label text="{i18n>shrtAlrt}" id="shrtT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus  icon="{path: 'oUIModel>shortageAlert', formatter: '.formatter.shortAge'}" id="shrtV" 	state="Error"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="materldesc" visible="true" width="7rem">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "prodDesc", "leadingProperty": "prodDesc", "columnIndex": 8}' />
+									</table:customData>
+									<Label text="{i18n>matDescr}" id="materldescT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>prodDesc}"  id="materldescV"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="baseUom" visible="true" width="4rem">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true, "columnKey": "baseunitofMeasure", "leadingProperty": "baseunitofMeasure", "columnIndex": 9}' />
+									</table:customData>
+									<Label text="{i18n>baseUom}" id="baseUomT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>baseunitofMeasure}"  id="baseUomV"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="fvTy" visible="true" width="5rem">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "zhfvType", "leadingProperty": "zhfvType", "columnIndex": 10}' />
+									</table:customData>
+									<Label text="{i18n>ft}" id="fvTyT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>zhfvType}"  id="fvTyV"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="fvV" visible="true" width="5rem">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": false, "columnKey": "zhfvValue", "leadingProperty": "zhfvValue", "columnIndex": 11}' />
+									</table:customData>
+									<Label text="{i18n>fv}" id="fvVT" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>zhfvValue}"  id="fvVV"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week1" visible="false"  >
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week1", "leadingProperty": "week1", "columnIndex": 12}' />
+									</table:customData>
+									<Label  id="weekT1" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week1}" state="{path: 'oUIModel>week1', formatter: '.formatter.WeekStatus'}" id="week1V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week2" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week2", "leadingProperty": "week2", "columnIndex": 13}' />
+									</table:customData>
+									<Label  id="weekT2"  wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week2}" state="{path: 'oUIModel>week2', formatter: '.formatter.WeekStatus'}" id="week2V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week3" visible="false" >
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week3", "leadingProperty": "week3", "columnIndex": 14}' />
+									</table:customData>
+									<Label  id="weekT3" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week3}" state="{path: 'oUIModel>week3', formatter: '.formatter.WeekStatus'}" id="week3V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week4" visible="false" >
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week4", "leadingProperty": "week4", "columnIndex": 15}' />
+									</table:customData>
+									<Label  id="weekT4" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week4}" state="{path: 'oUIModel>week4', formatter: '.formatter.WeekStatus'}" id="week4V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week5" visible="false" >
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week5", "leadingProperty": "week5", "columnIndex": 16}' />
+									</table:customData>
+									<Label  id="weekT5" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week5}" state="{path: 'oUIModel>week5', formatter: '.formatter.WeekStatus'}" id="week5V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week6" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week6", "leadingProperty": "week6", "columnIndex": 17}' />
+									</table:customData>
+									<Label  id="weekT6" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week6}" state="{path: 'oUIModel>week6', formatter: '.formatter.WeekStatus'}" id="week6V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week7" visible="false" >
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week7", "leadingProperty": "week7", "columnIndex": 18}' />
+									</table:customData>
+									<Label  id="weekT7" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week7}" state="{path: 'oUIModel>week7', formatter: '.formatter.WeekStatus'}" id="week7V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week8" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week8", "leadingProperty": "week8", "columnIndex": 19}' />
+									</table:customData>
+									<Label  id="weekT8" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week8}" state="{path: 'oUIModel>week8', formatter: '.formatter.WeekStatus'}" id="week8V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week9" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week9", "leadingProperty": "week9", "columnIndex": 20}' />
+									</table:customData>
+									<Label  id="weekT9" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week9}" state="{path: 'oUIModel>week9', formatter: '.formatter.WeekStatus'}" id="week9V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week10" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week10", "leadingProperty": "week10", "columnIndex": 21}' />
+									</table:customData>
+									<Label  id="weekT10" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week10}" state="{path: 'oUIModel>week10', formatter: '.formatter.WeekStatus'}" id="week10V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week11" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week11", "leadingProperty": "week11", "columnIndex": 22}' />
+									</table:customData>
+									<Label  id="weekT11" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week11}" state="{path: 'oUIModel>week11', formatter: '.formatter.WeekStatus'}" id="week11V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week12" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week12", "leadingProperty": "week12", "columnIndex": 23}' />
+									</table:customData>
+									<Label  id="weekT12" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week12}" state="{path: 'oUIModel>week12', formatter: '.formatter.WeekStatus'}" id="week12V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week13" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week13", "leadingProperty": "week13", "columnIndex": 24}' />
+									</table:customData>
+									<Label  id="weekT13" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week13}" state="{path: 'oUIModel>week13', formatter: '.formatter.WeekStatus'}" id="week13V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week14" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week14", "leadingProperty": "week14", "columnIndex": 25}' />
+									</table:customData>
+									<Label  id="weekT14" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week14}" state="{path: 'oUIModel>week14', formatter: '.formatter.WeekStatus'}" id="week14V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week15" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week15", "leadingProperty": "week15", "columnIndex": 26}' />
+									</table:customData>
+									<Label  id="weekT15" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week15}" state="{path: 'oUIModel>week15', formatter: '.formatter.WeekStatus'}" id="week15V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week16" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week16", "leadingProperty": "week16", "columnIndex": 27}' />
+									</table:customData>
+									<Label  id="weekT16" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week16}" state="{path: 'oUIModel>week16', formatter: '.formatter.WeekStatus'}" id="week16V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week17" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week17", "leadingProperty": "week17", "columnIndex": 28}' />
+									</table:customData>
+									<Label  id="weekT17" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week17}" state="{path: 'oUIModel>week17', formatter: '.formatter.WeekStatus'}" id="week17V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week18" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week18", "leadingProperty": "week18", "columnIndex": 29}' />
+									</table:customData>
+									<Label  id="weekT18" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week18}" state="{path: 'oUIModel>week18', formatter: '.formatter.WeekStatus'}" id="week18V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week19" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week19", "leadingProperty": "week19", "columnIndex": 30}' />
+									</table:customData>
+									<Label  id="weekT19" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week19}" state="{path: 'oUIModel>week19', formatter: '.formatter.WeekStatus'}" id="week19V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week20" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week20", "leadingProperty": "week20", "columnIndex": 31}' />
+									</table:customData>
+									<Label  id="weekT20" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week20}" state="{path: 'oUIModel>week20', formatter: '.formatter.WeekStatus'}" id="week20V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week21" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week21", "leadingProperty": "week21", "columnIndex": 32}' />
+									</table:customData>
+									<Label  id="weekT21" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week21}" state="{path: 'oUIModel>week21', formatter: '.formatter.WeekStatus'}" id="week21V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week22" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week22", "leadingProperty": "week22", "columnIndex": 33}' />
+									</table:customData>
+									<Label  id="weekT22" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week22}" state="{path: 'oUIModel>week22', formatter: '.formatter.WeekStatus'}" id="week22V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week23" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week23", "leadingProperty": "week23", "columnIndex": 34}' />
+									</table:customData>
+									<Label  id="weekT23" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week23}" state="{path: 'oUIModel>week23', formatter: '.formatter.WeekStatus'}" id="week23V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week24" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week24", "leadingProperty": "week24", "columnIndex": 35}' />
+									</table:customData>
+									<Label  id="weekT24" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week24}" state="{path: 'oUIModel>week24', formatter: '.formatter.WeekStatus'}" id="week24V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week25" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week25", "leadingProperty": "week25", "columnIndex": 36}' />
+									</table:customData>
+									<Label  id="weekT25" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week25}" state="{path: 'oUIModel>week25', formatter: '.formatter.WeekStatus'}" id="week25V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week26" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week26", "leadingProperty": "week26", "columnIndex": 37}' />
+									</table:customData>
+									<Label  id="weekT26" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week26}" state="{path: 'oUIModel>week26', formatter: '.formatter.WeekStatus'}" id="week26V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week27" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week27", "leadingProperty": "week27", "columnIndex": 38}' />
+									</table:customData>
+									<Label  id="weekT27" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week27}" state="{path: 'oUIModel>week27', formatter: '.formatter.WeekStatus'}" id="week27V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week28" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week28", "leadingProperty": "week28", "columnIndex": 39}' />
+									</table:customData>
+									<Label  id="weekT28" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week28}" state="{path: 'oUIModel>week28', formatter: '.formatter.WeekStatus'}" id="week28V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week29" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week29", "leadingProperty": "week29", "columnIndex": 40}' />
+									</table:customData>
+									<Label  id="weekT29" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week29}" state="{path: 'oUIModel>week29', formatter: '.formatter.WeekStatus'}" id="week29V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week30" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week30", "leadingProperty": "week30", "columnIndex": 41}' />
+									</table:customData>
+									<Label  id="weekT30" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week30}" state="{path: 'oUIModel>week30', formatter: '.formatter.WeekStatus'}" id="week30V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week31" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week31", "leadingProperty": "week31", "columnIndex": 42}' />
+									</table:customData>
+									<Label  id="weekT31" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week31}" state="{path: 'oUIModel>week31', formatter: '.formatter.WeekStatus'}" id="week31V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week32" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week32", "leadingProperty": "week32", "columnIndex": 43}' />
+									</table:customData>
+									<Label  id="weekT32" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week32}" state="{path: 'oUIModel>week32', formatter: '.formatter.WeekStatus'}" id="week32V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week33" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week33", "leadingProperty": "week33", "columnIndex": 44}' />
+									</table:customData>
+									<Label  id="weekT33" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week33}" state="{path: 'oUIModel>week33', formatter: '.formatter.WeekStatus'}" id="week33V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week34" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week34", "leadingProperty": "week34", "columnIndex": 45}' />
+									</table:customData>
+									<Label  id="weekT34" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week34}" state="{path: 'oUIModel>week34', formatter: '.formatter.WeekStatus'}" id="week34V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week35" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week35", "leadingProperty": "week35", "columnIndex": 46}' />
+									</table:customData>
+									<Label  id="weekT35" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week35}" state="{path: 'oUIModel>week35', formatter: '.formatter.WeekStatus'}" id="week35V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week36" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week36", "leadingProperty": "week36", "columnIndex": 47}' />
+									</table:customData>
+									<Label  id="weekT36" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week36}" state="{path: 'oUIModel>week36', formatter: '.formatter.WeekStatus'}" id="week36V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week37" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week37", "leadingProperty": "week37", "columnIndex": 48}' />
+									</table:customData>
+									<Label  id="weekT37" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week37}" state="{path: 'oUIModel>week37', formatter: '.formatter.WeekStatus'}" id="week37V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week38" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week38", "leadingProperty": "week38", "columnIndex": 49}' />
+									</table:customData>
+									<Label  id="weekT38" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week38}" state="{path: 'oUIModel>week38', formatter: '.formatter.WeekStatus'}" id="week38V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week39" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week39", "leadingProperty": "week39", "columnIndex": 50}' />
+									</table:customData>
+									<Label  id="weekT39" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week39}" state="{path: 'oUIModel>week39', formatter: '.formatter.WeekStatus'}" id="week39V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week40" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week40", "leadingProperty": "week40", "columnIndex": 51}' />
+									</table:customData>
+									<Label  id="weekT40" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week40}" state="{path: 'oUIModel>week40', formatter: '.formatter.WeekStatus'}" id="week40V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week41" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week41", "leadingProperty": "week41", "columnIndex": 52}' />
+									</table:customData>
+									<Label  id="weekT41" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week41}" state="{path: 'oUIModel>week41', formatter: '.formatter.WeekStatus'}" id="week41V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week42" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week42", "leadingProperty": "week42", "columnIndex": 53}' />
+									</table:customData>
+									<Label  id="weekT42" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week42}" state="{path: 'oUIModel>week42', formatter: '.formatter.WeekStatus'}" id="week42V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week43" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week43", "leadingProperty": "week43", "columnIndex": 54}' />
+									</table:customData>
+									<Label  id="weekT43" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week43}" state="{path: 'oUIModel>week43', formatter: '.formatter.WeekStatus'}" id="week43V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week44" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week44", "leadingProperty": "week44", "columnIndex": 55}' />
+									</table:customData>
+									<Label  id="weekT44" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week44}" state="{path: 'oUIModel>week44', formatter: '.formatter.WeekStatus'}" id="week44V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week45" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week45", "leadingProperty": "week45", "columnIndex": 56}' />
+									</table:customData>
+									<Label  id="weekT45" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week45}" state="{path: 'oUIModel>week45', formatter: '.formatter.WeekStatus'}" id="week45V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week46" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week46", "leadingProperty": "week46", "columnIndex": 57}' />
+									</table:customData>
+									<Label  id="weekT46" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week46}" state="{path: 'oUIModel>week46', formatter: '.formatter.WeekStatus'}" id="week46V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week47" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week47", "leadingProperty": "week47", "columnIndex": 58}' />
+									</table:customData>
+									<Label  id="weekT47" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week47}" state="{path: 'oUIModel>week47', formatter: '.formatter.WeekStatus'}" id="week47V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week48" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week48", "leadingProperty": "week48", "columnIndex": 59}' />
+									</table:customData>
+									<Label  id="weekT48" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week48}" state="{path: 'oUIModel>week48', formatter: '.formatter.WeekStatus'}" id="week48V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week49" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week49", "leadingProperty": "week49", "columnIndex": 60}' />
+									</table:customData>
+									<Label  id="weekT49" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week49}" state="{path: 'oUIModel>week49', formatter: '.formatter.WeekStatus'}" id="week49V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week50" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week50", "leadingProperty": "week50", "columnIndex": 61}' />
+									</table:customData>
+									<Label  id="weekT50" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week50}" state="{path: 'oUIModel>week50', formatter: '.formatter.WeekStatus'}" id="week50V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week51" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week51", "leadingProperty": "week51", "columnIndex": 62}' />
+									</table:customData>
+									<Label  id="weekT51" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week51}" state="{path: 'oUIModel>week51', formatter: '.formatter.WeekStatus'}" id="week51V"/>
+									</table:template>
+								</table:Column>
+								<table:Column id="week52" visible="false">
+									<table:customData>
+										<core:CustomData key="p13nData" value='\{"autoColumnWidth": true,"columnKey": "week52", "leadingProperty": "week52", "columnIndex": 63}' />
+									</table:customData>
+									<Label  id="weekT52" wrapping="true"/>
+									<table:template>
+										<ObjectStatus text="{oUIModel>week52}" state="{path: 'oUIModel>week52', formatter: '.formatter.WeekStatus'}" id="week52V"/>
+									</table:template>
+								</table:Column>
+								
+							</table:columns>
+						</table:Table>
+				</smartTable:SmartTable>
+
+			<FlexBox id="flexid" height="100px" alignItems="Center"
+				justifyContent="Center" direction="Column" class="sapUiSmallMarginTop,sapUiSmallMarginBottom">
+				<Button text="{i18n>more}" press="onMore"  id="idMoreBtn" type="Emphasized" enabled="false" />
+				<Text text="" id="paginText" class="sapUiSmallMarginBottom"/>
+			</FlexBox>
+				
+			</VBox>
+		</content>
+	</Page>
+</mvc:View>
+
+
+
+app/psshortageui/webapp/controller/BaseController.js
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Delta Application 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Display Delta Application
+//-----------------------------------------------------------------------------------*
+//Descriptions: Contains all the re-usable functions
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/core/UIComponent",
+    "sap/m/MessageBox"
+], function (Controller, UIComponent, MessageBox) {
+    "use strict";
+
+    return Controller.extend("pumorips.displayshortage.psshortageui.controller.BaseController", {
+		/**
+		 * Convenience method for accessing the router.
+		 * @public
+		 * @returns {sap.ui.core.routing.Router} the router for this component
+		 */
+
+        getRouter: function () {
+            return UIComponent.getRouterFor(this);
+        },
+
+		/**
+		 * Convenience method for getting the view model by name.
+		 * @public
+		 * @param {string} [sName] the model name
+		 * @returns {sap.ui.model.Model} the model instance
+		 */
+        getModel: function (sName) {
+            return this.getView().getModel(sName);
+        },
+
+		/**
+		 * Convenience method for setting the view model.
+		 * @public
+		 * @param {sap.ui.model.Model} oModel the model instance
+		 * @param {string} sName the model name
+		 * @returns {sap.ui.mvc.View} the view instance
+		 */
+        setModel: function (oModel, sName) {
+            return this.getView().setModel(oModel, sName);
+        },
+
+		/**
+		 * Getter for the resource bundle.
+		 * @public
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundle: function () {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
+        },
+        /**
+		 * Getter for the resource bundle text.
+		 * @public
+         * @param 
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundleText: function (sTextProperty) {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle().getText(sTextProperty);
+        },
+		/**
+		 * Convenience method for displaying error messages
+		 * @public
+		 */
+        //method to show the error message
+        showMsgBoxError: function (message) {
+            var title = this.getResourceBundle().getText("ErrorDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.ERROR,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+
+        },
+        //method to show the success message
+        showMsgBoxSuccess: function (message) {
+            var title = this.getResourceBundle().getText("SuccessDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.SUCCESS,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show the warning message
+        showMsgBoxWarning: function (message) {
+            var title = this.getResourceBundle().getText("WarningDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.WARNING,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show the information message
+        showMsgBoxInformation: function (message) {
+            var title = this.getResourceBundle().getText("InformationDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.INFORMATION,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        }
+
+    });
+
+});
+
+
+
+app/psshortageui/webapp/controller/ShortageList.controller.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Delta Application 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Display Delta Application
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for display filter and table in the app
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author         |   Defect/Incident     |   Change Description
+// 05/08/2024     Chowdhary,Mamtha      INC8637903        	    Delta Caculation Incorrect 
+// 13/08/2024     Chowdhary,Mamtha      INC8652517       	    KeyFigure Sequence Change
+// 20/08/2024     Chowdhary,Mamtha      INC8652517       	    KeyFigure Sequence Change in Excel download
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "../utils/formatter",
+    "sap/ui/export/Spreadsheet",
+    "sap/m/library",
+    "sap/ui/model/json/JSONModel",
+    "../utils/constants"
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (BaseController, formatter, Spreadsheet, mobileLibrary, JSONModel, constants) {
+        "use strict";
+        var DialogType = mobileLibrary.DialogType;
+        return BaseController.extend("pumorips.displayshortage.psshortageui.controller.ShortageList", {
+            formatter: formatter,
+            /* =========================================================== */
+            /* lifecycle methods                                           */
+            /* =========================================================== */
+            /**
+            * This method will trigger once during app initialization
+            * **/
+            onInit: function () {
+                this.getOwnerComponent().getRouter().getRoute("ShortageList").attachPatternMatched(this._onObjectMatched, this);
+                this.ShortageService = this.getOwnerComponent().getService('Shortage');
+                this.oUIModel = this.getOwnerComponent().getModel("oUIModel");
+                this.oUIModel.setProperty("/", []);
+                this.getView().byId("idShrttable").setModel(this.oUIModel, "oUIModel");
+                this.getView().byId("idShrttable").bindRows("oUIModel>/");
+                this.getView().byId("idshrtsmrttable").setTableBindingPath("oUIModel>/");
+            },
+            /* =========================================================== */
+            /* internal methods                                            */
+            /* =========================================================== */
+            /**
+            * App view routing pattern change event handler
+            * this method will trigger each time user navigate between views
+            * This method used here to load, initialize home screen 
+            * **/
+            _onObjectMatched: function () {
+
+            },
+
+            /**
+             * this method is triggered for fetching data
+             */
+
+            _onFetchData: function (oPayload) {
+                var that = this;
+                this.getView().setBusy(true);
+                return this.ShortageService.fetchMaxDelta({ PostingData: JSON.stringify(oPayload) }).then(
+                    function (odata) {
+                        if (that.bSearchBtn === true) {
+                            that.getOwnerComponent().getModel("oUIModel").setProperty("/", []);
+                        }
+                        var oData = JSON.parse(odata.data.MaxDelta);
+                        var oSmartTable = that.getView().byId("idshrtsmrttable");
+                        var oUIModel = that.getOwnerComponent().getModel("oUIModel");
+                        var aData = oUIModel.getProperty("/");
+                        if (oData.uidata.length !== 0) {
+                            for (var i = 1; i <= 52; i++) {
+                                that.getView().byId("week" + i).setVisible(false);
+                            }
+                            that.getView().byId("idMoreBtn").setEnabled(true);
+                            if (that.nSkip !== 0) {
+                                var aNewData = aData.concat(oData.uidata);
+                                oUIModel.setProperty("/", aNewData);
+                                if (that.getView().byId("shortAlrtType").getSelectedKey() !== '' && that.nSkip + that.nTop > that.nTotalRes) {
+                                    that.getView().byId("idMoreBtn").setEnabled(false);
+                                }
+                                else if (that.nTotalRes === aNewData.length) {
+                                    that.getView().byId("idMoreBtn").setEnabled(false);
+                                }
+                                that.getView().byId("paginText").setText("[ " + aNewData.length + " / " + that.nTotalRes + " ]");
+
+                            } else {
+                                oUIModel.setProperty("/", oData.uidata);
+                                that.nTotalRes = oData.total;
+                                if (that.getView().byId("shortAlrtType").getSelectedKey() !== '' && that.nSkip + that.nTop > that.nTotalRes) {
+                                    that.getView().byId("idMoreBtn").setEnabled(false);
+                                } else if (that.nTotalRes === oData.uidata.length) {
+                                    that.getView().byId("idMoreBtn").setEnabled(false);
+                                }
+                                that.getView().byId("paginText").setText("[ " + oData.uidata.length + " / " + that.nTotalRes + " ]");
+                            }
+                            that.getView().byId("idShrttable").setModel(oUIModel, "oUIModel");
+                            var iLength = oData.week.length <= 52 ? oData.week.length : 52;
+                            for (var i = 0; i < iLength; i++) {
+                                that.getView().byId("week" + oData.week[i].week.split("week")[1]).setVisible(true);
+                                if (oData.week[i].invalid) {
+                                    var sLabel = oData.week[i].invalid;
+                                }
+                                else {
+                                    var sLabel = oData.week[i].from + that.getResourceBundleText("bwNewLine") + oData.week[i].to;
+                                }
+                                that.getView().byId("weekT" + oData.week[i].week.split("week")[1]).setText(sLabel);
+                            }
+                            that.getView().byId("excelBtn").setEnabled(true);
+                        } else if (oData.uidata.length === 0 && oUIModel.getProperty("/").length === 0 && oData.total !== undefined) {
+                            for (var i = 1; i <= 52; i++) {
+                                that.getView().byId("week" + i).setVisible(false);
+                            }
+                            that.nTotalRes = oData.total;
+                            oUIModel.setProperty("/", oData.uidata);
+                            that.getView().byId("idShrttable").setModel(oUIModel, "oUIModel");
+                            if (that.getView().byId("shortAlrtType").getSelectedKey() !== '' && that.nSkip + that.nTop > that.nTotalRes) {
+                                that.getView().byId("idMoreBtn").setEnabled(false);
+                            } else if (that.nTotalRes === oData.uidata.length) {
+                                that.getView().byId("idMoreBtn").setEnabled(false);
+                            }
+                            that.getView().byId("paginText").setText("[ " + oData.uidata.length + " / " + that.nTotalRes + " ]");
+                            if (that.nSkip + that.nTop > that.nTotalRes && oData.uidata.length === 0) {
+                                that.getView().byId("excelBtn").setEnabled(false);
+                            } else {
+                                that.getView().byId("excelBtn").setEnabled(true);
+                            }
+                        } else if (oData.uidata.length === 0 && oUIModel.getProperty("/").length === 0) {
+                            for (var i = 1; i <= 52; i++) {
+                                that.getView().byId("week" + i).setVisible(false);
+                            }
+                            oUIModel.setProperty("/", oData.uidata);
+                            that.getView().byId("idShrttable").setModel(oUIModel, "oUIModel");
+                            that.getView().byId("paginText").setText("");
+                            that.getView().byId("idMoreBtn").setEnabled(false);
+                            that.getView().byId("excelBtn").setEnabled(false);
+                        }
+                        if (that.getView().byId("shortAlrtType").getSelectedKey() !== '') {
+                            oSmartTable.setHeader(that.getResourceBundleText("res") + " (" + oUIModel.getProperty("/").length + ")");
+                        } else {
+                            oSmartTable.setHeader(that.getResourceBundleText("res") + " (" + that.nTotalRes + ")");
+                        }
+                        var aSorter = [];
+
+                        aSorter.push(new sap.ui.model.Sorter("prodId", false));
+                        // aSorter.push(new sap.ui.model.Sorter("zmpn", false));
+                        // aSorter.push(new sap.ui.model.Sorter("zmpaPartno", false));
+                        aSorter.push(new sap.ui.model.Sorter("PRIORITY1", false));
+
+                        var oBinding = that.getView().byId("idshrtsmrttable").getTable().getBinding("rows");
+
+
+                        oBinding.sort(aSorter);
+                        that.getView().setBusy(false);
+                    },
+                    function (error) {
+                        var oerrMsg = JSON.parse(error.responseText).error.message.value;
+                        that.showMsgBoxError(that.getResourceBundleText(oerrMsg));
+                        that.getView().setBusy(false);
+                    });
+
+            },
+            /**
+            *  function for excel batch operation
+             */
+            _loadExcelData: async function (oExcelPayload) {
+                var iTotalRecords = this.nTotalRes;
+                var iBatchSize = 999;      // Number of records to fetch per call
+                var iNumberOfCalls = Math.ceil(iTotalRecords / iBatchSize);  // Number of calls needed
+                oExcelPayload.skip = 0;
+                this.nExcelSkip = 0;
+                oExcelPayload.top = 999;
+                this.bLength = false;
+                this.bCancel = false;
+                if (!this.oDialog) {
+                    this.oDialog = new sap.m.Dialog({
+                        type: DialogType.Message,
+                        title: "Export Document",
+                        contentHeight: "100px",
+                        contentWidth: "500px",
+                        content: [
+                            new sap.m.Text({ id: "dialogText" }),
+                            new sap.m.ProgressIndicator({
+                                displayValue: 0,
+                                percentValue: 0,
+                                displayAnimation: false,
+                                width: "100%",
+                                id: "progressIndicator"
+                            })
+                        ],
+                        beginButton: new sap.m.Button({
+                            text: "Cancel",
+                            press: function () {
+                                this.bCancel = true;
+                                this.oDialog.close();
+                            }.bind(this)
+                        })
+                    });
+                }
+                sap.ui.getCore().byId("dialogText").addStyleClass("sapUiSmallMarginBottom");
+                sap.ui.getCore().byId("dialogText").setText(this.getResourceBundleText("fetchServerMsg"));
+                sap.ui.getCore().byId("progressIndicator").setPercentValue(0);
+                sap.ui.getCore().byId("progressIndicator").setDisplayValue(0 + " / " + this.nTotalRes);
+                sap.ui.getCore().byId("progressIndicator").setState(this.getResourceBundleText("none"));
+                this.oDialog.open();
+
+                for (var i = 0; i < iNumberOfCalls; i++) {
+                    oExcelPayload.skip = i * iBatchSize;
+                    const data = await this._batchData(oExcelPayload, iBatchSize);
+                    if (this.bCancel) {
+                        break;
+                    }
+                    if (this.bLength) {
+                        var oExcelModel = this.getOwnerComponent().getModel("oExcelModel");
+                        var aDataExcel = oExcelModel.getProperty("/");
+                        aDataExcel.sort((a, b) => {
+                            if (a.prodId < b.prodId) return -1;
+                            if (a.prodId > b.prodId) return 1;
+                            // if (a.factoryNumber < b.factoryNumber) return -1;
+                            // if (a.factoryNumber > b.factoryNumber) return 1;
+                            // if (a.zmpaPartno < b.zmpaPartno) return -1;
+                            // if (a.zmpaPartno > b.zmpaPartno) return 1;
+                            if (a.PRIORITY1 < b.PRIORITY1) return -1;
+                            if (a.PRIORITY1 > b.PRIORITY1) return 1;
+                            return 0;
+                        });
+                        this._exportData(aDataExcel);
+                        this.oDialog.close();
+                    }
+                }
+            },
+
+            /*  function to call service for  excel data*/
+            _batchData: function (oExcelPayload, iBatchSize) {
+                var that = this;
+                return this.ShortageService.fetchMaxDelta({ PostingData: JSON.stringify(oExcelPayload) }).then(
+                    function (odata) {
+                        var oData = JSON.parse(odata.data.MaxDelta);
+                        var oExcelModel = that.getOwnerComponent().getModel("oExcelModel");
+                        if (oData.uidata.length !== 0) {
+                            var aData = oExcelModel.getProperty("/");
+                            if (that.nExcelSkip !== 0) {
+                                var aNewData = aData.concat(oData.uidata);
+                                oExcelModel.setProperty("/", aNewData);
+                            } else {
+                                oExcelModel.setProperty("/", oData.uidata);
+                            }
+                        } else if (oData.uidata.length === 0 && oExcelModel.getProperty("/").length === 0) {
+                            oExcelModel.setProperty("/", oData.uidata);
+                        }
+                        that.nExcelSkip = that.nExcelSkip + iBatchSize;
+                        var nPercentage = Math.ceil((that.nExcelSkip / that.nTotalRes) * 100);
+                        sap.ui.getCore().byId("progressIndicator").setPercentValue(nPercentage);
+                        var aExlData = oExcelModel.getProperty("/");
+                        sap.ui.getCore().byId("progressIndicator").setDisplayValue(aExlData.length + " / " + that.nTotalRes);
+                        sap.ui.getCore().byId("progressIndicator").setState(that.getResourceBundleText("information"));
+
+                        if (aExlData.length === that.nTotalRes) {
+                            that.bLength = true;
+                            sap.ui.getCore().byId("dialogText").setText(that.getResourceBundleText("genFileMsg"));
+                            sap.ui.getCore().byId("progressIndicator").setState(that.getResourceBundleText("success"));
+                        } else if (that.getView().byId("shortAlrtType").getSelectedKey() !== '' && oExcelPayload.skip + oExcelPayload.top > that.nTotalRes) {
+                            that.bLength = true;
+                            sap.ui.getCore().byId("dialogText").setText(that.getResourceBundleText("genFileMsg"));
+                            sap.ui.getCore().byId("progressIndicator").setState(that.getResourceBundleText("success"));
+                        }
+                    },
+                    function (error) {
+                        that.bCancel = true;
+                        that.oDialog.close();
+                        that.showMsgBoxError(that.getResourceBundleText("technicalIssue"));
+                    });
+            },
+
+            /**
+           *  method for creating columns for excel download
+           */
+            _createColumnConfig: function () {
+                var aCols = [];
+                var aLabel = [...aColumnLabel];
+                var aProperty = [...aColumnProperty];
+                var oTableCol = this.getView().byId("idshrtsmrttable").getTable().getColumns();
+                for (var i = 10; i < oTableCol.length; i++) {
+                    if (oTableCol[i].getVisible()) {
+                        var label = oTableCol[i].getAggregation("label").getText();
+                        var property = oTableCol[i].getAggregation("template").getBindingInfo("text").parts[0].path;
+                        aLabel.push(label);
+                        aProperty.push(property);
+                    }
+
+                }
+                for (var i = 0; i < aLabel.length; i++) {
+                    let o = {};
+                    o.label = aLabel[i];
+                    o.property = aProperty[i];
+                    aCols.push(o);
+                }
+                return aCols;
+            },
+
+            /**
+            *  method for downloading data in  excel
+            */
+            _exportData: function (data) {
+                var aCols, items, oSettings, oSheet;
+                var oModel = new JSONModel(data);
+                aCols = this._createColumnConfig();
+                items = oModel.getProperty('/');
+                oSettings = {
+                    workbook: { columns: aCols },
+                    dataSource: items,
+                    showProgress: false
+                };
+                oSettings.fileName = 'Display Delta';
+                oSheet = new Spreadsheet(oSettings);
+                oSheet.build().finally(function () {
+                    oSheet.destroy();
+                });
+            },
+            /* =========================================================== */
+            /* event handlers                                              */
+            /* =========================================================== */
+
+            /**
+             * triggers once user clicks on Go button in the smart filter bar
+             */
+            onSearch: function () {
+                this.oPayload = {};
+                this.getView().byId("idMoreBtn").setEnabled(false);
+                this.oPayload.factoryNo = this.getView().byId("smartFilterBar").getFilterGroupItems()[0].getControl().getValue();
+                this.oPayload.hppn = this.getView().byId("smartFilterBar").getFilterGroupItems()[1].getControl().getValue();
+                var oFilter = {};
+
+                // var nFPNTokens = this.getView().byId("smartFilterBar").getFilterGroupItems()[1].getControl().getTokens();
+                // var aFactoryPN = [];
+                // if (nFPNTokens.length !== 0) {
+                //     for (var i = 0; i < nFPNTokens.length; i++) {
+                //         oFilter.factoryPN = this.getView().byId("smartFilterBar").getFilterGroupItems()[1].getControl().getTokens()[i].getKey();
+                //         aFactoryPN.push(oFilter.factoryPN);
+                //         oFilter = {};
+                //     }
+                // }
+                // this.oPayload.factoryPN = aFactoryPN;
+
+                // var nMPNTokens = this.getView().byId("smartFilterBar").getFilterGroupItems()[3].getControl().getTokens();
+                // var aMPN = [];
+                // if (nMPNTokens.length !== 0) {
+                //     for (var i = 0; i < nMPNTokens.length; i++) {
+                //         oFilter.mpn = this.getView().byId("smartFilterBar").getFilterGroupItems()[3].getControl().getTokens()[i].getKey();
+                //         aMPN.push(oFilter.mpn);
+                //         oFilter = {};
+                //     }
+                // }
+                // this.oPayload.mpn = aMPN;
+
+                var nFTTokens = this.getView().byId("smartFilterBar").getFilterGroupItems()[2].getControl().getTokens();
+                var aFVType = [];
+                if (nFTTokens.length !== 0) {
+                    for (var i = 0; i < nFTTokens.length; i++) {
+                        oFilter.fvType = this.getView().byId("smartFilterBar").getFilterGroupItems()[2].getControl().getTokens()[i].getKey();
+                        aFVType.push(oFilter.fvType);
+                        oFilter = {};
+                    }
+                }
+                this.oPayload.fvType = aFVType;
+
+                var nFVTokens = this.getView().byId("smartFilterBar").getFilterGroupItems()[3].getControl().getTokens();
+                var aFVValue = [];
+                if (nFVTokens.length !== 0) {
+                    for (var i = 0; i < nFVTokens.length; i++) {
+                        oFilter.fvValue = this.getView().byId("smartFilterBar").getFilterGroupItems()[3].getControl().getTokens()[i].getKey();
+                        aFVValue.push(oFilter.fvValue);
+                        oFilter = {};
+                    }
+                }
+                this.oPayload.fvValue = aFVValue;
+
+                var sShortAlrtVal = this.getView().byId("shortAlrtType").getSelectedKey();
+                this.oPayload.shrtAlrt = sShortAlrtVal;
+                this.oPayload.fromDate = this.getView().byId("smartFilterBar").getFilterGroupItems()[12].getControl().getValue();
+                this.oPayload.toDate = this.getView().byId("smartFilterBar").getFilterGroupItems()[13].getControl().getValue();
+                var nMRPTokens = this.getView().byId("smartFilterBar").getFilterGroupItems()[4].getControl().getTokens();
+                var aMRPValue = [];
+                if (nMRPTokens.length !== 0) {
+                    for (var i = 0; i < nMRPTokens.length; i++) {
+                        oFilter.mrpValue = this.getView().byId("smartFilterBar").getFilterGroupItems()[4].getControl().getTokens()[i].getKey();
+                        aMRPValue.push(oFilter.mrpValue);
+                        oFilter = {};
+                    }
+                }
+                this.oPayload.mrpDate = aMRPValue;
+                if (this.oPayload.fromDate === '' && this.oPayload.toDate !== '') {
+                    this.showMsgBoxError(this.getResourceBundleText("frmDateNullErrMsg"));
+                    return false;
+                } else if (this.oPayload.fromDate !== '' && this.oPayload.toDate === '') {
+                    this.showMsgBoxError(this.getResourceBundleText("toDateNullErrMsg"));
+                    return false;
+                } else if (this.oPayload.fromDate > this.oPayload.toDate) {
+                    this.showMsgBoxError(this.getResourceBundleText("frmDateErrMsg"));
+                    return false;
+                }
+                this.bSearchBtn = true;
+                this.nTotalRes = 0;
+                this.nSkip = 0;
+                this.nTop = 999;
+                this.oPayload.skip = this.nSkip;
+                this.oPayload.top = this.nTop;
+                this._onFetchData(this.oPayload);
+            },
+
+            /**
+            * This method is triggered when More button is clicked
+            */
+            onMore: function () {
+                this.bSearchBtn = false;
+                this.nSkip = this.nSkip + this.nTop;
+                this.oPayload.skip = this.nSkip;
+                this.oPayload.top = this.nTop;
+                this._onFetchData(this.oPayload);
+            },
+
+            /**
+            * This method is triggered when filter value is changed
+            */
+            onFilterChange: function () {
+                this.getView().byId("idMoreBtn").setEnabled(false);
+            },
+
+            /**
+            * This method is triggered before table binding occurs
+            */
+            onBeforeRebindTable: function (oEvent) {
+                var smartTable = oEvent.getSource()
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                var frmDate = this.getView().byId("smartFilterBar").getFilterGroupItems()[11].getControl().getValue();
+                var toDate = this.getView().byId("smartFilterBar").getFilterGroupItems()[12].getControl().getValue();
+                if ((frmDate !== '' && toDate === '') || (frmDate === '' && toDate !== '') || (frmDate > toDate)) {
+                    oBindingParams.preventTableBind = "true";
+                }
+            },
+
+            /**
+            * This method is triggered when excel button is pressed
+            */
+            onDownloadPress: function () {
+                var { skip, top, ...oExcelObj } = this.oPayload;
+                var oExcelModel = this.getOwnerComponent().getModel("oExcelModel");
+                oExcelModel.setProperty("/", []);
+                this._loadExcelData(oExcelObj);
+            },
+
+            onClearPress: function () {
+                this.getView().byId("shortAlrtType").setSelectedKey();
+            }
+        });
+    });
+
+
+
+
+    app/services.cds
+
+
+    //-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Delta Application
+// WRICEF No        : 
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    service.cds
+//-----------------------------------------------------------------------------------*
+//Descriptions: Used for annotations
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author          |   Defect/Incident     |   Change Description
+//  05/08/2024     Chowdhary,Mamtha     INC8637903        	    Delta Caculation Incorrect    
+//-----------------------------------------------------------------------------------*/
+using from './psshortageui/annotations';
+
+annotate DisplayShortageService.HPShortageView with {
+    factoryNumber       @(title: '{i18n>factory}');
+    // zmpaPartno          @(title: '{i18n>factoryPN}');
+    prodId              @(title: '{i18n>hppn}');
+    // zmpn                @(title: '{i18n>mpn}');
+    @UI.HiddenFilter baseunitofMeasure;
+    // @UI.HiddenFilter prodDesc;
+    zhfvType            @(title: '{i18n>ft}');
+    zhfvValue           @(title: '{i18n>fv}');
+    mrpDate             @(title: '{i18n>mrpDte}');
+    @UI.HiddenFilter leadTime;
+    @UI.HiddenFilter keyFigure;
+    shortageAlert       @(title: '{i18n>shrtAlrt}');
+    fromDate            @(title: '{i18n>fromDate}');
+    toDate              @(title: '{i18n>toDate}'); 
+    @UI.HiddenFilter week1;
+    @UI.HiddenFilter week2;
+    @UI.HiddenFilter week3;
+    @UI.HiddenFilter week4;
+    @UI.HiddenFilter week5;
+    @UI.HiddenFilter week6;
+    @UI.HiddenFilter week7;
+    @UI.HiddenFilter week8;
+    @UI.HiddenFilter week9;
+    @UI.HiddenFilter week10;
+    @UI.HiddenFilter week11;
+    @UI.HiddenFilter week12;
+    @UI.HiddenFilter week13;
+    @UI.HiddenFilter week14;
+    @UI.HiddenFilter week15;
+    @UI.HiddenFilter week16;
+    @UI.HiddenFilter week17;
+    @UI.HiddenFilter week18;
+    @UI.HiddenFilter week19;
+    @UI.HiddenFilter week20;
+    @UI.HiddenFilter week21;
+    @UI.HiddenFilter week22;
+    @UI.HiddenFilter week23;
+    @UI.HiddenFilter week24;
+    @UI.HiddenFilter week25;
+    @UI.HiddenFilter week26;
+    @UI.HiddenFilter week27;
+    @UI.HiddenFilter week28;
+    @UI.HiddenFilter week29;
+    @UI.HiddenFilter week30;
+    @UI.HiddenFilter week31;
+    @UI.HiddenFilter week32;
+    @UI.HiddenFilter week33;
+    @UI.HiddenFilter week34;
+    @UI.HiddenFilter week35;
+    @UI.HiddenFilter week36;
+    @UI.HiddenFilter week37;
+    @UI.HiddenFilter week38;
+    @UI.HiddenFilter week39;
+    @UI.HiddenFilter week40;
+    @UI.HiddenFilter week41;
+    @UI.HiddenFilter week42;
+    @UI.HiddenFilter week43;
+    @UI.HiddenFilter week44;
+    @UI.HiddenFilter week45;
+    @UI.HiddenFilter week46;
+    @UI.HiddenFilter week47;
+    @UI.HiddenFilter week48;
+    @UI.HiddenFilter week49;
+    @UI.HiddenFilter week50;
+    @UI.HiddenFilter week51;
+    @UI.HiddenFilter week52;
+    @UI.HiddenFilter forecastQty;
+    // @UI.HiddenFilter LOC_LIFNR;
+    @UI.HiddenFilter projectedDelta;
+    @UI.HiddenFilter totalQty;
+    // @UI.HiddenFilter ZFLAG;
+    // @UI.HiddenFilter ZMESSAGE;
+    // @UI.HiddenFilter ZHP_PARTID;
+}
+
+annotate DisplayShortageService.FactoryNumberValueHelp with {
+    factoryNumber @(title: '{i18n>factory}');
+}
+
+// annotate DisplayShortageService.FPNValueHelp with {
+//     zmpaPartno @(title: '{i18n>factoryPN}');
+// }
+
+annotate DisplayShortageService.HPPNValueHelp with {
+    prodId @(title: '{i18n>hppn}');
+}
+
+// annotate DisplayShortageService.MPNValueHelp with {
+//     zmpn @(title: '{i18n>mpn}');
+// }
+
+annotate DisplayShortageService.FTValueHelp with {
+    zhfvType @(title: '{i18n>ft}');
+}
+
+annotate DisplayShortageService.FVValueHelp with {
+    zhfvValue @(title: '{i18n>fv}');
+}
+
+annotate DisplayShortageService.ShrtValueHelp with {
+    shortageAlert @(title: '{i18n>shrtAlrt}');
+}
+
+annotate DisplayShortageService.FromDateValuehelp with {
+    fromDate @(title: '{i18n>fromDate}');
+}
+
+annotate DisplayShortageService.ToDateValuehelp with {
+    toDate @(title: '{i18n>toDate}');
+}
+annotate DisplayShortageService.MRPDateValuehelp with {
+    mrpDate @(title: '{i18n>mrpDte}');
+}
+
+annotate DisplayShortageService.HPShortageView with @(UI: {
+    SelectionFields: [
+        factoryNumber,
+        // zmpaPartno,
+        prodId,
+        // zmpn,
+        zhfvType,
+        zhfvValue,
+        shortageAlert,
+        mrpDate
+    ],
+    LineItem       : [
+        {
+            Value                : factoryNumber,
+            Label                : factoryNumber
+        },
+        {
+            Value                : prodId,
+            Label                : prodId
+        },
+        // {
+        //     Value                : zmpn,
+        //     Label                : zmpn
+        // },
+        {
+            Value                : leadTime,
+            Label                : '{i18n>leadTme}'
+        },
+        {
+            Value                : mrpDate,
+            Label                : mrpDate
+        },
+        {
+            Value                : keyFigure,
+            Label                : keyFigure
+
+        },
+        // {
+        //     Value                : zmpaPartno,
+        //     Label                : zmpaPartno
+        // },
+        {
+            Value                : shortageAlert,
+            Label                : '{i18n>shrtAlrt}'
+        },
+        // {
+        //     Value                : prodDesc,
+        //     Label                : prodDesc
+        // },
+        {
+            Value                : baseunitofMeasure,
+            Label                : baseunitofMeasure
+        },
+        {
+            Value                : zhfvType,
+            Label                : zhfvType
+        },
+        {
+            Value                : zhfvValue,
+            Label                : zhfvValue
+        }
+
+    ]
+},
+
+Capabilities: {FilterRestrictions: {FilterExpressionRestrictions: [
+        {
+            $Type             : 'Capabilities.FilterExpressionRestrictionType',
+            Property          : fromDate,
+            AllowedExpressions: 'SingleValue'
+        },
+        {
+            $Type             : 'Capabilities.FilterExpressionRestrictionType',
+            Property          : toDate,
+            AllowedExpressions: 'SingleValue'
+        }
+]}}
+
+
+ ); 
+ 
+ annotate DisplayShortageService.HPShortageView with {
+    factoryNumber @(Common: {
+        Text     : {
+            $value                : factoryNumber,
+            ![@UI.TextArrangement]: #TextOnly
+
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : factoryNumber,
+            CollectionPath : 'FactoryNumberValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: factoryNumber,
+                ValueListProperty: 'factoryNumber'
+            }
+
+            ]
+        }
+    });
+    // zmpaPartno    @(Common: {
+    //     Text     : {
+    //         $value                : zmpaPartno,
+    //         ![@UI.TextArrangement]: #TextOnly
+
+    //     },
+    //     ValueList: {
+    //         SearchSupported: true,
+    //         Label          : zmpaPartno,
+    //         CollectionPath : 'FPNValueHelp',
+    //         Parameters     : [{
+    //             $Type            : 'Common.ValueListParameterInOut',
+    //             LocalDataProperty: zmpaPartno,
+    //             ValueListProperty: 'zmpaPartno'
+    //         }, 
+    //         {
+    //             $Type             : 'Common.ValueListParameterIn',
+    //             LocalDataProperty : factoryNumber,
+    //             ValueListProperty : 'factoryNumber'
+    //         }
+
+    //         ]
+    //     }
+    // });
+    prodId        @(Common: {
+        Text     : {
+            $value                : prodId,
+            ![@UI.TextArrangement]: #TextOnly
+
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : prodId,
+            CollectionPath : 'HPPNValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: prodId,
+                ValueListProperty: 'prodId'
+            }, 
+            {
+                $Type             : 'Common.ValueListParameterIn',
+                LocalDataProperty : factoryNumber,
+                ValueListProperty : 'factoryNumber'
+            }
+
+            ]
+        }
+    });
+    // zmpn     @(Common: {
+    //     Text     : {
+    //         $value                : zmpn,
+    //         ![@UI.TextArrangement]: #TextOnly
+
+    //     },
+    //     ValueList: {
+    //         SearchSupported: true,
+    //         Label          : zmpn,
+    //         CollectionPath : 'MPNValueHelp',
+    //         Parameters     : [{
+    //             $Type            : 'Common.ValueListParameterInOut',
+    //             LocalDataProperty: zmpn,
+    //             ValueListProperty: 'zmpn'
+    //         }, 
+    //         {
+    //             $Type             : 'Common.ValueListParameterIn',
+    //             LocalDataProperty : factoryNumber,
+    //             ValueListProperty : 'factoryNumber'
+    //         }
+
+    //         ]
+    //     }
+    // });
+    zhfvType      @(Common: {
+        Text     : {
+            $value                : zhfvType,
+            ![@UI.TextArrangement]: #TextOnly
+
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : zhfvType,
+            CollectionPath : 'FTValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: zhfvType,
+                ValueListProperty: 'zhfvType'
+            }, 
+            {
+                $Type             : 'Common.ValueListParameterIn',
+                LocalDataProperty : factoryNumber,
+                ValueListProperty : 'factoryNumber'
+            }
+
+            ]
+        }
+    });
+    zhfvValue     @(Common: {
+        Text     : {
+            $value                : zhfvValue,
+            ![@UI.TextArrangement]: #TextOnly
+
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : zhfvValue,
+            CollectionPath : 'FVValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: zhfvValue,
+                ValueListProperty: 'zhfvValue'
+            }, 
+            {
+                $Type             : 'Common.ValueListParameterIn',
+                LocalDataProperty : factoryNumber,
+                ValueListProperty : 'factoryNumber'
+            }
+
+            ]
+        }
+    });
+    shortageAlert @(Common: {
+        Text     : {
+            $value                : '{i18n>shrtAlrt}',
+            ![@UI.TextArrangement]: #TextOnly
+
+        },
+        ValueList: {
+            SearchSupported: true,
+            Label          : '{i18n>shrtAlrt}',
+            CollectionPath : 'ShrtValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: shortageAlert,
+                ValueListProperty: 'shortageAlert'
+            }
+
+            ]
+        }
+    });
+    fromDate @(Common : {
+        Text      : {
+            $value                 : 'fromDate',
+            ![@UI.TextArrangement] : #TextOnly
+        },
+        ValueList : {
+            SearchSupported : true,
+            Label           : 'fromDate',
+            CollectionPath  : 'FromDateValuehelp',
+            Parameters      : [{
+                $Type             : 'Common.ValueListParameterInOut',
+                LocalDataProperty : fromDate,
+                ValueListProperty : 'fromDate'
+            },
+            {
+                $Type             : 'Common.ValueListParameterIn',
+                LocalDataProperty : factoryNumber,
+                ValueListProperty : 'factoryNumber'
+            }            ]
+        }
+    });
+    toDate @(Common : {
+        Text      : {
+            $value                 : 'toDate',
+            ![@UI.TextArrangement] : #TextOnly
+        },
+        ValueList : {
+            SearchSupported : true,
+            Label           : 'toDate',
+            CollectionPath  : 'ToDateValuehelp',
+            Parameters      : [{
+                $Type             : 'Common.ValueListParameterInOut',
+                LocalDataProperty : toDate,
+                ValueListProperty : 'toDate'
+            },
+            {
+                $Type             : 'Common.ValueListParameterIn',
+                LocalDataProperty : factoryNumber,
+                ValueListProperty : 'factoryNumber'
+            }]
+        }
+    });
+
+    mrpDate @(Common : {
+        Text      : {
+            $value                 : 'mrpDate',
+            ![@UI.TextArrangement] : #TextOnly
+        },
+        ValueList : {
+            SearchSupported : true,
+            Label           : 'mrpDate',
+            CollectionPath  : 'MRPDateValuehelp',
+            Parameters      : [{
+                $Type             : 'Common.ValueListParameterInOut',
+                LocalDataProperty : mrpDate,
+                ValueListProperty : 'mrpDate'
+            },
+            {
+                $Type             : 'Common.ValueListParameterIn',
+                LocalDataProperty : factoryNumber,
+                ValueListProperty : 'factoryNumber'
+            }]
+        }
+    });
+}
+
+
+
+
+    app/psshortageui/webapp/service/CoreService.js
+
+
+
+    //-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Delta Application 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Display Delta Application
+//-----------------------------------------------------------------------------------*
+//Descriptions: Core service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object"
+], function (Object) {
+	"use strict";
+
+	return Object.extend("pumorips.displayshortage.psshortageui.service.CoreService", {
+		constructor: function (model) {
+			Object.call(this);
+			if (model) {
+				this.setModel(model);
+			}
+		},
+		setModel: function (model) {
+			this.model = model;
+		},
+		odata: function (url) {
+			var me = this;
+			var core = {
+				ajax: function (type, url, data, parameters) {
+					var promise = new Promise(function (resolve, reject) {
+						var args = [];
+						var params = {};
+						args.push(url);
+						if (data) {
+							args.push(data);
+						}
+						if (parameters) {
+							params = parameters;
+						}
+						params.success = function (result, response) {
+							resolve({
+								data: result,
+								response: response
+							});
+						};
+						params.error = function (error) {
+							reject(error);
+						};
+						args.push(params);
+						me.model[type].apply(me.model, args);
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (params) {
+					return core.ajax('read', url, false, params);
+				},
+				'post': function (data, params) {
+					return core.ajax('create', url, data, params);
+				},
+				'put': function (data, params) {
+					return core.ajax('update', url, data, params);
+				},
+				'delete': function (params) {
+					return core.ajax('remove', url, false, params);
+				}
+			};
+		},
+		http: function (url) {
+			var core = {
+				ajax: function (method, url, headers, args) {
+					var promise = new Promise(function (resolve, reject) {
+						var client = new XMLHttpRequest();
+						var uri = url;
+						if (args && method === 'GET') {
+							uri += '?';
+							var argcount = 0;
+							for (var key in args) {
+								if (args.hasOwnProperty(key)) {
+									if (argcount++) {
+										uri += '&';
+									}
+									uri += encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+								}
+							}
+						}
+						if (args && (method === 'POST' || method === 'PUT')) {
+							var data = {};
+							for (var keyp in args) {
+								if (args.hasOwnProperty(keyp)) {
+									data[keyp] = args[keyp];
+								}
+							}
+						}
+						client.open(method, uri);
+						
+						if (method === 'POST' || method === 'PUT') {
+							client.setRequestHeader("accept", "application/json");
+							client.setRequestHeader("content-type", "application/json");
+						}
+						for (var keyh in headers) {
+							if (headers.hasOwnProperty(keyh)) {
+								client.setRequestHeader(keyh, headers[keyh]);
+							}
+						}
+						if (data) {
+							client.send(JSON.stringify(data));
+						} else {
+							client.send();
+						}
+						client.onload = function () {
+							if (this.status == 200) {
+								resolve(this.response);
+							} else {
+								reject(this.statusText);
+							}
+						};
+						client.onerror = function () {
+							reject(this.statusText);
+						};
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (headers, args) {
+					return core.ajax('GET', url, headers, args);
+				},
+				'post': function (headers, args) {
+					return core.ajax('POST', url, headers, args);
+				},
+				'put': function (headers, args) {
+					return core.ajax('PUT', url, headers, args);
+				},
+				'delete': function (headers, args) {
+					return core.ajax('DELETE', url, headers, args);
+				}
+			};
+		}
+	});
+});
+
+
+
+app/psshortageui/webapp/service/ShortageService.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Delta Application 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Display Delta Application
+//-----------------------------------------------------------------------------------*
+//Descriptions: Application service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./CoreService",
+], function (CoreService) {
+    "use strict";
+
+    var ShortageService = CoreService.extend("pumorips.displayshortage.psshortageui.service.ShortageService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        },
+        /**
+            *  method for maximum lead time  service call
+        */
+        fetchMaxDelta: function (oGetPayload) {
+            return this.odata("/MaxDelta").post(oGetPayload);
+        }
+    });
+    return ShortageService;
+});
+
+
+
+
+app/psshortageui/webapp/state/BaseState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Delta Application
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Display Delta Application 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Base State file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object",
+	"sap/ui/model/json/JSONModel"
+], function(Object, JSONModel) {
+	"use strict";
+	return Object.extend("pumorips.displayshortage.psshortageui.state.BaseState", {
+       //method to get model
+		getModel: function() {
+			if (!this.model) {
+				this.model = new JSONModel(this.data, true);
+			}
+			return this.model;
+		},
+        //method to update model
+		updateModel: function(bHardRefresh) {
+			if (this.model) {
+				this.model.refresh(bHardRefresh ? true : false);
+			}
+		}
+	});
+});
+
+
+
+app/psshortageui/webapp/state/ShortageState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Delta Application 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Display Delta Application 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Application state file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "../state/BaseState",
+], function (BaseState) {
+    "use strict";
+    var ShortageState = BaseState.extend("pumorips.displayshortage.psshortageui.state.ShortageState", {
+        constructor: function (oService) {
+            this.data = {
+                display: true,
+                busy: true                
+            };
+            this.ShortageService = oService;
+            BaseState.call(this);
+        }
+       
+
+    });
+    return ShortageState;
+});
+
+
+
+
+app/psshortageui/webapp/Component.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Delta Application 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Display Delta Application 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for model instantiation
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+        "sap/ui/core/UIComponent",
+        "sap/ui/Device",
+        "pumorips/displayshortage/psshortageui/model/models",
+        "./service/ShortageService",
+        "./state/ShortageState"
+    ],
+    function (UIComponent, Device, models, ShortageService, ShortageState) {
+        "use strict";
+
+        return UIComponent.extend("pumorips.displayshortage.psshortageui.Component", {
+            metadata: {
+                manifest: "json"
+            },
+
+            /**
+             * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
+             * @public
+             * @override
+             */
+            init: function () {
+                // call the base component's init function
+                UIComponent.prototype.init.apply(this, arguments);
+
+                // initialize receive service with the component
+                this._oShortageService = new ShortageService(this.getModel());
+                // initialize receive state with the component
+                this._oShortageState = new ShortageState(this._oShortageService);
+
+                // enable routing
+                this.getRouter().initialize();
+
+                // set the device model
+                this.setModel(models.createDeviceModel(), "device");
+            },
+            // Return the service name as per parameter
+            getService: function (sService) {
+                return this["_o" + sService + "Service"];
+            },
+             // Return the state name as per parameter
+             getState: function (sState) {
+                return this["_o" + sState + "State"];
+            }
+        });
+    }
+);
+
+
+
+
+app/psshortageui/webapp/manifest.json
+
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.displayshortage.psshortageui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.13.1",
+      "toolsId": "d49a5f26-8f63-406d-9ce6-8af65df7b69e"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/display-shortage/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "psshortage-display": {
+          "semanticObject": "psshortage",
+          "action": "display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.122.1",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.displayshortage.psshortageui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "oUIModel": {
+        "type": "sap.ui.model.json.JSONModel"
+      },
+      "oExcelModel":{
+        "type": "sap.ui.model.json.JSONModel"
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.displayshortage.psshortageui.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "ShortageList",
+          "pattern": "",
+          "target": [
+            "TargetShortageList"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetShortageList": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "ShortageList",
+          "viewName": "ShortageList"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "pumorips.displayshortage.psshortageui.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSSHORTAGE"
+  }
+}
+
+
+
+app/psshortageui/xs-app.json
+
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumoripsdisplayshortage-srv-api",
+      "csrfProtection": false
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa"
+    }
+  ]
+}
+
+
+
+db/pumoripsdisplayshortage-model.cds
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Delta Application 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Omar,Sajal
+// Date             :    18.04.2024
+// Description      :    Display Delta Application
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic table and view creation
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//   05/08/2024     Omar,Sajal      INC8637903        	    Lead Time duplication fix 
+//-----------------------------------------------------------------------------------*/
+
+namespace pumorips.displayshortage;
+
+using {managed} from '@sap/cds/common';
+
+/* Shortage table */
+@cds.persistence.exists
+entity syn_HPShortage {
+  key MATNR              : String(40);
+  key LOC_WERKS          : String(20);
+  key ZTDATE             : String(8);
+      RECORDMODE         : String(1);
+      ZUOM               : String(10);
+      ZMRPD              : String(8);
+      ZFDATE             : String(8);
+      MNG01_FQTY         : Decimal(17, 3);
+      MNG01_TSQTY        : Decimal(17, 3);
+      MNG01_DELTA        : Decimal(17, 3);
+}
+
+/* Tlane Merge output table */
+@cds.persistence.exists
+entity syn_PumoriTranslane {
+    key prodId            : String(40);
+    key locFr             : String(20);
+        locfrType         : String(1);
+    key locTo             : String(20);
+        loctoType         : String(1);
+        mot               : String(20);
+        leadTime          : Integer;
+        coO               : String(2);
+        lotSize           : Integer;
+        moq               : Integer;
+        pPriority         : Integer;
+        zQuota            : Integer;
+        spQ               : Integer;
+        sourcingModel     : String(4);
+        markedforDeletion : String(1);
+        custAttr1         : String(10);
+        custAttr2         : String(10);
+        custAttr3         : String(10);
+        custAttr4         : Date;
+        custAttr5         : String(20);
+        custAttr6         : String(20);
+        custAttr7         : Integer;
+        custAttr8         : Decimal(13, 3);
+        custAttr9         : Decimal(5, 2);
+        custAttr10        : String(40);
+    key validTo           : Date;
+    key validFrom         : Date;
+}
+
+/* Pumori Products merge table */
+@cds.persistence.exists
+entity syn_PumoriProducts {
+    key prodId                 : String(40);
+        prodDesc               : String(200);
+        baseunitofMeasure      : String(3);
+        materialType           : String(4);
+        zplcStatus             : String(20);
+        unspscCode             : String(9);
+        zhfvType               : String(70);
+        zhfvValue              : String(70);
+        zintroDate             : Date;
+        category               : String(4);
+        materialGroup          : String(9);
+        gatingAttribute        : String(1);
+        markedforDeletion      : String(1);
+        strategicautoFlag      : String(1);
+        zcontrolCode           : String(40);
+        zmhbigSeries           : String(70);
+        zmhbigseriesDesc       : String(40);
+        zmhCategory            : String(70);
+        zmhcategoryDesc        : String(40);
+        zmhModel               : String(70);
+        zmhmodelDesc           : String(40);
+        zmhSeries              : String(40);
+        zmhseriesDesc          : String(70);
+        zmhsubCategory         : String(40);
+        zmhsubcategoryDesc     : String(70);
+        zmhType                : String(70);
+        zmhtypeDesc            : String(40);
+        zpchbusinessGrp        : String(40);
+        zpchbusinessgrpDesc    : String(40);
+        zpchbusinesssubgrp     : String(30);
+        zpchbusinesssubgrpDesc : String(40);
+        zpchextSegment         : String(30);
+        zpchextsegmentDesc     : String(40);
+        zpchgBu                : String(40);
+        zpchgBuDesc            : String(40);
+        zpchhpCompany          : String(40);
+        zpchhpcompanyDesc      : String(40);
+        zpchprdcategoryDesc    : String(40);
+        zpchprofitCenter       : String(10);
+        zpchprofitcenterDesc   : String(40);
+        zspPl                  : String(20);
+        languagekey            : String(1);
+}
+
+entity HPShortageBTP : managed{
+  key MATNR              : String(40);
+  key LOC_WERKS          : String(20);
+  key ZTDATE             : String(8);
+      RECORDMODE         : String(1);
+      ZUOM               : String(10);
+      ZMRPD              : String(8);
+      ZFDATE             : String(8);
+      MNG01_FQTY         : Decimal(17, 3);
+      MNG01_TSQTY        : Decimal(17, 3);
+      MNG01_DELTA        : Decimal(17, 3); 
+}
+view HPShortageView as 
+    select distinct
+        createdAt,
+        createdBy,
+        modifiedAt,
+        modifiedBy,
+    key LOC_WERKS           as factoryNumber        : String(20),
+    key MATNR               as prodId               : String(40),
+        ZUOM                as baseunitofMeasure    : String(10),
+        b.zhfvType                                    : String(70),
+        b.zhfvValue                                   : String(70),
+        CASE WHEN ZMRPD  = '00000000' THEN ''
+        ELSE
+        TO_VARCHAR(TO_DATE(ZMRPD, 'YYYYMMDD'), 'MM/DD/YYYY')  end as mrpDate : String(10),
+        TO_INT((c.leadTime)/7) as leadTime                                 : Integer,
+        TO_VARCHAR(TO_DATE(ZFDATE, 'YYYYMMDD'), 'MM/DD/YYYY') as fromDate :String(10),
+    key TO_VARCHAR(TO_DATE(ZTDATE, 'YYYYMMDD'), 'MM/DD/YYYY') as toDate :String(10),
+        'N'                 as shortageAlert        : String(1),
+        NULL                as keyFigure            : String(30),
+        NULL                as week1                : Integer,
+        NULL                as week2                : Integer,
+        NULL                as week3                : Integer,
+        NULL                as week4                : Integer,
+        NULL                as week5                : Integer,
+        NULL                as week6                : Integer,
+        NULL                as week7                : Integer,
+        NULL                as week8                : Integer,
+        NULL                as week9                : Integer,
+        NULL                as week10                : Integer,
+        NULL                as week11                : Integer,
+        NULL                as week12                : Integer,
+        NULL                as week13                : Integer,
+        NULL                as week14                : Integer,
+        NULL                as week15                : Integer,
+        NULL                as week16                : Integer,
+        NULL                as week17                : Integer,
+        NULL                as week18                : Integer,
+        NULL                as week19                : Integer,
+        NULL                as week20                : Integer,
+        NULL                as week21                : Integer,
+        NULL                as week22                : Integer,
+        NULL                as week23                : Integer,
+        NULL                as week24                : Integer,
+        NULL                as week25                : Integer,
+        NULL                as week26                : Integer,
+        NULL                as week27                : Integer,
+        NULL                as week28                : Integer,
+        NULL                as week29                : Integer,
+        NULL                as week30                : Integer,
+        NULL                as week31                : Integer,
+        NULL                as week32                : Integer,
+        NULL                as week33                : Integer,
+        NULL                as week34                : Integer,
+        NULL                as week35                : Integer,
+        NULL                as week36                : Integer,
+        NULL                as week37                : Integer,
+        NULL                as week38                : Integer,
+        NULL                as week39                : Integer,
+        NULL                as week40                : Integer,
+        NULL                as week41                : Integer,
+        NULL                as week42                : Integer,
+        NULL                as week43                : Integer,
+        NULL                as week44                : Integer,
+        NULL                as week45                : Integer,
+        NULL                as week46                : Integer,
+        NULL                as week47                : Integer,
+        NULL                as week48                : Integer,
+        NULL                as week49                : Integer,
+        NULL                as week50                : Integer,
+        NULL                as week51                : Integer,
+        NULL                as week52                : Integer,
+    key MNG01_FQTY          as forecastQty          : Decimal(15, 2),
+    key MNG01_TSQTY         as totalQty             : Decimal(15, 2),
+    key MNG01_DELTA         as projectedDelta       : Decimal(15, 2)
+    from HPShortageBTP as a
+    left outer join syn_PumoriProducts as b
+    on a.MATNR = b.prodId
+    left outer join syn_PumoriTranslane AS c
+    on a.MATNR = c.prodId
+    and a.LOC_WERKS = c.locTo;
+    
+
+// INC8637903 Changes
+view UIView
+as SELECT distinct   
+    key a.factoryNumber,
+    key a.prodId,
+        CASE WHEN a.baseunitofMeasure = '' then (SELECT distinct c.baseunitofMeasure from HPShortageView as c where a.factoryNumber = c.factoryNumber and a.prodId = c.prodId and c.baseunitofMeasure!='')
+        ELSE
+        a.baseunitofMeasure end as baseunitofMeasure : String(10),
+        MAX(a.leadTime) as leadTime:Integer,
+        a.mrpDate,
+        a.zhfvType,
+        a.zhfvValue,
+        a.shortageAlert,
+        b.keyFigure : String(8),
+     CASE WHEN b.keyFigure = 'FORECAST' THEN 1
+	 WHEN b.keyFigure = 'TOTAL SUPPLY' THEN 2
+	 WHEN b.keyFigure = 'PROJECTED TO FORECAST (DELTA)' THEN 3
+	 END AS PRIORITY1 : Integer
+     FROM HPShortageView as a
+    cross join 
+    (SELECT 'FORECAST' AS keyFigure
+    FROM HPShortageView
+    UNION
+    SELECT 'TOTAL SUPPLY' AS keyFigure
+    FROM HPShortageView
+    UNION
+    SELECT 'PROJECTED TO FORECAST (DELTA)' AS keyFigure
+    FROM HPShortageView)as b
+    group by 
+     a.factoryNumber,
+     a.prodId,
+     a.baseunitofMeasure,
+     a.mrpDate,
+     a.zhfvType,
+     a.zhfvValue,
+     a.shortageAlert,
+     b.keyFigure 
+    ORDER by PRIORITY1;
+
+/*Factory number Value help */
+view FactoryNumberValueHelp as select distinct key factoryNumber  from HPShortageView;
+
+
+// /*HPPN Value help */
+// view HPPNValueHelp as select distinct key zHpPartno  from Delta;
+
+/*HPPN Value help */
+view HPPNValueHelp as select distinct key prodId, factoryNumber  from HPShortageView where prodId!='' and prodId is not null;
+
+
+
+
+/*FT Value help */
+view FTValueHelp as select distinct key zhfvType, factoryNumber from HPShortageView where zhfvType!='' and zhfvType is not null;
+
+/*FV Value help */
+view FVValueHelp as select distinct key zhfvValue, factoryNumber from HPShortageView where zhfvValue!='' and zhfvValue is not null;
+
+/*Shortage Value help */
+view ShrtValueHelp as select distinct key shortageAlert from HPShortageView;
+
+
+
+/*FromDate Value help */
+view FromDateValuehelp as select distinct key fromDate, factoryNumber from HPShortageView;
+
+/*ToDate Value help */
+view ToDateValuehelp as select distinct key toDate, factoryNumber from HPShortageView;
+
+/*MRPDate Value help */
+view MRPDateValuehelp as select distinct key mrpDate, factoryNumber from HPShortageView;
+
+
+
+
+db/src/procedure/shortage.hdbprocedure
+
+
+
+
+/*//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Delta Application
+// WRICEF No        :
+// Release          :    M1 Release
+// Author           :    Sravika Munaganuri
+// Date             :    18/10/2024
+// Description      :    Display Delta Application
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date              |   Author      |   Defect/Incident     |   Change Description   
+//-----------------------------------------------------------------------------------*/
+
+PROCEDURE "shortage"()
+
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+AS
+BEGIN
+SEQUENTIAL EXECUTION
+
+it_payload = 
+SELECT
+            a.MATNR,
+            a.LOC_WERKS,
+            a.ZTDATE,
+            a.RECORDMODE ,       
+            a.ZUOM ,
+            a.ZMRPD,
+            a.ZFDATE,
+            a.MNG01_FQTY,
+            a.MNG01_TSQTY,
+            a.MNG01_DELTA
+            FROM "PUMORIPS_DISPLAYSHORTAGE_SYN_HPSHORTAGE" as a
+            LEFT OUTER JOIN "PUMORIPS_DISPLAYSHORTAGE_HPSHORTAGEBTP" as b
+            on a.LOC_WERKS = b.LOC_WERKS
+            AND a.MATNR = b.MATNR
+            AND a.ZTDATE = b.ZTDATE
+            AND a.ZMRPD != b.ZMRPD
+            WHERE b.MATNR is NOT NULL;
+
+it_payload1 =
+SELECT
+            a.MATNR,
+            a.LOC_WERKS,
+            a.ZTDATE,
+            a.RECORDMODE ,       
+            a.ZUOM ,
+            a.ZMRPD,
+            a.ZFDATE,
+            a.MNG01_FQTY,
+            a.MNG01_TSQTY,
+            a.MNG01_DELTA
+            FROM "PUMORIPS_DISPLAYSHORTAGE_SYN_HPSHORTAGE" as a
+            LEFT OUTER JOIN "PUMORIPS_DISPLAYSHORTAGE_HPSHORTAGEBTP" as b
+            on a.LOC_WERKS = b.LOC_WERKS
+            AND a.MATNR = b.MATNR
+            AND a.ZTDATE = b.ZTDATE
+            WHERE b.MATNR is  NULL;
+
+it_joined =
+SELECT
+            MATNR,
+            LOC_WERKS,
+            ZTDATE,
+            RECORDMODE ,       
+            ZUOM ,
+            ZMRPD,
+            ZFDATE,
+            MNG01_FQTY,
+            MNG01_TSQTY,
+            MNG01_DELTA
+            FROM :it_payload
+            UNION ALL
+            SELECT 
+                    MATNR,
+                    LOC_WERKS,
+                    ZTDATE,
+                    RECORDMODE ,       
+                    ZUOM ,
+                    ZMRPD,
+                    ZFDATE,
+                    MNG01_FQTY,
+                    MNG01_TSQTY,
+                    MNG01_DELTA
+              FROM :it_payload1;
+
+DELETE FROM "PUMORIPS_DISPLAYSHORTAGE_HPSHORTAGEBTP" AS a
+WHERE EXISTS (
+    SELECT *
+    FROM "PUMORIPS_DISPLAYSHORTAGE_SYN_HPSHORTAGE" as b
+    WHERE a.LOC_WERKS = b.LOC_WERKS
+    AND a.MATNR = b.MATNR
+    AND a.ZTDATE = b.ZTDATE
+    AND a.ZMRPD != b.ZMRPD
+  );
+
+  DELETE FROM "PUMORIPS_DISPLAYSHORTAGE_HPSHORTAGEBTP" AS a
+  WHERE NOT EXISTS (
+      SELECT *
+      FROM "PUMORIPS_DISPLAYSHORTAGE_SYN_HPSHORTAGE" as b
+      WHERE a.LOC_WERKS = b.LOC_WERKS
+      AND a.MATNR = b.MATNR
+      AND a.ZTDATE = b.ZTDATE
+    );
+Insert into "PUMORIPS_DISPLAYSHORTAGE_HPSHORTAGEBTP" 
+SELECT 
+            now() as "CREATEDAT" ,
+            '' as "CREATEDBY" ,
+            now() as "MODIFIEDAT" ,
+            '' as "MODIFIEDBY" ,
+            MATNR,
+            LOC_WERKS,
+            ZTDATE,
+            RECORDMODE ,       
+            ZUOM ,
+            ZMRPD,
+            ZFDATE,
+            MNG01_FQTY,
+            MNG01_TSQTY,
+            MNG01_DELTA
+            FROM :it_joined;
+ END
+
+
+
+
+
+
+
+srv/jobscheduler/scheduler.js
+
+
+const TextBundle = require('@sap/textbundle').TextBundle;
+const bundle = new TextBundle('../_i18n/i18n');
+const passport = require('passport');
+const xsenv = require('@sap/xsenv');
+const JWTStrategy = require('@sap/xssec').JWTStrategy;
+//configure passport
+const xsuaaService = xsenv.getServices({ myXsuaa: { tag: 'xsuaa' } });
+const xsuaaCredentials = xsuaaService.myXsuaa;
+const jwtStrategy = new JWTStrategy(xsuaaCredentials);
+passport.use(jwtStrategy);
+// configure express server with authentication middleware
+const express = require('express');
+const app = express();
+app.use(passport.initialize());
+app.use(passport.authenticate('JWT', { session: false }));
+const https = require('https');
+// access credentials from environment variable (alternatively use xsenv)
+const VCAP_SERVICES = JSON.parse(process.env.VCAP_SERVICES)
+const CREDENTIALS = VCAP_SERVICES.jobscheduler[0].credentials
+//oauth
+const UAA = CREDENTIALS.uaa
+const OA_CLIENTID = UAA.clientid;
+const OA_SECRET = UAA.clientsecret;
+const OA_ENDPOINT = UAA.url;
+const { SUCCESS_STATUS_CODE, RESULT_STATUS_CODE, ACCEPT_STATUS_CODE } = require('../constants');
+
+
+/********************Set the status in Jobscheduler***********************/
+const doUpdateStatus = function (headers, success, message) {
+    return new Promise((resolve, reject) => {
+        return fetchJwtToken()
+            .then((jwtToken) => {
+                const jobId = headers['x-sap-job-id']
+                const scheduleId = headers['x-sap-job-schedule-id']
+                const runId = headers['x-sap-job-run-id']
+                const host = headers['x-sap-scheduler-host']
+
+                const data = JSON.stringify({ success: success, message: JSON.stringify(message) })
+                const options = {
+                    host: host.replace('https://', ''),
+                    path: `/scheduler/jobs/${jobId}/schedules/${scheduleId}/runs/${runId}`,
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Content-Length': data.length,
+                        Authorization: 'Bearer ' + jwtToken
+                    }
+                }
+                const req = https.request(options, (res) => {
+                    res.setEncoding('utf8')
+                    const status = res.statusCode
+                    if (status !== SUCCESS_STATUS_CODE && status !== RESULT_STATUS_CODE && status !== ACCEPT_STATUS_CODE) {
+                        return reject(new Error(bundle.getText('updateStatusErr')))
+                    }
+                    res.on('data', () => {
+                        console.log(bundle.getText('callJobSuccess'))
+                        resolve(message)
+                    })
+                });
+
+                req.on('error', (error) => {
+                    console.log(bundle.getText('errCallJob'))
+                    return reject({ error: error })
+                });
+
+                req.write(data)
+                req.end()
+            })
+            .catch((error) => {
+                console.log(error)
+                reject(error)
+            })
+    })
+}
+
+/***********************JWT token required for calling REST API ***********************/
+const fetchJwtToken = function () {
+    return new Promise((resolve, reject) => {
+        const options = {
+            host: OA_ENDPOINT.replace('https://', ''),
+            path: '/oauth/token?grant_type=client_credentials&response_type=token',
+            headers: {
+                Authorization: "Basic " + Buffer.from(OA_CLIENTID + ':' + OA_SECRET).toString("base64")
+            }
+        }
+
+        https.get(options, res => {
+            res.setEncoding('utf8')
+            let response = ''
+            res.on('data', chunk => {
+                response += chunk
+            })
+
+            res.on('end', () => {
+                try {
+                    const responseAsJson = JSON.parse(response)
+                    const jwtToken = responseAsJson.access_token
+                    if (!jwtToken) {
+                        return reject(new Error(bundle.getText('errFetchToken')))
+                    }
+                    resolve(jwtToken)
+                } catch (error) {
+                    return reject(new Error(bundle.getText('errFetchToken')))
+                }
+            })
+        })
+            .on("error", (error) => {
+                console.log("Error: " + error.message);
+                return reject({ error: error })
+            });
+    })
+}
+
+module.exports = {
+    doUpdateStatus
+}
+
+
+
+srv/constants.js
+
+
+const ERROR_STATUS_CODE = 400;
+const SUCCESS_STATUS_CODE = 200;
+const RESULT_STATUS_CODE = 201;
+const ACCEPT_STATUS_CODE = 202;
+
+
+module.exports = {
+    ERROR_STATUS_CODE,
+    SUCCESS_STATUS_CODE,
+    RESULT_STATUS_CODE,
+    ACCEPT_STATUS_CODE
+};
+
+
+
+srv/helper.js
+
+
+
+const TextBundle = require('@sap/textbundle').TextBundle;
+const bundle = new TextBundle('./_i18n/i18n');
+const { doUpdateStatus } = require('./jobscheduler/scheduler');
+const { callProcedure } = require('./procedurecall');
+
+const handleAsyncJobReptask = async function (headers, req) {
+    try {
+        let result = await operationMasterUploadShortage(req)
+        if ((typeof result !== 'undefined') && (result !== null)) {
+            await doUpdateStatus(headers, true, result)
+            return result;
+        } else {
+            await operationMasterUploadShortage(req)
+        }
+    } catch (error) {
+        doUpdateStatus(headers, false, error.message)
+            .then(() => {
+                console.log(bundle.getText('successResJob'))
+            }).catch((error) => {
+                console.log(bundle.getText('errResJob') + error)
+            })
+    }
+}
+
+const operationMasterUploadShortage = async function (req) {
+    try {
+        let aResult = [];
+
+        try {
+            await cds.run(`CALL "PUMORIPS_SHORTAGE"."reptaskshortage.START_REPLICATION"()`);
+            await cds.run(`CALL "PUMORIPS_SHORTAGE"."shortage"()`);
+            aResult.push("HP Shortage Table loaded successfully");
+            await cds.run(`DELETE FROM "PUMORIPS_SHORTAGE"."TARGET_/BIC/AZPPSTTSD2"`);
+        } catch (err) {
+            aResult.push(err.message);
+        }
+        return aResult;
+
+    } catch (error) {
+        return req.error(error.code, error.message);
+    }
+}
+
+module.exports = {
+    handleAsyncJobReptask
+}
+
+
+
+srv/procedurecall.js
+
+
+const dbClass = require("sap-hdb-promisfied");
+
+async function callProcedure(procedureName, req) {
+    try {
+        // const db = await cds.connect.to('db');
+        let dbConn = new dbClass(await dbClass.createConnectionFromEnv());
+        const sp = await dbConn.loadProcedurePromisified(null, procedureName);
+        const output = await dbConn.callProcedurePromisified(sp, []);
+        console.log(output.results);
+        return true;
+    } catch (error) {
+        console.error(error);
+        return req.error(error.code, error.message);
+    }
+}
+
+module.exports = {
+    callProcedure
+}
+
+
+
+
+
+srv/pumoripsdisplayshortage-service.cds
+
+
+
+using pumorips.displayshortage as shortage from '../db/pumoripsdisplayshortage-model';
+
+service DisplayShortageService @(requires: 'authenticated-user') { 
+    entity HPShortageView as projection on shortage.HPShortageView;
+    entity UIView  as projection on shortage.UIView;
+    entity FactoryNumberValueHelp as projection on shortage.FactoryNumberValueHelp;
+    entity HPPNValueHelp as projection on shortage.HPPNValueHelp;
+    entity FTValueHelp as projection on shortage.FTValueHelp;
+    entity FVValueHelp as projection on shortage.FVValueHelp;
+    entity ShrtValueHelp as projection on shortage.ShrtValueHelp;   
+    entity FromDateValuehelp as projection on shortage.FromDateValuehelp;
+    entity ToDateValuehelp as projection on shortage.ToDateValuehelp;
+    entity MRPDateValuehelp as projection on shortage.MRPDateValuehelp;
+
+    action MaxDelta(PostingData : LargeString) returns String;
+    function callShortage() returns String;
+}
+
+
+
+
+
+srv/pumoripsdisplayshortage-service.js
+
+
+
+const cds = require('@sap/cds');
+const TextBundle = require('@sap/textbundle').TextBundle;
+const bundle = new TextBundle('./_i18n/i18n');
+const hdbext = require("@sap/hdbext");
+const dbclass = require("sap-hdbext-promisfied");
+const express = require('express');
+const { HPShortageView, UIView } = cds.entities('pumorips.displayshortage');
+const { ACCEPT_STATUS_CODE } = require('./constants');
+const {handleAsyncJobReptask} = require ('./helper')
+
+module.exports = cds.service.impl(function () {
+    this.on('MaxDelta', async (req) => {
+        try {
+            let oData = req.data;
+            let oPayload = JSON.parse(oData.PostingData);
+            const tx = cds.transaction(req);
+            let skip = oPayload.skip;
+            let top = oPayload.top;
+            var wherecondition = {};
+            var finalresults = {};
+            wherecondition.factoryNumber = oPayload.factoryNo;
+            if (oPayload.hppn != "") {
+                wherecondition.prodId = oPayload.hppn;
+            }
+            if (oPayload.fvType.length > 0) {
+                wherecondition.zhfvType = oPayload.fvType;
+            }
+            if (oPayload.fvValue.length > 0) {
+                wherecondition.zhfvValue = oPayload.fvValue;
+            }
+            if (oPayload.mrpDate.length > 0) {
+                wherecondition.mrpDate = oPayload.mrpDate;
+            }
+            var deltadata = [];
+            let filterdata = await tx.run(SELECT`*`.from(HPShortageView).where(wherecondition));
+
+            if (filterdata.length > 0) {
+
+                if (oPayload.fromDate.length > 0 || oPayload.toDate.length > 0) {
+                    let fromDate = oPayload.fromDate;
+                    let toDate = oPayload.toDate;
+                    deltadata = filterdata.filter(x => new Date(x.fromDate).getTime() >= new Date(fromDate).getTime() && new Date(x.toDate).getTime() <= new Date(toDate).getTime());
+                }
+                else {
+                    deltadata = filterdata;
+                }
+                if (skip == 0) {
+                    let totalcount = await tx.run(SELECT`*`.from(UIView).where(wherecondition));
+                    finalresults.total = totalcount.length;
+                }
+                let filteruiview = await tx.run(SELECT`*`.from(UIView).where(wherecondition).orderBy('factoryNumber', 'prodId').limit(top, skip));
+
+                let maxresult = await tx.run(SELECT`MAX(leadTime) as max_value`.from(UIView)
+                    .where(wherecondition));
+
+
+
+                var maxleadtime = maxresult[0].max_value;
+
+                var week = 0;
+                let weekdata = [];
+                let weeknumber = [];
+                const uniquedata = [...new Set(deltadata.map(item => item.toDate))];
+                const sortdate = uniquedata.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+                for (let i = 0; i < sortdate.length; i++) {
+                    week = week + 1;
+                    if (maxleadtime >= week) {
+                        let weekvalue = "week" + week;
+                        weeknumber.push(weekvalue);
+                        const delta = deltadata.filter(item => item.toDate == sortdate[i]);
+                        if(oPayload.hppn == "" && new Date(sortdate[i]).getFullYear() == '9999'){
+                           weekdata.push({"week":weekvalue , "invalid": "Delta without Forecast"});
+                        }else{
+                            weekdata.push({ "week": weekvalue, "from": delta[0].fromDate, "to": delta[0].toDate });
+                        }                       
+                        for (let j = 0; j < delta.length; j++) {
+                            const filter = filteruiview.filter(x => x.factoryNumber == delta[j].factoryNumber && x.prodId == delta[j].prodId);
+                            
+                            for (let k = 0; k < filter.length; k++) {
+                                if (filter[k].keyFigure == "FORECAST") {
+                                    filter[k][weekvalue] = parseInt(delta[j].forecastQty.toString());
+                                }
+                                else if (filter[k].keyFigure == "TOTAL SUPPLY") {
+                                    filter[k][weekvalue] = parseInt(delta[j].totalQty.toString());
+                                }
+                                else {
+                                    filter[k][weekvalue] = parseInt(delta[j].projectedDelta.toString());
+                                }
+                            }
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                
+                let updateshortage=[];
+                for(let items of filteruiview){
+                    let leadtime=items.leadTime;
+                    let weeks=[];
+                    for(var j=1;j<=leadtime;j++){    
+                        weeks.push("week"+j);
+                    }
+                    
+                    var FilterWeek=Object.keys(items).filter(key => key.includes('week') && !weeks.includes(key));
+                    var WeekValue= Object.keys(items).filter(key => key.includes('week') && !FilterWeek.includes(key)).map(key => items[key]);
+                    if(WeekValue.some(value => value<0)){
+                        let sAlert = 'Y';
+                        updateshortage.push({ "factoryNumber": items.factoryNumber, "prodId": items.prodId, "shortageAlert": sAlert  });
+                    }
+                }
+                const uniqueupdateshortage = updateshortage.filter((obj, index) => {
+                    return index === updateshortage.findIndex(o => obj.factoryNumber === o.factoryNumber && obj.prodId === o.prodId);
+                });
+                for (var i = 0; i < uniqueupdateshortage.length; i++) {
+                    filteruiview.forEach(item => {
+                        if (item.factoryNumber == uniqueupdateshortage[i].factoryNumber && item.prodId == uniqueupdateshortage[i].prodId) {
+                            item.shortageAlert = uniqueupdateshortage[i].shortageAlert;
+                        }
+                    });
+                }
+
+                var finaluiview = [];
+                if (oPayload.shrtAlrt == 'Y') {
+                    finaluiview = filteruiview.filter(x => x.shortageAlert == 'Y');
+                } else if (oPayload.shrtAlrt == 'N') {
+                    finaluiview = filteruiview.filter(x => x.shortageAlert == 'N');
+                } else {
+                    finaluiview = filteruiview;
+                }
+                finalresults.uidata = finaluiview;
+                finalresults.week = weekdata;
+            }
+            else {
+                finalresults.uidata = [];
+            }
+
+            return (JSON.stringify(finalresults));
+
+        }
+        catch (error) {
+            return req.error(error.code, error.message);
+        }
+    });
+
+    this.on('callShortage', async (req) => {
+        try {
+            req.notify(ACCEPT_STATUS_CODE, bundle.getText('longRunAccept'));
+            // afterwards the actual processing
+            var finalResult = await handleAsyncJobReptask(req.headers, req);
+            return finalResult;
+        }
+        catch (error) {
+            return req.error(error.code, error.message);
+        }
+    });
+
+});
+
+
+
+
+
+srv/server.js
+
+
+
+"use strict";
+ 
+const cds = require("@sap/cds");
+const proxy = require("@cap-js-community/odata-v2-adapter");
+ 
+cds.on("bootstrap", app => app.use(proxy()));
+ 
+module.exports = cds.server;
+
+
+
+mta.yaml
+
+
+
+_schema-version: "3.1"
+ID: pumorips_shortage
+description: A simple CAP project.
+version: 1.0.0
+modules:
+- name: pumorips_shortage-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: PUMORIPS_SHORTAGE
+  - name: uaa_pumorips_shortage
+  - name: pumori_job-scheduling-service
+  - name: pumori_app_logging-service
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+  build-parameters:
+    builder: npm
+    ignore: ["node_modules/"]
+- name: pumorips_shortage-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: PUMORIPS_SHORTAGE
+    properties:
+      TARGET_CONTAINER: PUMORIPS_SHORTAGE
+  - name: PUMORI_EBW_UPS
+    group: SERVICE_REPLACEMENTS
+    properties:
+      key: ServiceName_1
+      service: ~{the-service-name}
+  - name: pumoripsproduct-grantor
+    group: SERVICE_REPLACEMENTS
+    properties:
+      key: logical-pumoripsproduct-grantor
+      service: ~{pumoripsproduct-grantor-service}
+  parameters:
+    buildpack: nodejs_buildpack
+- name: pumorips_shortage-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: pumorips_shortage-destination-service
+    parameters:
+      content-target: true
+  - name: pumorips_shortage_html_repo_host
+    parameters:
+      service-key:
+        name: pumorips_shortage_html_repo_host-key
+  - name: uaa_pumorips_shortage
+    parameters:
+      service-key:
+        name: uaa_pumorips_shortage-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: PSSHORTAGE_pumorips_shortage_html_repo_host
+          ServiceInstanceName: pumorips_shortage-html5-app-host-service
+          ServiceKeyName: pumorips_shortage_html_repo_host-key
+          sap.cloud.service: PSSHORTAGE
+        - Authentication: OAuth2UserTokenExchange
+          Name: PSSHORTAGE_uaa_pumorips_shortage
+          ServiceInstanceName: pumorips_shortage-xsuaa-service
+          ServiceKeyName: uaa_pumorips_shortage-key
+          sap.cloud.service: PSSHORTAGE
+        existing_destinations_policy: update
+  build-parameters:
+    no-source: true
+- name: pumorips_shortage-app-content
+  type: com.sap.application.content
+  path: app
+  requires:
+  - name: pumorips_shortage_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - pumoripsdisplayshortagepsshortageui.zip
+      name: pumoripsdisplayshortagepsshortageui
+      target-path: resources/
+- name: pumoripsdisplayshortagepsshortageui
+  type: html5
+  path: app/psshortageui
+  requires:
+  - name: uaa_pumorips_shortage
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: PUMORIPS_SHORTAGE
+  type: com.sap.xs.hdi-container
+  parameters:
+    config:
+      schema: PUMORIPS_SHORTAGE
+    service: hana
+    service-plan: hdi-shared
+- name: pumorips_shortage-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            HTML5.DynamicDestination: true
+            HTML5.ForwardAuthToken: true
+            Name: pumoripsdisplayshortage-srv-api
+            ProxyType: Internet
+            Type: HTTP
+            URL: ~{srv-api/srv-url}
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: pumorips_shortage-destination-service
+    service-plan: lite
+  requires:
+  - name: srv-api
+- name: pumorips_shortage_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: pumorips_shortage-html5-app-host-service
+    service-plan: app-host
+- name: uaa_pumorips_shortage
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: pumorips_shortage-xsuaa-service
+    service-plan: application
+- name: PUMORI_EBW_UPS
+  type: org.cloudfoundry.existing-service
+  parameters:
+    service-name: PUMORI_EBW_UPS
+  properties:
+    the-service-name: ${service-name}
+- name: pumoripsproduct-grantor
+  type: org.cloudfoundry.existing-service
+  parameters:
+    service-name: PUMORIPS_PRODUCT
+  properties:
+    pumoripsproduct-grantor-service: ${service-name}
+- name: pumori_job-scheduling-service
+  type: org.cloudfoundry.existing-service
+  parameters:
+    config:
+      enable-xsuaa-support: true
+    service: jobscheduler
+    service-name: pumori_job-scheduling-service
+    service-plan: standard
+- name: pumori_app_logging-service
+  type: org.cloudfoundry.existing-service
+  parameters:
+    service: application-logs
+    service-name: pumori_app_logging-service
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npx cds build --production
+
+
+
+
+    package.json
+
+
+
+    {
+  "name": "pumorips_shortage",
+  "version": "1.0.0",
+  "description": "CAP Project for Display Delta Application.",
+  "repository": "https://github.azc.ext.hp.com/HP-Supply-Chain-Planning/BTP-pumori_ps_display_shortage.git",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@cap-js-community/odata-v2-adapter": "^1.12.3",
+    "@sap/cds": "^6",
+    "@sap/cds-odata-v2-adapter-proxy": "^1.9.4",
+    "@sap/hana-client": "^2.19.21",
+    "@sap/hdbext": "^7.6.6",
+    "@sap/hdi-deploy": "^4.9.2",
+    "@sap/textbundle": "^4.3.0",
+    "@sap/xsenv": "4.2.0",
+    "@sap/xssec": "3.6.1",
+    "express": "^4",
+    "hdb": "^0.19.8",
+    "passport": "^0.7.0",
+    "sap-hdb-promisfied": "^2.202402.1",
+    "@sap/cds-dk": "^7",
+    "sap-hdbext-promisfied": "^2.202208.1"
+  },
+  "devDependencies": {
+    "@sap/cds-dk": "^7",
+    "@sap/hdi-deploy": "4.9.2",
+    "@sap/ux-specification": "^1.120.3",
+    "rimraf": "^3.0.2"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch-psshortageui": "cds watch --open psshortageui/webapp/index.html?sap-ui-xx-viewCache=false",
+    "undeploy": "cf undeploy pumorips_shortage --delete-services --delete-service-keys --delete-service-brokers",
+    "build": "rimraf resources mta_archives && mbt build --mtar archive",
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
+  },
+  "engines": {
+    "node": "^18.14.2"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "hana"
+      },
+      "uaa": {
+        "kind": "xsuaa"
+      }
+    },
+    "auth": {
+      "passport": {
+        "strategy": "JWT"
+      }
+    },
+    "hana": {
+      "deploy-format": "hdbtable"
+    }
+  }
+}
+
+
+
+xs-security.json
+
+
+
+{
+  "xsappname": "pumorips_shortage",
+  "tenant-mode": "dedicated",
+  "description": "Security profile of called application",
+  "scopes": [
+    {
+      "name": "uaa.user",
+      "description": "UAA"
+    },
+    {
+      "name": "$XSAPPNAME.scopeformyapp",
+      "description": "Users of display shortage app need this special role",
+      "grant-as-authority-to-apps": [
+          "$XSSERVICENAME(pumori_job-scheduling-service)"
+      ]
+  }
+  ],
+  "role-templates": [
+    {
+      "name": "Token_Exchange",
+      "description": "UAA",
+      "scope-references": [
+        "uaa.user"
+      ]
+    },
+    {
+      "name": "RoleTemplateForPumoriPSProductApp",
+      "description": "Users of pumoriPS shortage app need this special role",
+      "default-role-name": "Pumori Shortage Role",
+      "scope-references": [
+          "$XSAPPNAME.scopeformyapp"
+      ]
+    }
+  ],
+  "role-collections": [
+    {
+        "name": "app_job_schedular_ps_shortage_app",
+        "description": "job schedular",
+        "role-template-references": [
+            "$XSAPPNAME.scopeformyapp"
+        ]
+    }
+]
+}
+
+
+
