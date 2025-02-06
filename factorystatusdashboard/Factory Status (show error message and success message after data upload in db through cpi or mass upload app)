@@ -1,0 +1,603 @@
+app/pumorifacstatusdashboard/webapp/view/PumFacStatusDashboard.view.xml
+
+
+
+<mvc:View
+    controllerName="pumorips.pumoriconfig.pumorifacstatusdashboard.controller.PumFacStatusDashboard"
+    xmlns:mvc="sap.ui.core.mvc"
+    displayBlock="true"
+    xmlns="sap.m"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+    xmlns:ui="sap.ui.table"
+    xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:core="sap.ui.core"
+>
+    <Page
+        id="page"
+        title="{i18n>title}"
+        showHeader="false"
+    >
+        <content>
+            <smartFilterBar:SmartFilterBar
+                id="smartFilterBar"
+                persistencyKey="SmartFilterPKey"
+                showMessages="true"
+                showClearOnFB="true"
+                clear="onClearPress"
+                entitySet="FactoryStatusDashboard"
+            />
+            <smartTable:SmartTable
+                id="idPMSmrtTable"
+                smartFilterId="smartFilterBar"
+                tableType="ResponsiveTable"
+                editable="false"
+                entitySet="FactoryStatusDashboard"
+                useVariantManagement="true"
+                showVariantManagement="true"
+                header="{i18n>res}"
+                showRowCount="true"
+                ignoredFields="markedforDeletion"
+                enableAutoBinding="false"
+                enableExport="true"
+                placeToolbarInTable="true"
+                beforeRebindTable="onBeforeRebindTable"
+                persistencyKey="SmartTablePersistencyKey"
+                enableAutoColumnWidth="true"
+            >
+                <ui:Table
+                    id="idPMtable"
+                    visibleRowCount="Auto"
+                    selectionMode="None"
+                    class="sapUiMediumMarginTop"
+                    threshold="20"
+                    rowSelectionChange="onSelectedLineItem"
+                >
+                <ui:rowMode>
+                     <rowmodes:Auto id="idRowM" xmlns:rowmodes="sap.ui.table.rowmodes" minRowCount="5" maxRowCount="5"/>
+                </ui:rowMode>
+                    <ui:columns>
+                        <ui:Column
+                            hAlign="Center"
+                            id="idErrCol"
+                            width="100px"
+                        >
+                        <ui:customData>
+                            <core:CustomData key="p13nData"
+                                          value='\{"columnKey": "errorLog", "autoColumnWidth": \{ "visibleProperty": "errorLog" }, "columnIndex": 11, "leadingProperty": "errorLog", "sortProperty": "errorLog", "additionalProperty": "errorLog", "additionalSortProperty": "errorLog", "width": "60rem"}'/>
+                        </ui:customData>
+                            <Label
+                                text="{i18n>errorLog}"
+                                textAlign="Center"
+                                id="idErrL"
+                            />
+                            <ui:template>
+                                <Button
+                                    icon="sap-icon://download"
+                                    press="onPressDownloadError"
+                                    id="idErrBtn"
+                                />
+                            </ui:template>
+                        </ui:Column>
+                    </ui:columns>
+                </ui:Table>
+            </smartTable:SmartTable>
+        </content>
+    </Page>
+</mvc:View>
+
+
+
+app/pumorifacstatusdashboard/webapp/controller/PumFacStatusDashboard.controller.js
+
+
+
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/model/json/JSONModel",
+    "sap/m/MessageToast",
+    "sap/ui/export/Spreadsheet",
+    "sap/m/MessageBox"
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (Controller, JSONModel, MessageToast, Spreadsheet, MessageBox) {
+        "use strict";
+        return Controller.extend("pumorips.pumoriconfig.pumorifacstatusdashboard.controller.PumFacStatusDashboard", {
+            onInit: function () {
+                this.FacStatusState = this.getOwnerComponent().getState('FacStatus');
+                this.FacStatusService = this.getOwnerComponent().getService('FacStatus');
+                this.component = this.getOwnerComponent();
+                this.oModel = this.component.getModel("oJsonModel");
+                this.oBundle = this.component.getModel('i18n').getResourceBundle();
+                this.getOwnerComponent().getRouter().getRoute("PumFacStatusDashboard").attachPatternMatched(this._onObjectMatched, this);
+            },
+            _getUserInfoService: function () {
+                return new Promise(resolve => sap.ui.require([
+                    "sap/ushell/library"
+                ], oSapUshellLib => {
+                    const oContainer = oSapUshellLib.Container;
+                    const pService = (oContainer) ? oContainer.getServiceAsync("UserInfo") : ""; // .getService is deprecated!
+                    resolve(pService);
+                }));
+            },
+
+            getZoomLevel: function () {
+
+
+                let currentWidth = window.innerWidth;   // Width of the current window
+                let currentHeight = window.innerHeight; // Height of the current window
+
+
+                let totalWidth = screen.width;   // Total screen width
+                let totalHeight = screen.height; // Total screen height
+
+                // Calculate the resolution percentage
+                let resolutionPercentage = ((currentWidth * currentHeight) / (totalWidth * totalHeight)) * 100;
+
+                resolutionPercentage=resolutionPercentage/4.1;
+
+                return resolutionPercentage;
+
+            },
+
+            _onObjectMatched: function () {
+                let row = this.getView().byId("idRowM");
+                row.setMinRowCount(parseInt(this.getZoomLevel()));
+                row.setMaxRowCount(parseInt(this.getZoomLevel()));
+            },
+
+
+            onBeforeRebindTable: function () {
+                let row = this.getView().byId("idRowM");
+                row.setMinRowCount(parseInt(this.getZoomLevel()));
+                row.setMaxRowCount(parseInt(this.getZoomLevel()));
+            },
+            /**
+            * triggers when error Error log Download button is pressed
+             */
+            onPressDownloadError: function (oEvent) {
+                var oThisController = this;
+                var oView = this.getView();
+                oView.setBusy(true);
+                let oSelectedRow = oEvent.getSource().getBindingContext().getObject();
+                var sFileName = oSelectedRow.fileName;
+                var FileName = {FileName:sFileName};
+                this.FacStatusService.DownloadErrHistory(FileName).then(
+                    function (data) {
+                        if (data.data.results.length <= 0)
+                            {
+                                oView.setBusy(false);
+                                MessageBox.error(this.oBundle.getText("ErrorLogdoesnotExsit"));
+                                return;
+                            }
+                            oView.setBusy(false);
+                            oThisController._exportData(data.data.results);
+                            MessageBox.success(this.oBundle.getText("ErrorLogDownSucc"));
+                    }.bind(this),
+                    function (error) {
+                        oView.setBusy(false);
+                        var oerrMsg = JSON.parse(error.responseText).error.message.value;
+                        MessageBox.error(oerrMsg); 
+                    }.bind(this));
+            },
+            /**
+            *  method for creating columns for Error logs excel download
+            */
+            _createColumnConfig: function (oEvent) {
+
+                return [
+                    {
+                        label: this.oBundle.getText("interface"),
+                        property: 'interface'
+                    },
+                    {
+                        label: this.oBundle.getText("factoryId"),
+                        property: 'factoryId'
+                    },
+                    {
+                        label: this.oBundle.getText("fileName"),
+                        property: 'fileName'
+                    }, {
+                        label: this.oBundle.getText("uploadedtime"),
+                        property: 'uploadedtime'
+                    },
+                    {
+                        label: this.oBundle.getText("FactoryNo"),
+                        property: 'factoryNumber'
+                    },
+                    {
+                        label: this.oBundle.getText("prodId"),
+                        property: 'prodId'
+                    },
+                    {
+                        label: this.oBundle.getText("zmpaPartno"),
+                        property: 'zmpaPartno'
+                    },
+                    {
+                        label: this.oBundle.getText("locId"),
+                        property: 'locId'
+                    },
+                    {
+                        label: this.oBundle.getText("uomAlt"),
+                        property: 'uomAlt'
+                    },
+                    {
+                        label: this.oBundle.getText("locFr"),
+                        property: 'locFr'
+                    },
+                    {
+                        label: this.oBundle.getText("locfrType"),
+                        property: 'locfrType'
+                    },
+                    {
+                        label: this.oBundle.getText("locTo"),
+                        property: 'locTo'
+                    },
+                    {
+                        label: this.oBundle.getText("loctoType"),
+                        property: 'loctoType'
+                    },
+                    {
+                        label: this.oBundle.getText("locType"),
+                        property: 'locType'
+                    },
+                    {
+                        label: this.oBundle.getText("alternativeBom"),
+                        property: 'alternativeBom'
+                    },
+                    {
+                        label: this.oBundle.getText("levelNo"),
+                        property: 'levelNo'
+                    },
+                    {
+                        label: this.oBundle.getText("mpnChildPn"),
+                        property: 'mpnChildPn'
+                    },
+                    {
+                        label: this.oBundle.getText("bomVersion"),
+                        property: 'bomVersion'
+                    },
+                    {
+                        label: this.oBundle.getText("modifiedAt"),
+                        property: 'modifiedAt'
+                    },
+                    {
+                        label: this.oBundle.getText("modifiedBy"),
+                        property: 'modifiedBy'
+                    },
+                    {
+                        label: this.oBundle.getText("errordetails"),
+                        property: 'errordetails'
+                    }
+                ];
+            },
+            /**
+            *  method for downloading the excel file
+            */
+            _exportData: function(data) {
+                var aCols = this._createColumnConfig();
+                var sName = "ErrorLogs" + "_" + this._formatDate(new Date());
+                var oModel = new JSONModel(data);
+                var aData = oModel.getProperty('/');
+                var oSettings = {
+                    workbook: { columns: aCols },
+                    dataSource: aData,
+                    fileName: sName,
+                };
+                var oSheet = new Spreadsheet(oSettings);
+                oSheet.build()
+                    .then(function () {
+                        MessageToast.show(this.oBundle.getText("EXPORTED"));
+                    })
+                    .finally(oSheet.destroy);
+            },
+            /**
+             * convert date into specfic format
+             * @param {object} date - date type
+             * @name _formatDate
+             * @private
+             */
+            _formatDate: function (date) {
+                const year = date.getFullYear();
+                const shortYear = year.toString().slice(-2);
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${shortYear}${month}${day}${hours}${minutes}`;
+            },
+        });
+    });
+
+
+
+    app/pumorifacstatusdashboard/webapp/service/FacStatusService.js
+
+
+
+    sap.ui.define([
+    "./CoreService",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
+], function (CoreService, Filter, FilterOperator) {
+    "use strict";
+
+    var FacStatusService = CoreService.extend("pumorips.pumoriconfig.pumorifacstatusdashboard.service.FacStatusService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        },
+        
+        /**
+       * Odata service for Download template
+       * **/
+        DownloadErrHistory: function (FileName) {
+            return this.odata("/StatusResponseData").post(FileName);
+        }
+    });
+    return FacStatusService;
+});
+
+
+
+
+app/pumorifacstatusdashboard/webapp/state/FacStatusState.js
+
+
+
+sap.ui.define([
+    "../state/BaseState",
+], function (BaseState) {
+    "use strict";
+    var FacStatusState = BaseState.extend("pumorips.pumoriconfig.pumorifacstatusdashboard.state.FacStatusState", {
+        constructor: function (oService) {
+            this.data = {
+                display: true,
+                busy: true                
+            };
+            this.FacStatusService = oService;
+            BaseState.call(this);
+        }
+       
+
+    });
+    return FacStatusState;
+});
+
+
+
+app/pumorifacstatusdashboard/webapp/Component.js
+
+
+
+
+/**
+ * eslint-disable @sap/ui5-jsdocs/no-jsdoc
+ */
+
+sap.ui.define([
+        "sap/ui/core/UIComponent",
+        "sap/ui/Device",
+        "pumorips/pumoriconfig/pumorifacstatusdashboard/model/models",
+        './service/FacStatusService',
+        './state/FacStatusState',
+        'sap/ui/model/json/JSONModel'
+    ],
+    function (UIComponent, Device, models,FacStatusService,FacStatusState,JSONModel) {
+        "use strict";
+
+        return UIComponent.extend("pumorips.pumoriconfig.pumorifacstatusdashboard.Component", {
+            metadata: {
+                manifest: "json"
+            },
+
+            /**
+             * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
+             * @public
+             * @override
+             */
+            init: function () {
+                // call the base component's init function
+                UIComponent.prototype.init.apply(this, arguments);
+
+                // enable routing
+                this.getRouter().initialize();
+
+                // set the device model
+                this.setModel(models.createDeviceModel(), "device");
+
+                var jsonModel = new JSONModel();
+                this.setModel(jsonModel, "oJsonModel");
+
+                this._oFacStatusService = new FacStatusService(this.getModel());
+                this._oFacStatusState = new FacStatusState(this._oFacStatusService);
+                this.setModel(this._oFacStatusState.getModel(), 'oModel');
+            },
+            
+            getService: function (sService) {
+                return this["_o" + sService + "Service"];
+            }, 
+            getState: function (sState) {
+                return this["_o" + sState + "State"];
+            }
+        });
+    }
+);
+
+
+
+app/pumorifacstatusdashboard/webapp/manifest.json
+
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.pumoriconfig.pumorifacstatusdashboard",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.13.0",
+      "toolsId": "599b8c98-e561-4c32-9cf8-740d37259488"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/pumori-config/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "pumoripsfacstatusdashboard-Display": {
+          "semanticObject": "pumoripsfacstatusdashboard",
+          "action": "Display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.122.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.pumoriconfig.pumorifacstatusdashboard.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.pumoriconfig.pumorifacstatusdashboard.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "PumFacStatusDashboard",
+          "pattern": "",
+          "target": [
+            "TargetPumFacStatusDashboard"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetPumFacStatusDashboard": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "PumFacStatusDashboard",
+          "viewName": "PumFacStatusDashboard"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "pumorips.pumoriconfig.pumorifacstatusdashboard.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSCONFIG"
+  }
+}
+
+
+
+app/pumorifacstatusdashboard/xs-app.json
+
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumoripsconfig-srv-api",
+      "csrfProtection": false
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa"
+    }
+  ]
+}
+
+
+

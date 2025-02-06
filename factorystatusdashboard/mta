@@ -1,0 +1,145 @@
+_schema-version: "3.1"
+ID: pumorips_config
+description: Display pumori manage config.
+version: 1.0.0
+modules:
+- name: pumorips_config-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: PUMORIPS_CONFIG
+  - name: uaa_pumorips_config
+  - name: pumori_app_logging-service
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+  build-parameters:
+    builder: npm
+    ignore: ["node_modules/"]
+- name: pumorips_config-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: PUMORIPS_CONFIG
+    properties:
+      TARGET_CONTAINER: PUMORIPS_CONFIG
+  parameters:
+    buildpack: nodejs_buildpack
+- name: pumorips_config-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: pumorips_config-destination-service
+    parameters:
+      content-target: true
+  - name: pumorips_config_html_repo_host
+    parameters:
+      service-key:
+        name: pumorips_config_html_repo_host-key
+  - name: uaa_pumorips_config
+    parameters:
+      service-key:
+        name: uaa_pumorips_config-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: PSCONFIG_pumorips_config_html_repo_host
+          ServiceInstanceName: pumorips_config-html5-app-host-service
+          ServiceKeyName: pumorips_config_html_repo_host-key
+          sap.cloud.service: PSCONFIG
+        - Authentication: OAuth2UserTokenExchange
+          Name: PSCONFIG_uaa_pumorips_config
+          ServiceInstanceName: pumorips_config-xsuaa-service
+          ServiceKeyName: uaa_pumorips_config-key
+          sap.cloud.service: PSCONFIG
+        existing_destinations_policy: update
+  build-parameters:
+    no-source: true
+- name: pumorips_config-app-content
+  type: com.sap.application.content
+  path: app
+  requires:
+  - name: pumorips_config_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - pumoripspumoriconfigpumorifacstatusdashboard.zip
+      name: pumoripspumoriconfigpumorifacstatusdashboard
+      target-path: resources/
+- name: pumoripspumoriconfigpumorifacstatusdashboard
+  type: html5
+  path: app/pumorifacstatusdashboard
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: PUMORIPS_CONFIG
+  type: com.sap.xs.hdi-container
+  parameters:
+    config:
+      schema: PUMORIPS_CONFIG
+    service: hana
+    service-plan: hdi-shared
+- name: pumorips_config-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            HTML5.DynamicDestination: true
+            HTML5.ForwardAuthToken: true
+            Name: pumoripsconfig-srv-api
+            ProxyType: Internet
+            Type: HTTP
+            URL: ~{srv-api/srv-url}
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: pumorips_config-destination-service
+    service-plan: lite
+  requires:
+  - name: srv-api
+- name: pumorips_config_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: pumorips_config-html5-app-host-service
+    service-plan: app-host
+- name: pumori_app_logging-service
+  type: org.cloudfoundry.existing-service
+  parameters:
+    service: application-logs
+    service-name: pumori_app_logging-service
+- name: uaa_pumorips_config
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: pumorips_config-xsuaa-service
+    service-plan: application
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npx -p @sap/cds-dk cds build --production

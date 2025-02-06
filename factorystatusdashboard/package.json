@@ -1,0 +1,85 @@
+{
+    "name": "pumorips_config",
+    "version": "1.0.0",
+    "description": "Display pumori manage config.",
+    "repository": "<Add your repository here>",
+    "license": "UNLICENSED",
+    "private": true,
+    "dependencies": {
+      "@sap/cds": "^6",
+      "@sap/cds-hana": "^2",
+      "@sap/cds-odata-v2-adapter-proxy": "^1.9.21",
+      "@sap/hana-client": "^2.19.21",
+      "@sap/hdbext": "^7.6.5",
+      "@sap/hdi-deploy": "^4.9.2",
+      "@sap/textbundle": "^4.1.0",
+      "@sap/xsenv": "^4.2.0",
+      "@sap/xssec": "3.6.1",
+      "axios": "^0.27.2",
+      "express": "^4",
+      "hdb": "^0.19.7",
+      "passport": "^0",
+      "sap-hdbext-promisfied": "^2.202208.1",
+      "xlsx": "^0.18.5"
+    },
+    "devDependencies": {
+      "@sap/cds-dk": "^7",
+      "@sap/ux-specification": "^1.120.6",
+      "rimraf": "5.0.5"
+    },
+    "scripts": {
+      "start": "cds-serve",
+      "watch-pumoriconfig": "cds watch --open pumoriconfig/webapp/index.html?sap-ui-xx-viewCache=false",
+      "undeploy": "cf undeploy pumorips_config --delete-services --delete-service-keys --delete-service-brokers",
+      "build": "rimraf resources mta_archives && mbt build --mtar archive",
+      "deploy": "cf deploy mta_archives/archive.mtar --retries 1",
+      "watch-pumorifacstatusdashboard": "cds watch --open pumorifacstatusdashboard/webapp/index.html?sap-ui-xx-viewCache=false"
+    },
+    "eslintConfig": {
+      "extends": "eslint:recommended",
+      "env": {
+        "es2020": true,
+        "node": true,
+        "jest": true,
+        "mocha": true
+      },
+      "globals": {
+        "SELECT": true,
+        "INSERT": true,
+        "UPDATE": true,
+        "DELETE": true,
+        "CREATE": true,
+        "DROP": true,
+        "CDL": true,
+        "CQL": true,
+        "CXL": true,
+        "cds": true
+      },
+      "rules": {
+        "no-console": "off",
+        "require-atomic-updates": "off"
+      }
+    },
+    "cds": {
+      "requires": {
+        "db": {
+          "kind": "hana"
+        },
+        "uaa": {
+          "kind": "xsuaa"
+        }
+      },
+      "auth": {
+        "passport": {
+            "strategy": "JWT"
+        }
+      },
+      "hana": {
+        "deploy-format": "hdbtable"
+      }
+    },
+    "sapux": [
+      "app/pumorifacstatusdashboard"
+      
+    ]
+  }
