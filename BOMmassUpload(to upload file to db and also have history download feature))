@@ -1,0 +1,1222 @@
+NOTE: THIS APP IS MADE IN SAME REPO AS DISPLAY BOM SO ALL THE COMMON CODE SUCH AS MODEL.CDS AND SERVICE.CDS AND SERVICES.CDS IS IN display bom (tree structure) FILE 
+
+
+
+app/psmassuploadui/webapp/view/MassUploadList.view.xml
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Bom Upload 
+ RICEFW No                : 
+ Release                  :   M2 Release  
+ Author                   :   Chowdhary,Mamtha
+ Date                     :   01.08.2024
+ Description              :   Bom Upload
+ *Descriptions: Displays functionality for Upload, Upload History and Download template  
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<mvc:View controllerName="pumorips.bomdisplay.psmassuploadui.controller.MassUploadList"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	xmlns:u="sap.ui.unified"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:table="sap.ui.table"
+	>
+    <Page id="page" title="{i18n>title}" showHeader="false">
+        <content>
+        <VBox fitContainer="true" id="idVbox" >
+                <OverflowToolbar
+                    id="_IDGenOverflowToolbar1"
+                    style="Standard"
+                    design="Transparent"
+                >
+                    <content>
+                        <ToolbarSpacer id="_IDGenToolbarSpacer1" />
+
+                        <Button
+                            id="UpldHisId"
+                            text="{i18n>UPLOAD_HIS}"
+                            press="onStatusClk"
+                            
+                        />
+                        <Text
+                            id="actnId"
+                            text="{i18n>actionText}"
+                        />
+                        <Button
+                            id="ExcelButton"
+                            text="{i18n>Download}"
+                            press="onDownloadTemplate"
+                            type="Default"
+                        />
+                    </content>
+                </OverflowToolbar>
+
+                <form:SimpleForm
+                    id="SimpleformId"
+                    editable="true"
+                    layout="ResponsiveGridLayout"
+                    labelSpanXL="1"
+                    labelSpanL="1"
+                    labelSpanM="1"
+                    labelSpanS="1"
+                    adjustLabelSpan="false"
+                    emptySpanXL="8"
+                    emptySpanL="8"
+                    emptySpanM="8"
+                    emptySpanS="0"
+                    columnsXL="1"
+                    columnsL="1"
+                    columnsM="1"
+                    singleContainerFullSize="false"
+                >
+                    <form:content>
+                        <Title
+                            id="title"
+                            text="{i18n>uploadTitle}"
+                        />
+                        <Label
+                            id="idlabel"
+                            text=""
+                        />
+                        <u:FileUploader
+                            id="fileUploaderSelectedParts"
+                            name="myFileUpload"
+                            uploadUrl="upload/"
+                            typeMissmatch="handleTypeMissmatch"
+                            uploadComplete="handleUploadComplete"
+                            change="handleValueChange"
+                            fileType="xlsx,csv"
+                            style="Emphasized"
+                        />
+                    </form:content>
+                </form:SimpleForm>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>
+
+
+
+app/psmassuploadui/webapp/view/fragments/BomUploadStatus.fragment.xml
+
+
+
+<!-- 
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :    Bom Upload
+ RICEFW No                : 
+ Release                  :    
+ Author                   :    Chowdhary,Mamtha
+ Date                     :    01.08.2024
+ Description              :    Bom Upload
+ *Descriptions:   Upload History fragment
+ ****************************************************************
+Change Log:
+    Date       |   Author      |   Defect/Incident     |   Change Description
+**************************************************************** -->
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:table="sap.ui.table">
+	<Dialog stretch="true" verticalScrolling="true" horizontalScrolling="true" title="{i18n>frgTtl}"
+		class="sapUiSizeCompact"  titleAlignment="Center" id="idDialog">
+		<content>
+        
+			<table:Table  id="id_Loc_history" rows="{ path:'oBasicDataModel>/aBckOriginalData', sorter: { path: 'modifiedAt',descending:true}}" alternateRowColors="true" selectionMode="None"
+				class="sapUiMediumMarginTop">
+				<table:rowMode>
+					<rowmodes:Auto xmlns:rowmodes="sap.ui.table.rowmodes" id="idRowM" minRowCount="10"/>
+				</table:rowMode>
+				<table:columns>
+					<table:Column hAlign="Center" id="idPrcessCol">
+						<Label text="{i18n>PROCESS_ID}" textAlign="Center" id="idPrcessL"/>
+						<table:template>
+							<Text text="{oBasicDataModel>processId}" id="idPrcessT"/>
+						</table:template>
+					</table:Column>
+					<table:Column hAlign="Center" id="idStatCol">
+						<Label text="{i18n>STATUS}" textAlign="Center" id="idStatL"/>
+						<table:template>
+							<Text text="{oBasicDataModel>status}" id="idStatT"/>
+						</table:template>
+					</table:Column>
+					<table:Column hAlign="Center" id="idResCol">
+						<Label text="{i18n>RESPONCE}" textAlign="Center" id="idResL"/>
+						<table:template>
+							<Text text="{oBasicDataModel>records}" id="idResT"/>
+						</table:template>
+					</table:Column>
+                    <table:Column hAlign="Center" id="idUplCol">
+						<Label text="{i18n>UPLOAD_BY}" textAlign="Center" id="idUplL"/>
+						<table:template>
+							<Text text="{oBasicDataModel>modifiedBy}" id="idUplT"/>
+						</table:template>
+					</table:Column>
+                    <table:Column hAlign="Center" id="idUplTmeCol">
+						<Label text="{i18n>UPLOAD_TIME}" textAlign="Center" id="idUplTmeL"/>
+						<table:template>
+							<Text text="{path:'oBasicDataModel>modifiedAt',type:'sap.ui.model.type.Date',formatOptions:{pattern:'MMM dd, yyyy hh:mm'}}" id="idUplTmeT"/>
+						</table:template>
+					</table:Column>
+                    <table:Column hAlign="Center" id="idErrCol">
+						<Label text="{i18n>ERROR_LOG}" textAlign="Center" id="idErrL"/>
+						<table:template>
+							<Button icon="sap-icon://download" visible="{oBasicDataModel>errorVisible}" press="onPressDownloadError" id="idErrBtn"/>
+						</table:template>
+					</table:Column>
+				</table:columns>
+			</table:Table>
+		</content>
+		<beginButton>
+			<Button text="{i18n>CLOSE}" press="oncloseUploadStatus" id="idCloseUpld"/>
+		</beginButton>
+	</Dialog>
+</core:FragmentDefinition>
+
+
+
+app/psmassuploadui/webapp/controller/BaseController.js
+
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Bom Upload 
+// WRICEF No        :    
+// Release          :    M2 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    01.08.2024
+// Description      :    Bom Upload
+//-----------------------------------------------------------------------------------*
+//Descriptions: Contains all the re-usable functions
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/core/UIComponent",
+    "sap/m/MessageBox"
+], function (Controller, UIComponent, MessageBox) {
+    "use strict";
+
+    return Controller.extend("pumorips.bomdisplay.psmassuploadui.controller.BaseController", {
+		/**
+		 * Convenience method for accessing the router.
+		 * @public
+		 * @returns {sap.ui.core.routing.Router} the router for this component
+		 */
+
+        getRouter: function () {
+            return UIComponent.getRouterFor(this);
+        },
+
+		/**
+		 * Convenience method for getting the view model by name.
+		 * @public
+		 * @param {string} [sName] the model name
+		 * @returns {sap.ui.model.Model} the model instance
+		 */
+        getModel: function (sName) {
+            return this.getView().getModel(sName);
+        },
+
+		/**
+		 * Convenience method for setting the view model.
+		 * @public
+		 * @param {sap.ui.model.Model} oModel the model instance
+		 * @param {string} sName the model name
+		 * @returns {sap.ui.mvc.View} the view instance
+		 */
+        setModel: function (oModel, sName) {
+            return this.getView().setModel(oModel, sName);
+        },
+
+		/**
+		 * Getter for the resource bundle.
+		 * @public
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundle: function () {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
+        },
+        /**
+		 * Getter for the resource bundle text.
+		 * @public
+         * @param 
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundleText: function (sTextProperty) {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle().getText(sTextProperty);
+        },
+		/**
+		 * Convenience method for displaying error messages
+		 * @public
+		 */
+
+        showMsgBoxError: function (message) {
+            var title = this.getResourceBundle().getText("ErrorDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.ERROR,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+
+        },
+        showMsgBoxSuccess: function (message) {
+            var title = this.getResourceBundle().getText("SuccessDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.SUCCESS,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        showMsgBoxWarning: function (message) {
+            var title = this.getResourceBundle().getText("WarningDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.WARNING,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        showMsgBoxInformation: function (message) {
+            var title = "Information"
+            var title = this.getResourceBundle().getText("InformationDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.INFORMATION,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        _getUserInfoService: function () {
+            return new Promise(resolve => sap.ui.require([
+                "sap/ushell/library"
+            ], oSapUshellLib => {
+                const oContainer = oSapUshellLib.Container;
+                const pService = (oContainer) ? oContainer.getServiceAsync("UserInfo") : ""; // .getService is deprecated!
+                resolve(pService);
+            }));
+        }
+
+    });
+
+});
+
+
+
+app/psmassuploadui/webapp/controller/MassUploadList.controller.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Bom Upload 
+// WRICEF No        :    
+// Release          :    M2 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    01.08.2024
+// Description      :    Bom Upload
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for display filter and table in the app
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/export/Spreadsheet",
+    "sap/m/MessageBox"
+],
+    function (BaseController, JSONModel, Spreadsheet, MessageBox) {
+        "use strict";
+
+        return BaseController.extend("pumorips.bomdisplay.psmassuploadui.controller.MassUploadList", {
+            /* =========================================================== */
+            /* lifecycle methods                                           */
+            /* =========================================================== */
+            /**
+            * This method will trigger once during app initialization
+            * **/
+            onInit: function () {
+                this.MassUpdSrv = this.getOwnerComponent().getService('MassUpd');
+            },
+
+            /* =========================================================== */
+            /* internal methods                                            */
+            /* =========================================================== */
+            
+            /**
+             *  method to read and validate uploaded excel
+             */
+            _onUploadBom: function () {
+                var oThisController = this;
+                var oFileUploader = this.getView().byId("fileUploaderSelectedParts"),
+                    fSelectedFile = oFileUploader.getValue().split(".");
+                oThisController.fileType = oFileUploader.getValue().split(".")[1];
+                var fileDetails = oFileUploader.oFileUpload.files[0];
+                var oView = this.getView();
+                oView.setBusy(true);
+                sap.ui.getCore().fileUploadArr = [];
+                if (fileDetails && oThisController.fileType === "csv") {
+                    var mimeDet = fileDetails.type,
+                        fileName = fileDetails.name;
+
+                    // Calling method....
+                    this._base64conversionMethod(mimeDet, fileName, fileDetails, "001");
+                } else {
+                    oThisController.showMsgBoxError(this.getResourceBundleText("VALID_CHOICE"));
+                    oView.setBusy(false);
+
+                }
+
+            },
+            /**
+                *  method to convert the excel data to base64
+            */
+
+            _base64conversionMethod: function (fileMime, fileName, fileDetails, DocNum) {
+                var that = this;
+                if (!FileReader.prototype.readAsBinaryString) {
+                    FileReader.prototype.readAsBinaryString = function (fileData) {
+                        var binary = "";
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            var bytes = new Uint8Array(reader.result);
+                            var length = bytes.byteLength;
+                            for (var i = 0; i < length; i++) {
+                                binary += String.fromCharCode(bytes[i]);
+                            }
+                            that.base64ConversionRes = btoa(binary);
+                            sap.ui.getCore().fileUploadArr.push({
+                                "DocumentType": DocNum,
+                                "MimeType": fileMime,
+                                "FileName": fileName,
+                                "Content": that.base64ConversionRes,
+                            });
+                        };
+                        reader.readAsArrayBuffer(fileData);
+                    };
+                }
+                var reader = new FileReader();
+                var excelpayload;
+                reader.onload = function (readerEvt) {
+                    var binaryString = readerEvt.target.result;
+                    that.base64ConversionRes = btoa(binaryString);
+                    sap.ui.getCore().fileUploadArr.push({
+                        "DocumentType": DocNum,
+                        "MimeType": fileMime,
+                        "FileName": fileName,
+                        "Content": that.base64ConversionRes,
+
+                    });
+                    excelpayload = sap.ui.getCore().fileUploadArr[0].Content;
+                    var sfileName = sap.ui.getCore().fileUploadArr[0].FileName;
+                    that._sendPayload(excelpayload, sfileName);
+                };
+                reader.readAsBinaryString(fileDetails);
+            },
+
+            /**
+            *  method for service call to Upload Data in Pumori Product Loc Table
+            */
+            _sendPayload: async function (payload, sfileName) {
+                var that = this;
+                var oView = this.getView();
+                oView.setBusy(true);
+                var oUserInfo = await this._getUserInfoService();
+                var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                return this.MassUpdSrv.uploadData({ 'payload': payload, 'fileName': sfileName, 'userEmail': sModifiedBy }).then(
+                    function (data) {
+                        MessageBox.success(this.getResourceBundleText("SuccessMSG"), {
+                            onClose: function () {
+                                that.resetFileuploader();
+                            }
+                        });
+                        oView.setBusy(false);
+                    }.bind(this),
+                    function (error) {
+                        var oerrMsg = JSON.parse(error.responseText).error.message.value;
+                        MessageBox.error(oerrMsg, {
+                            onClose: function () {
+                                that.resetFileuploader();
+                            }
+                        });
+                        oView.setBusy(false);
+                    }.bind(this));
+            },
+
+            /**
+            * Getter for the user details through userinfo service.
+            * @public
+            */
+            _getUserInfoService: function () {
+                return new Promise(resolve => sap.ui.require([
+                    "sap/ushell/library"
+                ], oSapUshellLib => {
+                    const oContainer = oSapUshellLib.Container;
+                    const pService = (oContainer) ? oContainer.getServiceAsync("UserInfo") : ""; // .getService is deprecated!
+                    resolve(pService);
+                }));
+            },
+
+            /**
+                *  method for validate the uploaded excel
+            */
+            _setHistoryData: function (aHistory) {
+
+                var oBasicDataModel = this.getOwnerComponent().getModel("oBasicDataModel");
+                aHistory.forEach(function (rowIndexObj) {
+                    var records = rowIndexObj.records;
+                    if (records) {
+                        var n = records.lastIndexOf(':');
+                        var error = records.substring(n + 2);
+
+                        if (error == '0') {
+
+                            rowIndexObj.errorVisible = false;
+                        }
+                        else {
+                            rowIndexObj.errorVisible = true;
+                        }
+
+                    } else {
+                        rowIndexObj.errorVisible = false;
+
+                    }
+                });
+                oBasicDataModel.setProperty("/oBasicDataModel", aHistory);
+            },
+            /**
+            *  method for creating columns for excel download
+            */
+            _createColumnConfig: function (oEvent) {
+
+                return [
+                    {
+                        label: this.getResourceBundleText("appname"),
+                        property: 'appName'
+                    },
+                    {
+                        label: this.getResourceBundleText("ProcessID"),
+                        property: 'processId'
+                    },
+                    {
+                        label: this.getResourceBundleText("MPA_FPN_P"),
+                        property: 'zmpaPartno'
+                    },
+                    {
+                        label: this.getResourceBundleText("facCode"),
+                        property: 'factoryNumber'
+                    },
+                    {
+                        label: this.getResourceBundleText("alternativeBom"),
+                        property: 'alternativeBom'
+                    },
+                    {
+                        label: this.getResourceBundleText("lvlNO"),
+                        property: 'levelNo'
+                    },
+                    {
+                        label: this.getResourceBundleText("mpnChildPn"),
+                        property: 'mpnChildPn'
+                    },
+                    {
+                        label: this.getResourceBundleText("BOM_VERSION"),
+                        property: 'bomVersion'
+                    },
+                    {
+                        label: this.getResourceBundleText("errdtls"),
+                        property: 'errordetails'
+                    },
+                ];
+            },
+            _exportData: function (data) {
+                var aCols = this._createColumnConfig();
+                var sName = this.getResourceBundleText("exclNm")
+                var oModel = new JSONModel(data);
+                var aData = oModel.getProperty('/');
+                var oSettings = {
+                    workbook: { columns: aCols },
+                    dataSource: aData,
+                    fileName: sName,
+                };
+                var oSheet = new Spreadsheet(oSettings);
+                oSheet.build()
+                    .then(function () {
+                        MessageToast.show(this.getResourceBundleText("EXPORTED"));
+                    })
+                    .finally(oSheet.destroy);
+            },
+
+
+            /**
+             * Triggerd on change of FileUploader
+             * Calls onUploadBom() function
+            **/
+            handleValueChange: function () {
+                this._onUploadBom();
+            },
+
+
+            /**
+            * triggers when clicked on Upload History to open Upload History Fragment
+            */
+            onStatusClk: function () {
+                var oView = this.getView();
+                oView.setBusy(true);
+                var oThisController = this;
+                var oBasicDataModel = this.getOwnerComponent().getModel("oBasicDataModel");
+                oBasicDataModel.setProperty("/sHistorySearch", "");
+
+                if (!oThisController.UploadFragmentOpen) {
+                    oThisController.UploadFragmentOpen = sap.ui.xmlfragment("pumorips.bomdisplay.psmassuploadui.view.fragments.BomUploadStatus", oThisController);
+                }
+                this.MassUpdSrv.UploadHistory().then(
+                    function (data) {
+                        oView.setBusy(false);
+                        oThisController._setHistoryData(data.data.results);
+                        oBasicDataModel.setProperty("/aBckOriginalData", data.data.results);
+                        oBasicDataModel.setProperty("/aBckServiceData", data.data.results);
+                        oThisController.getView().addDependent(oThisController.UploadFragmentOpen);
+                        var list = sap.ui.getCore().byId("id_Loc_history")
+                        var binding = list.getBinding("rows");
+                        binding.filter([]);
+                        oThisController.UploadFragmentOpen.open();
+
+
+                    }.bind(this),
+                    function (error) {
+                        oView.setBusy(false);
+                    }.bind(this));
+
+            },
+            /**
+             * triggers when Upload History Dialog is closed
+             */
+            oncloseUploadStatus: function () {
+                var oThisController = this;
+                oThisController.UploadFragmentOpen.close();
+            },
+
+
+
+            /**
+             * Called when ok button is pressed on the MessageBox
+             * Clears the fileuploader, changes the name 
+            */
+            resetFileuploader: function () {
+                var fileUploader = this.getView().byId("fileUploaderSelectedParts");
+                fileUploader.clear();
+            },
+
+            /**
+             * triggers when error  History download button is clicked
+             */
+            onPressDownloadError: function (oEvent) {
+                var oThisController = this;
+                var oView = this.getView();
+                oView.setBusy(true);
+                var oSelItem = oEvent.getSource().getBindingContext("oBasicDataModel").getObject();
+                oSelItem.processId;
+                this.MassUpdSrv.DownloadErrHistory(oSelItem.processId, oSelItem.appName).then(
+                    function (data) {
+                        oView.setBusy(false);
+                        oThisController._exportData(data.data.results);
+                    }.bind(this),
+                    function (error) {
+                        oView.setBusy(false);
+                    }.bind(this));
+            },
+
+            /**
+             * triggers when clicked on download Template
+            */
+            onDownloadTemplate: function () {
+                var fileName = "BomUpload.csv";
+                var sURL = sap.ui.require.toUrl(`pumorips/bomdisplay/psmassuploadui/excelTemplate/${fileName}`);
+                const oA = document.createElement("a");
+                oA.href = sURL;
+                oA.style.display = "none";
+                document.body.appendChild(oA);
+                oA.click();
+                document.body.removeChild(oA);
+            }
+
+        });
+    });
+
+
+
+    app/psmassuploadui/webapp/excelTemplate/BomUpload.csv is a template file for bulk uploading BOM (Bill of Materials) data.
+
+    *FACTORY_PARENT_PN,*FACTORY_CODE,*ALTERNATE_BOM,*PARENT_PART_DESC,HPPN,*BASE_QUANTITY,*BASE_UOM,*BOM_VALID_FROM,*BOM_VALID_TO,BOM_VERSION,MARKEDFORDELETION,YIELD,PLANNINGDIV,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,
+*FACTORY_PARENT_PN,*FACTORY_CODE,*LINE_NO,*LEVEL_NO,*FACTORY_CHILD_PN,*MPN_CHILD_PN,*DESCRIPTION,HPPN_CHILD,*UNT_USG,*UOM,SOURCE_CD,VENDOR_ID,MANUF_NAME,SORT_STRING,*MARKET_SHARE,ALTERNATIVE_ITEM_FLAG,ALTERNATE_ITEM_GROUP,SCRAP,*COMPONENT_VALID_FROM,*COMPONENT_VALID_TO,PHANTOM_BOM,MANUFACTURING_OVERHEAD  ,COST_OF_COMPONENTS,ROLL_UP_COST
+
+
+
+app/psmassuploadui/webapp/service/CoreService.js
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    BOM Upload
+// WRICEF No        :    
+// Release          :   
+// Author           :    Chowdhary,Mamtha
+// Date             :    09.05.2024
+// Description      :    BOM Upload
+//-----------------------------------------------------------------------------------*
+//Descriptions: Core service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object"
+], function (Object) {
+	"use strict";
+
+	return Object.extend("pumorips.bomdisplay.psmassuploadui.service.CoreService", {
+		constructor: function (model) {
+			Object.call(this);
+			if (model) {
+				this.setModel(model);
+			}
+		},
+		setModel: function (model) {
+			this.model = model;
+		},
+		odata: function (url) {
+			var me = this;
+			var core = {
+				ajax: function (type, url, data, parameters) {
+					var promise = new Promise(function (resolve, reject) {
+						var args = [];
+						var params = {};
+						args.push(url);
+						if (data) {
+							args.push(data);
+						}
+						if (parameters) {
+							params = parameters;
+						}
+						params.success = function (result, response) {
+							resolve({
+								data: result,
+								response: response
+							});
+						};
+						params.error = function (error) {
+							reject(error);
+						};
+						args.push(params);
+						me.model[type].apply(me.model, args);
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (params) {
+					return core.ajax('read', url, false, params);
+				},
+				'post': function (data, params) {
+					return core.ajax('create', url, data, params);
+				},
+				'put': function (data, params) {
+					return core.ajax('update', url, data, params);
+				},
+				'delete': function (params) {
+					return core.ajax('remove', url, false, params);
+				}
+			};
+		},
+		http: function (url) {
+			var core = {
+				ajax: function (method, url, headers, args) {
+					var promise = new Promise(function (resolve, reject) {
+						var client = new XMLHttpRequest();
+						var uri = url;
+						if (args && method === 'GET') {
+							uri += '?';
+							var argcount = 0;
+							for (var key in args) {
+								if (args.hasOwnProperty(key)) {
+									if (argcount++) {
+										uri += '&';
+									}
+									uri += encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+								}
+							}
+						}
+						if (args && (method === 'POST' || method === 'PUT')) {
+							var data = {};
+							for (var keyp in args) {
+								if (args.hasOwnProperty(keyp)) {
+									data[keyp] = args[keyp];
+								}
+							}
+						}
+						client.open(method, uri);
+						
+						if (method === 'POST' || method === 'PUT') {
+							client.setRequestHeader("accept", "application/json");
+							client.setRequestHeader("content-type", "application/json");
+						}
+						for (var keyh in headers) {
+							if (headers.hasOwnProperty(keyh)) {
+								client.setRequestHeader(keyh, headers[keyh]);
+							}
+						}
+						if (data) {
+							client.send(JSON.stringify(data));
+						} else {
+							client.send();
+						}
+						client.onload = function () {
+							if (this.status == 200) {
+								resolve(this.response);
+							} else {
+								reject(this.statusText);
+							}
+						};
+						client.onerror = function () {
+							reject(this.statusText);
+						};
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (headers, args) {
+					return core.ajax('GET', url, headers, args);
+				},
+				'post': function (headers, args) {
+					return core.ajax('POST', url, headers, args);
+				},
+				'put': function (headers, args) {
+					return core.ajax('PUT', url, headers, args);
+				},
+				'delete': function (headers, args) {
+					return core.ajax('DELETE', url, headers, args);
+				}
+			};
+		}
+	});
+});
+
+
+app/psmassuploadui/webapp/service/MassUpdService.js
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    BOM Upload 
+// WRICEF No        :    
+// Release          :    M2 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    09.05.2024
+// Description      :    BOM Upload
+//-----------------------------------------------------------------------------------*
+//Descriptions: Application service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./CoreService",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+], function (CoreService, Filter, FilterOperator) {
+    "use strict";
+
+    var MassUpdService = CoreService.extend("pumorips.bomdisplay.psmassuploadui.service.MassUpdService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        },
+        /**
+        * Odata service for upload operation
+        * **/
+       uploadData:function(oSaveData){
+        return this.odata("/BOMMassUpload").post(oSaveData); 
+       },
+       /**
+        * Odata service for read operation
+        * **/
+       UploadHistory: function(){
+            var aFilters = [];
+            aFilters.push(new Filter("appName", FilterOperator.EQ, "BOM"));
+            var mParameters = {
+                filters: aFilters
+            };
+            return this.odata("/UploadHistoryView").get(mParameters);
+        },
+        /**
+            * Odata service for read operation
+            * **/
+        DownloadErrHistory:function(prcId,appName){
+            var aFilters = [];
+            aFilters.push(new Filter("appName", FilterOperator.EQ, appName));
+            aFilters.push(new Filter("processId", FilterOperator.EQ, prcId));
+            var mParameters = {
+                filters: aFilters
+            };
+            return this.odata("/UploadResponseView").get(mParameters);
+        }
+    });
+    return MassUpdService;
+});
+
+
+
+app/psmassuploadui/webapp/state/BaseState.js
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    BOM Upload
+// WRICEF No        :    
+// Release          :   
+// Author           :    Chowdhary,Mamtha
+// Date             :    09.05.2024
+// Description      :    BOM Upload
+//-----------------------------------------------------------------------------------*
+//Descriptions: Base State file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object",
+	"sap/ui/model/json/JSONModel"
+], function(Object, JSONModel) {
+	"use strict";
+	return Object.extend("pumorips.bomdisplay.psmassuploadui.state.BaseState", {
+       
+		getModel: function() {
+			if (!this.model) {
+				this.model = new JSONModel(this.data, true);
+			}
+			return this.model;
+		},
+		updateModel: function(bHardRefresh) {
+			if (this.model) {
+				this.model.refresh(bHardRefresh ? true : false);
+			}
+		}
+	});
+});
+
+
+
+app/psmassuploadui/webapp/state/MassUpdState.js
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    BOM Upload 
+// WRICEF No        :    
+// Release          :    M2 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    09.05.2024
+// Description      :    BOM Upload
+//-----------------------------------------------------------------------------------*
+//Descriptions: Application state file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "../state/BaseState",
+], function (BaseState) {
+    "use strict";
+    var MassUpdState = BaseState.extend("pumorips.bomdisplay.psmassuploadui.state.MassUpdState", {
+        constructor: function (oService) {
+            this.data = {
+                display: true,
+                busy: true                
+            };
+            this.MassUpdService = oService;
+            BaseState.call(this);
+        }
+       
+
+    });
+    return MassUpdState;
+});
+
+
+app/psmassuploadui/webapp/Component.js
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Bom Upload 
+// WRICEF No        :    
+// Release          :    M2 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    01.08.2024
+// Description      :    Bom Upload 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for model instantiation
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+        "sap/ui/core/UIComponent",
+        "sap/ui/Device",
+        "pumorips/bomdisplay/psmassuploadui/model/models",
+        "./service/MassUpdService",
+        "./state/MassUpdState"
+    ],
+    function (UIComponent, Device, models, MassUpdService, MassUpdState) {
+        "use strict";
+
+        return UIComponent.extend("pumorips.bomdisplay.psmassuploadui.Component", {
+            metadata: {
+                manifest: "json"
+            },
+
+            /**
+             * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
+             * @public
+             * @override
+             */
+            init: function () {
+                // call the base component's init function
+                UIComponent.prototype.init.apply(this, arguments);
+
+                // enable routing
+                this.getRouter().initialize();
+
+                // initialize receive service with the component
+                this._oMassUpdService = new MassUpdService(this.getModel());
+                // initialize receive state with the component
+                this._oMassUpdState = new MassUpdState(this._oMassUpdService);
+
+                // set the device model
+                this.setModel(models.createDeviceModel(), "device");
+            },
+            // Return the service name as per parameter
+            getService: function (sService) {
+                return this["_o" + sService + "Service"];
+            },
+            // Return the state name as per parameter
+            getState: function (sState) {
+                return this["_o" + sState + "State"];
+            }
+        });
+    }
+);
+
+
+
+app/psmassuploadui/webapp/manifest.json
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.bomdisplay.psmassuploadui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.14.1",
+      "toolsId": "098f889f-f0d1-40cb-881f-77c7d3ba3d10"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/bomdisplay/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "psmassupload-display": {
+          "semanticObject": "psmassupload",
+          "action": "display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.126.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.bomdisplay.psmassuploadui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "oBasicDataModel":{
+        "type":"sap.ui.model.json.JSONModel"
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.bomdisplay.psmassuploadui.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "MassUploadList",
+          "pattern": "",
+          "target": [
+            "TargetMassUploadList"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetMassUploadList": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "MassUploadList",
+          "viewName": "MassUploadList"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "pumorips.bomdisplay.psmassuploadui.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSBOMDISP"
+  }
+}
+
+
+
+app/psmassuploadui/xs-app.json
+
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumorips_bomdisp-srv-api",
+      "csrfProtection": false
+
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa"
+
+    }
+  ]
+}
