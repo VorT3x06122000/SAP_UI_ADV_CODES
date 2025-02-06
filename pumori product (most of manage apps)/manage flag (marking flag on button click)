@@ -1,0 +1,1069 @@
+app/manageflagui/webapp/view/ManageFlag.view.xml
+
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Manage Flag 
+ RICEFW No                : 
+ Release                  :   M1 Release  
+ Author                   :   Pahurkar, Vyankatesh
+ Date                     :   19.04.2024
+ Description              :   Manage Flag
+ *Descriptions: Manage Flag view page
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<mvc:View controllerName="pumorips.pumoriproduct.manageflagui.controller.ManageFlag"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+	xmlns:smartTable="sap.ui.comp.smarttable">
+    <Page id="page" title="{i18n>title}" showHeader="false">
+        <content>
+        
+        <smartFilterBar:SmartFilterBar id="smartFilterBar" persistencyKey="SmartFilterPKey" showMessages="true" showClearOnFB="true" clear="onClearPress" entitySet="manageflag" search=".onSFBSearch">
+                </smartFilterBar:SmartFilterBar>
+
+                <smartTable:SmartTable id="idSmartTable"  smartFilterId="smartFilterBar" tableType="ResponsiveTable" editable="false" entitySet="manageflag" useVariantManagement="true" showVariantManagement="true" 
+                        header="{i18n>title}" showRowCount="true" enableExport="true"  requestAtLeastFields="factoryNumber" ignoredFields="entity" 
+                        enableAutoBinding="false" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindTable"   persistencyKey="SmartTablePersistencyKey" demandPopin="true"
+                >
+                    <smartTable:customToolbar>
+                        <OverflowToolbar id="ovrflwtoolbr">
+                            <ToolbarSpacer id="toolbarSpaceId"/>
+                            <Button id="idactionbtn" enabled="false" text="{i18n>action}" class="sapUiSmallMargin" press=".onButtonPress" ariaHasPopup="Menu" visible="false">
+                                <dependents>
+                                    <ActionSheet id="actionSheet" title="{i18n>acttit}" showCancelButton="true" placement="Bottom">
+                                        <Button id="idStrtgic" text="{i18n>Strtgic}" press="onActionPress"/>
+										<Button id="idnonStrtgic" text="{i18n>nonStrtgic}" press="onActionPress" />
+                                    </ActionSheet>
+                                </dependents>
+                            </Button>
+                            <Button id="idactionResp" enabled="false" text="{i18n>actionResp}" class="sapUiSmallMargin" press=".onRespButtonPress" ariaHasPopup="Menu" visible="false">
+                                <dependents>
+                                    <ActionSheet id="actionSheetResp" title="{i18n>acttit}" showCancelButton="true" placement="Bottom">
+                                        <Button id="idResponse" text="{i18n>resp}" press="onActionRespPress"/>
+										<Button id="idRevert" text="{i18n>revert}" press="onActionRespPress" />
+                                    </ActionSheet>
+                                </dependents>
+                            </Button>
+                        </OverflowToolbar>
+                    </smartTable:customToolbar>
+                    <Table id="idTable" mode="MultiSelect" selectionChange="onItemSelect" sticky="ColumnHeaders,HeaderToolbar" growing="true" growingScrollToLoad="true" growingThreshold="20">
+                    </Table>
+
+                </smartTable:SmartTable>
+        
+        </content>
+    </Page>
+</mvc:View>
+
+
+
+app/manageflagui/webapp/controller/BaseController.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Flag
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Pahurkar, Vyankatesh
+// Date             :    18.04.2024
+// Description      :    Manage Flag
+//-----------------------------------------------------------------------------------*
+//Descriptions: Contains all the re-usable functions
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/core/UIComponent",
+    "sap/m/MessageBox"
+], function (Controller, UIComponent, MessageBox) {
+    "use strict";
+
+    return Controller.extend("pumorips.pumoriproduct.manageflagui.controller.BaseController", {
+		/**
+		 * Convenience method for accessing the router.
+		 * @public
+		 * @returns {sap.ui.core.routing.Router} the router for this component
+		 */
+
+        getRouter: function () {
+            return UIComponent.getRouterFor(this);
+        },
+
+		/**
+		 * Convenience method for getting the view model by name.
+		 * @public
+		 * @param {string} [sName] the model name
+		 * @returns {sap.ui.model.Model} the model instance
+		 */
+        getModel: function (sName) {
+            return this.getView().getModel(sName);
+        },
+
+		/**
+		 * Convenience method for setting the view model.
+		 * @public
+		 * @param {sap.ui.model.Model} oModel the model instance
+		 * @param {string} sName the model name
+		 * @returns {sap.ui.mvc.View} the view instance
+		 */
+        setModel: function (oModel, sName) {
+            return this.getView().setModel(oModel, sName);
+        },
+
+		/**
+		 * Getter for the resource bundle.
+		 * @public
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundle: function () {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
+        },
+        /**
+		 * Getter for the resource bundle text.
+		 * @public
+         * @param 
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundleText: function (sTextProperty) {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle().getText(sTextProperty);
+        },
+		/**
+		 * Convenience method for displaying error messages
+		 * @public
+		 */
+        //method to show error message
+        showMsgBoxError: function (message) {
+            var title = this.getResourceBundle().getText("Error");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.ERROR,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+
+        },
+        //method to show success message
+        showMsgBoxSuccess: function (message) {
+            var title = this.getResourceBundle().getText("Success");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.SUCCESS,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show warning message
+        showMsgBoxWarning: function (message) {
+            var title = this.getResourceBundle().getText("Warning");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.WARNING,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show information message
+        showMsgBoxInformation: function (message) {
+            var title = "Information"
+            var title = this.getResourceBundle().getText("InformationDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.INFORMATION,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        /**            * 
+          * function to fetch the logged in user details             *  
+          **/
+         _getUserInfoService: function () {
+            return new Promise(resolve => sap.ui.require([
+                "sap/ushell/library"
+            ], oSapUshellLib => {
+                const oContainer = oSapUshellLib.Container;
+                const pService = (oContainer) ? oContainer.getServiceAsync("UserInfo") : ""; // .getService is deprecated!
+                resolve(pService);
+            }));
+        },
+		
+
+    });
+
+});
+
+
+
+app/manageflagui/webapp/controller/ManageFlag.controller.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Flag
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Pahurkar, Vyankatesh
+// Date             :    18.04.2024
+// Description      :    Manage Flag
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for display filter and table in the app
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "sap/m/MessageBox",
+    "sap/m/MessageToast"
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (BaseController ,MessageBox,MessageToast) {
+        "use strict";
+
+        return BaseController.extend("pumorips.pumoriproduct.manageflagui.Controller.ManageFlag", {
+            onInit: function () {
+
+
+                this.ManageFlagSrv = this.getOwnerComponent().getService('ManageFlag');
+                this.ManageFlagState = this.getOwnerComponent().getState('ManageFlag');
+                this.getRouter().getRoute("ManageFlag").attachPatternMatched(this._onObjectMatched, this);
+
+            },
+
+            _onObjectMatched: function (oEve) {
+                 this._fetchAuthorizationScopes();
+
+            },
+            
+            /**
+           * Method for Fetch Authorization scopes
+           * **/
+            _fetchAuthorizationScopes: function () {
+                var that = this;
+                this.getView().setBusy(true);
+                this.ManageFlagSrv.fetchSecurityAuthScopes().then(
+                    function (oResponse) {
+                        var oSecurityScope = (oResponse.data.value) ? JSON.parse(oResponse.data.value) : JSON.parse(oResponse.data.SecurityAction);
+                        if (oSecurityScope.WithCost) {
+                            that.getView().byId("idactionbtn").setVisible(true);
+                            that.getView().byId("idactionResp").setVisible(true);   
+                        } 
+                        else if (oSecurityScope.WithoutCost) {
+
+                            that.getView().byId("idactionbtn").setVisible(true); 
+                            that.getView().byId("idactionResp").setVisible(true);  
+                        }
+                        else if (oSecurityScope.WithCostview) {
+                            
+                            that.getView().byId("idactionbtn").setVisible(false);
+                            that.getView().byId("idactionResp").setVisible(false);  
+                        }
+                        else if (oSecurityScope.WithoutCostview) {
+
+                            that.getView().byId("idactionbtn").setVisible(false);
+                            that.getView().byId("idactionResp").setVisible(false);   
+
+                        }
+                        that.getView().setBusy(false);
+                    },
+                    function (error) {
+                        that.showMsgBoxError(JSON.parse(error.responseText).error.message.value);
+                        that.getView().setBusy(false);
+                    });
+
+            },
+            /**
+           * triggers after user clicks on GO button
+           * **/
+            onSFBSearch: function(){
+                this.getView().byId("idSmartTable").rebindTable();
+            },
+
+            /**
+           * triggers after user clicks on Strategic/NonStrategic button
+           * **/
+            onButtonPress: function (oEvent) {
+                var oButton = oEvent.getSource();
+                this.byId("actionSheet").openBy(oButton);
+            },
+             /**
+             * triggers after user clicks on Response/Revert button
+             * **/
+             onRespButtonPress: function (oEvent) {
+                var oButton = oEvent.getSource();
+                this.byId("actionSheetResp").openBy(oButton);
+            },
+            /**
+            * triggers once user select line item from table
+            * **/
+            onItemSelect: function (oEvent) {
+                if ((oEvent.getSource().getSelectedItems().length > 0) || (oEvent.mParameters.selectAll === true)) {
+                    this.getView().byId("idactionbtn").setEnabled(true);
+                    this.getView().byId("idactionResp").setEnabled(true);
+                }
+                else {
+                    this.getView().byId("idactionbtn").setEnabled(false);
+                    this.getView().byId("idactionResp").setEnabled(false);
+                }
+            },
+
+            /**
+            * triggers after user clicks on Strategic/NonStrategic action
+            * **/
+            onActionPress: function (oEvent) {
+                this.iMsgCountr = 0;
+                var aPayload = [];
+                var bUpdate = true;
+
+                this.aSelData = this.getView().byId("idTable").getSelectedItems();
+                if (oEvent.getSource().sId.split("--")[2] === "idStrtgic") {
+
+                    var aSelData = this.getView().byId("idTable").getSelectedItems();
+                    for (var i = 0; i < aSelData.length; i++) {
+                        var oSaveData = {};
+                        aSelData[i].getBindingContext().getObject();
+                        oSaveData.zhfvType = aSelData[i].getBindingContext().getObject().zhfvType;
+                        oSaveData.Strategicautoflag = "X";
+                        oSaveData.response = "D";
+                        aPayload.push(oSaveData);
+                    }
+                }
+                else if (oEvent.getSource().sId.split("--")[2] === "idnonStrtgic") {
+
+                    var aSelData = this.getView().byId("idTable").getSelectedItems();
+                    for (var i = 0; i < aSelData.length; i++) {
+                        var oSaveData = {};
+                        aSelData[i].getBindingContext().getObject();
+                        oSaveData.zhfvType = aSelData[i].getBindingContext().getObject().zhfvType;
+                        oSaveData.Strategicautoflag = "";
+                        oSaveData.response = "D";
+                        aPayload.push(oSaveData);
+                    }
+                }
+                if (bUpdate) {
+                    var bIndi = true;
+                    var that = this;
+                    //validation if data is more than 1000
+                    if (aPayload.length > 1000) {
+                        bIndi = false;
+                        MessageBox.confirm(this.getResourceBundleText("lengthExcd"), {
+                            icon: "QUESTION",
+                            title: "Confirm",
+                            actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+                            onClose: function (oAction) {
+                                if (oAction === "OK") {
+                                    bIndi = true;
+                                    var aTempLoad = [];
+                                    for (var i = 0; i < 1000; i++) {
+                                        aTempLoad.push(aPayload[i]);
+                                    }
+                                    
+                                    that._UpdateData(aTempLoad);
+                                }
+                                else {
+                                    return;
+                                }
+                            }
+                        });
+                    }
+                    //this will be called if data is less than or equal to 1000
+                    if (bIndi)
+                        this._UpdateData(aPayload);
+                }
+
+            },
+            /**
+            * triggers after user clicks on Response/Revert action
+            * **/
+            onActionRespPress: function (oEvent) {
+                this.iMsgCountr = 0;
+                var aPayload = [];
+                var bUpdate = true;
+
+                this.aSelData = this.getView().byId("idTable").getSelectedItems();
+                
+                 if (oEvent.getSource().sId.split("--")[2] === "idResponse") {
+                    var aSelData = this.getView().byId("idTable").getSelectedItems(); 
+                    for (var i = 0; i < aSelData.length; i++) {
+                        var oSaveData = {};
+                        aSelData[i].getBindingContext().getObject();
+                        if(aSelData[i].getBindingContext().getObject().Strategicautoflag === 'X'){
+                            oSaveData.zhfvType = aSelData[i].getBindingContext().getObject().zhfvType;
+                            oSaveData.Strategicautoflag = "X";
+                            oSaveData.response = "R";
+                        }else{
+                            MessageToast.show(this.getResourceBundleText("msgToast1"));
+                            return;
+                        }
+                        aPayload.push(oSaveData);
+                    }
+                }
+                else if (oEvent.getSource().sId.split("--")[2] === "idRevert") {
+                    var aSelData = this.getView().byId("idTable").getSelectedItems(); 
+                    for (var i = 0; i < aSelData.length; i++) {
+                        var oSaveData = {};
+                        aSelData[i].getBindingContext().getObject();
+                        if(aSelData[i].getBindingContext().getObject().Strategicautoflag === 'X' && aSelData[i].getBindingContext().getObject().response === 'R'){
+                            oSaveData.zhfvType = aSelData[i].getBindingContext().getObject().zhfvType;
+                            oSaveData.Strategicautoflag = "X";
+                            oSaveData.response = "D";
+                        }else{
+                            MessageToast.show(this.getResourceBundleText("msgToast2"));
+                            return;
+                            
+                        }
+                        aPayload.push(oSaveData);
+                    }
+                    
+                }
+                if (bUpdate) {
+                    var bIndi = true;
+                    var that = this;
+                    //validation if data is more than 1000
+                    if (aPayload.length > 1000) {
+                        bIndi = false;
+                        MessageBox.confirm(this.getResourceBundleText("lengthExcd"), {
+                            icon: "QUESTION",
+                            title: "Confirm",
+                            actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+                            onClose: function (oAction) {
+                                if (oAction === "OK") {
+                                    bIndi = true;
+                                    var aTempLoad = [];
+                                    for (var i = 0; i < 1000; i++) {
+                                        aTempLoad.push(aPayload[i]);
+                                    }
+                                    
+                                    that._UpdateRespData(aTempLoad);
+                                }
+                                else {
+                                    return;
+                                }
+                            }
+                        });
+                    }
+                    //this will be called if data is less than or equal to 1000
+                    if (bIndi)
+                        this._UpdateRespData(aPayload);
+                }
+                
+
+            },
+            /***  Method to perform the update action* **/
+            _UpdateData: async function (aStrategicData) {
+                var oView = this.getView();
+                var oUserInfo = await this._getUserInfoService();
+                var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                var oSaveData = { PostingData: aStrategicData, UserEmail: sModifiedBy }; 
+                oView.setBusy(true);
+
+                return this.ManageFlagSrv.updateData(oSaveData).then(
+                    function (success) {
+                        this.iMsgCountr++;
+                        oView.setBusy(false);
+                        this.showMsgBoxSuccess(JSON.parse(success.data.ManageFlag)[0].message);
+                        this.getView().byId("idSmartTable").rebindTable(true);
+                        this.getView().byId("idactionbtn").setEnabled(false);
+                        this.getView().byId("idactionResp").setEnabled(false);
+                    }.bind(this),
+                    function (error) {
+                        this.showMsgBoxError(this.getResourceBundleText("Error"));
+                        oView.setBusy(false);
+                    }.bind(this));
+
+            },
+
+            /***  Method to perform the update Response/Revert action* **/
+            _UpdateRespData: async function (aRespData) {
+                var oView = this.getView();
+                var oUserInfo = await this._getUserInfoService();
+                var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                var oSaveData = { PostingData: aRespData, UserEmail: sModifiedBy }; 
+                oView.setBusy(true);
+
+                return this.ManageFlagSrv.updateRespData(oSaveData).then(
+                    function (success) {
+                        this.iMsgCountr++;
+                        oView.setBusy(false);
+                        this.showMsgBoxSuccess(JSON.parse(success.data.ManageFlag)[0].message);
+                        this.getView().byId("idSmartTable").rebindTable(true);
+                        this.getView().byId("idactionbtn").setEnabled(false);
+                        this.getView().byId("idactionResp").setEnabled(false);
+                    }.bind(this),
+                    function (error) {
+                        this.showMsgBoxError(this.getResourceBundleText("Error"));
+                        oView.setBusy(false);
+                    }.bind(this));
+
+            },
+            /***  Triggers when user clicks on clear button* **/
+            onClearPress:function(){
+                this.getView().byId("entityNameId").setSelectedKey();
+            }
+            
+        });
+    });
+
+
+
+    app/manageflagui/webapp/service/CoreService.js
+
+
+
+    //-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Flag 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Pahurkar, Vyankatesh
+// Date             :    18.04.2024
+// Description      :    Manage Flag 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Core service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object"
+], function (Object) {
+	"use strict";
+
+	return Object.extend("pumorips.pumoriproduct.manageflagui.service.CoreService", {
+		constructor: function (model) {
+			Object.call(this);
+			if (model) {
+				this.setModel(model);
+			}
+		},
+		setModel: function (model) {
+			this.model = model;
+		},
+		odata: function (url) {
+			var me = this;
+			var core = {
+				ajax: function (type, url, data, parameters) {
+					var promise = new Promise(function (resolve, reject) {
+						var args = [];
+						var params = {};
+						args.push(url);
+						if (data) {
+							args.push(data);
+						}
+						if (parameters) {
+							params = parameters;
+						}
+						params.success = function (result, response) {
+							resolve({
+								data: result,
+								response: response
+							});
+						};
+						params.error = function (error) {
+							reject(error);
+						};
+						args.push(params);
+						me.model[type].apply(me.model, args);
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (params) {
+					return core.ajax('read', url, false, params);
+				},
+				'post': function (data, params) {
+					return core.ajax('create', url, data, params);
+				},
+				'put': function (data, params) {
+					return core.ajax('update', url, data, params);
+				},
+				'delete': function (params) {
+					return core.ajax('remove', url, false, params);
+				}
+			};
+		},
+		http: function (url) {
+			var core = {
+				ajax: function (method, url, headers, args) {
+					var promise = new Promise(function (resolve, reject) {
+						var client = new XMLHttpRequest();
+						var uri = url;
+						if (args && method === 'GET') {
+							uri += '?';
+							var argcount = 0;
+							for (var key in args) {
+								if (args.hasOwnProperty(key)) {
+									if (argcount++) {
+										uri += '&';
+									}
+									uri += encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+								}
+							}
+						}
+						if (args && (method === 'POST' || method === 'PUT')) {
+							var data = {};
+							for (var keyp in args) {
+								if (args.hasOwnProperty(keyp)) {
+									data[keyp] = args[keyp];
+								}
+							}
+						}
+						client.open(method, uri);
+						
+						if (method === 'POST' || method === 'PUT') {
+							client.setRequestHeader("accept", "application/json");
+							client.setRequestHeader("content-type", "application/json");
+						}
+						for (var keyh in headers) {
+							if (headers.hasOwnProperty(keyh)) {
+								client.setRequestHeader(keyh, headers[keyh]);
+							}
+						}
+						if (data) {
+							client.send(JSON.stringify(data));
+						} else {
+							client.send();
+						}
+						client.onload = function () {
+							if (this.status == 200) {
+								resolve(this.response);
+							} else {
+								reject(this.statusText);
+							}
+						};
+						client.onerror = function () {
+							reject(this.statusText);
+						};
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (headers, args) {
+					return core.ajax('GET', url, headers, args);
+				},
+				'post': function (headers, args) {
+					return core.ajax('POST', url, headers, args);
+				},
+				'put': function (headers, args) {
+					return core.ajax('PUT', url, headers, args);
+				},
+				'delete': function (headers, args) {
+					return core.ajax('DELETE', url, headers, args);
+				}
+			};
+		}
+	});
+});
+
+
+
+app/manageflagui/webapp/service/ManageFlagService.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Flag 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Pahurkar, Vyankatesh
+// Date             :    18.04.2024
+// Description      :    Manage Flag 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Application service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./CoreService",
+], function (CoreService) {
+    "use strict";
+
+    var ManageFlagService = CoreService.extend("pumorips.pumoriproduct.manageflagui.service.ManageFlagService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        },
+
+        /**
+        * Odata service for strategy update
+        * **/
+        updateData: function (oSaveData) {
+            return this.odata("/ManageFlag").post(oSaveData);
+        },
+        /**
+        * Odata service for Response or revert update
+        * **/
+        updateRespData: function (oSaveData) {
+            return this.odata("/ManageFlag").post(oSaveData);
+        },
+        fetchSecurityAuthScopes: function () {
+            return this.odata("/SecurityAction").get({});
+        }
+
+    });
+    return ManageFlagService;
+});
+
+
+
+app/manageflagui/webapp/state/BaseState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Flag 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Pahurkar, Vyankatesh
+// Date             :    18.04.2024
+// Description      :    Manage Flag 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Core state file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object",
+	"sap/ui/model/json/JSONModel"
+], function(Object, JSONModel) {
+	"use strict";
+	return Object.extend("pumorips.pumoriproduct.manageflagui.state.BaseState", {
+        //method to getmodel
+		getModel: function() {
+			if (!this.model) {
+				this.model = new JSONModel(this.data, true);
+			}
+			return this.model;
+		},
+        //method to update model
+		updateModel: function(bHardRefresh) {
+			if (this.model) {
+				this.model.refresh(bHardRefresh ? true : false);
+			}
+		}
+	});
+});
+
+
+
+app/manageflagui/webapp/state/ManageFlagState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Flag 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Pahurkar, Vyankatesh
+// Date             :    18.04.2024
+// Description      :    Manage Flag 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Application state file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "../state/BaseState",
+], function (BaseState) {
+    "use strict";
+    var ManageFlagState = BaseState.extend("pumorips.pumoriproduct.manageflagui.state.ManageFlagState", {
+        constructor: function (oService) {
+            this.data = {
+                display: true,
+                busy: true                
+            };
+            this.ManageFlagService = oService;
+            BaseState.call(this);
+        }
+    });
+    return ManageFlagState;
+});
+
+
+
+app/manageflagui/webapp/Component.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Flag
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Pahurkar, Vyankatesh
+// Date             :    18.04.2024
+// Description      :    Manage Flag
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for model instantiation
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+
+sap.ui.define([
+        "sap/ui/core/UIComponent",
+        "sap/ui/Device",
+        "pumorips/pumoriproduct/manageflagui/model/models",
+        "./service/ManageFlagService",
+        "./state/ManageFlagState"
+    ],
+    function (UIComponent, Device, models,ManageFlagService,ManageFlagState) {
+        "use strict";
+
+        return UIComponent.extend("pumorips.pumoriproduct.manageflagui.Component", {
+            metadata: {
+                manifest: "json"
+            },
+
+            /**
+             * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
+             * @public
+             * @override
+             */
+            init: function () {
+                // call the base component's init function
+                UIComponent.prototype.init.apply(this, arguments);
+
+                //Create globle object for etag
+                this.metadataForEtag;
+                // initialize receive service with the component
+                this._oManageFlagService = new ManageFlagService(this.getModel());
+                // initialize receive state with the component
+                this._oManageFlagState = new ManageFlagState(this._oManageFlagService);
+
+                // enable routing
+                this.getRouter().initialize();
+
+                // set the device model
+                this.setModel(models.createDeviceModel(), "device");
+                this.setModel(this._oManageFlagState.getModel(), "oJSONModel");
+            },
+
+            // Return the service name as per parameter
+            getService: function (sService) {
+                return this["_o" + sService + "Service"];
+            },
+             // Return the state name as per parameter
+             getState: function (sState) {
+                return this["_o" + sState + "State"];
+            },
+        });
+    }
+);
+
+
+
+app/manageflagui/webapp/manifest.json
+
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.pumoriproduct.manageflagui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.13.1",
+      "toolsId": "c1afe8af-5101-4f4b-9951-a80d187a9f1f"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/pumori-product/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "manageflag-Display": {
+          "semanticObject": "manageflag",
+          "action": "Display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.122.1",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.pumoriproduct.manageflagui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.pumoriproduct.manageflagui.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "ManageFlag",
+          "pattern": "",
+          "target": [
+            "TargetManageFlag"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetManageFlag": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "ManageFlag",
+          "viewName": "ManageFlag"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "pumorips.pumoriproduct.manageflagui.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSPUMORIPROD"
+  }
+}
+
+
+
+app/manageflagui/xs-app.json
+
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumoripsproduct-srv-api",
+      "csrfProtection":false,
+      "scope": ["$XSAPPNAME.WithCost","$XSAPPNAME.WithoutCost","$XSAPPNAME.WithCostview","$XSAPPNAME.WithoutCostview"]
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa",
+      "scope": ["$XSAPPNAME.WithCost","$XSAPPNAME.WithoutCost","$XSAPPNAME.WithCostview","$XSAPPNAME.WithoutCostview"]
+    }
+  ]
+}

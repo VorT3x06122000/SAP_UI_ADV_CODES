@@ -1,0 +1,271 @@
+_schema-version: "3.1"
+ID: pumorips_product
+description: A simple CAP project.
+version: 1.0.0
+modules:
+- name: pumorips_product-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: PUMORIPS_PRODUCT
+  - name: uaa_pumorips_product
+  - name: pumori_job-scheduling-service
+  - name: pumori_app_logging-service
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+  build-parameters:
+    builder: npm
+    ignore:
+    - node_modules/
+- name: pumorips_product-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: PUMORIPS_PRODUCT
+    properties:
+      TARGET_CONTAINER: PUMORIPS_PRODUCT
+  - name: facprod-grantor
+    group: SERVICE_REPLACEMENTS
+    properties:
+      key: logical-facprod-grantor
+      service: ~{facprod-grantor-service}
+  - name: hpproductsview-grantor
+    group: SERVICE_REPLACEMENTS
+    properties:
+      key: logical-hpproductsview-grantor
+      service: ~{hpproductsview-grantor-service}
+  - name: factory_location-grantor
+    group: SERVICE_REPLACEMENTS
+    properties:
+      key: logical-factory_location-grantor
+      service: ~{factory_location-grantor-service}
+  - name: pumori_location-grantor
+    group: SERVICE_REPLACEMENTS
+    properties:
+      key: logical-pumori_location-grantor
+      service: ~{pumori_location-grantor-service}
+  parameters:
+    buildpack: nodejs_buildpack
+- name: pumorips_product-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: pumorips_product-destination-service
+    parameters:
+      content-target: true
+  - name: pumorips_product_html_repo_host
+    parameters:
+      service-key:
+        name: pumorips_product_html_repo_host-key
+  - name: uaa_pumorips_product
+    parameters:
+      service-key:
+        name: uaa_pumorips_product-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: PSPUMORIPROD_pumorips_product_html_repo_host
+          ServiceInstanceName: pumorips_product-html5-app-host-service
+          ServiceKeyName: pumorips_product_html_repo_host-key
+          sap.cloud.service: PSPUMORIPROD
+        - Authentication: OAuth2UserTokenExchange
+          Name: PSPUMORIPROD_uaa_pumorips_product
+          ServiceInstanceName: pumorips_product-xsuaa-service
+          ServiceKeyName: uaa_pumorips_product-key
+          sap.cloud.service: PSPUMORIPROD
+        existing_destinations_policy: update
+  build-parameters:
+    no-source: true
+- name: pumorips_product-app-content
+  type: com.sap.application.content
+  path: app
+  requires:
+  - name: pumorips_product_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - pumoripspumoriproductpumoriprodui.zip
+      name: pumoripspumoriproductpumoriprodui
+      target-path: resources/
+    - artifacts:
+      - pumoripspumoriproductpumoriprodlocui.zip
+      name: pumoripspumoriproductpumoriprodlocui
+      target-path: resources/
+    - artifacts:
+      - pumoripspumoriproductpumoriprodtlane.zip
+      name: pumoripspumoriproductpumoriprodtlane
+      target-path: resources/
+    - artifacts:
+      - pumoripspumoriproductmapftfvui.zip
+      name: pumoripspumoriproductmapftfvui
+      target-path: resources/
+    - artifacts:
+      - pumoripspumoriproductflushandfillui.zip
+      name: pumoripspumoriproductflushandfillui
+      target-path: resources/
+    - artifacts:
+      - pumoripspumoriproductmanageflagui.zip
+      name: pumoripspumoriproductmanageflagui
+      target-path: resources/
+- name: pumoripspumoriproductpumoriprodui
+  type: html5
+  path: app/pumoriprodui
+  requires:
+  - name: uaa_pumorips_product
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: pumoripspumoriproductpumoriprodlocui
+  type: html5
+  path: app/pumoriprodlocui
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: pumoripspumoriproductpumoriprodtlane
+  type: html5
+  path: app/pumoriprodtlane
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: pumoripspumoriproductmapftfvui
+  type: html5
+  path: app/mapftfvui
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: pumoripspumoriproductflushandfillui
+  type: html5
+  path: app/flushandfillui
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: pumoripspumoriproductmanageflagui
+  type: html5
+  path: app/manageflagui
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: PUMORIPS_PRODUCT
+  type: com.sap.xs.hdi-container
+  parameters:
+    config:
+      schema: PUMORIPS_PRODUCT
+    service: hana
+    service-plan: hdi-shared
+- name: pumorips_product-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            HTML5.DynamicDestination: true
+            HTML5.ForwardAuthToken: true
+            Name: pumoripsproduct-srv-api
+            ProxyType: Internet
+            Type: HTTP
+            URL: ~{srv-api/srv-url}
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: pumorips_product-destination-service
+    service-plan: lite
+  requires:
+  - name: srv-api
+- name: pumorips_product_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: pumorips_product-html5-app-host-service
+    service-plan: app-host
+- name: uaa_pumorips_product
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: pumorips_product-xsuaa-service
+    service-plan: application
+- name: pumori_job-scheduling-service
+  type: org.cloudfoundry.existing-service
+  parameters:
+    config:
+      enable-xsuaa-support: true
+    service: jobschedulers
+    service-name: pumori_job-scheduling-service
+    service-plan: standard
+- name: facprod-grantor
+  type: org.cloudfoundry.existing-service
+  parameters:
+    service-name: PUMORIPS_FACPROD
+  properties:
+    facprod-grantor-service: ${service-name}
+- name: pumori_app_logging-service
+  type: org.cloudfoundry.existing-service
+  parameters:
+    service: application-logs
+    service-name: pumori_app_logging-service
+- name: hpproductsview-grantor
+  type: org.cloudfoundry.existing-service
+  parameters:
+    service-name: PUMORIPS_HPPROD
+  properties:
+    hpproductsview-grantor-service: ${service-name}
+- name: factory_location-grantor
+  type: org.cloudfoundry.existing-service
+  parameters:
+    service-name: PUMORIPS_FACLOC
+  properties:
+    factory_location-grantor-service: ${service-name}
+- name: pumori_location-grantor
+  type: org.cloudfoundry.existing-service
+  parameters:
+    service-name: PUMORIPS_LOCATION
+  properties:
+    pumori_location-grantor-service: ${service-name}
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npx cds build --production

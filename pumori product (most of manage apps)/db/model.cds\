@@ -1,0 +1,1732 @@
+namespace pumorips.pumoriproduct;
+
+using {managed} from '@sap/cds/common';
+
+/**
+ * _********SCP tables********_\*\*
+ */
+/*PumoriProducts table*/
+entity PumoriProducts : managed {
+    key prodId                 : String(40);
+        prodDesc               : String(200);
+        baseunitofMeasure      : String(3);
+        materialType           : String(4);
+        zplcStatus             : String(20);
+        unspscCode             : String(9);
+        zhfvType               : String(70);
+        zhfvValue              : String(70);
+        zintroDate             : Date;
+        category               : String(4);
+        materialGroup          : String(9);
+        gatingAttribute        : String(1);
+        markedforDeletion      : String(1);
+        strategicautoFlag      : String(1)
+        @asset.range enum {
+            Strategic    = 'X';
+            nonstrategic = '';
+        };
+        zcontrolCode           : String(40);
+        zmhbigSeries           : String(70);
+        zmhbigseriesDesc       : String(70);
+        zmhCategory            : String(70);
+        zmhcategoryDesc        : String(70);
+        zmhModel               : String(70);
+        zmhmodelDesc           : String(70);
+        zmhSeries              : String(70);
+        zmhseriesDesc          : String(70);
+        zmhsubCategory         : String(70);
+        zmhsubcategoryDesc     : String(70);
+        zmhType                : String(70);
+        zmhtypeDesc            : String(70);
+        zpchbusinessGrp        : String(40);
+        zpchbusinessgrpDesc    : String(40);
+        zpchbusinesssubgrp     : String(30);
+        zpchbusinesssubgrpDesc : String(40);
+        zpchextSegment         : String(30);
+        zpchextsegmentDesc     : String(40);
+        zpchgBu                : String(40);
+        zpchgBuDesc            : String(40);
+        zpchhpCompany          : String(40);
+        zpchhpcompanyDesc      : String(40);
+        zpchprdcategoryDesc    : String(40);
+        zpchprofitCenter       : String(10);
+        zpchprofitcenterDesc   : String(40);
+        zspPl                  : String(20);
+        languagekey            : String(1);
+        keeperFlag             : String(1);
+        response               : String(1);
+        custAttr1              : String(10);
+        custAttr2              : String(10);
+        custAttr3              : String(10);
+        custAttr4              : Date;
+        custAttr5              : String(20);
+        custAttr6              : String(20);
+        custAttr7              : Integer;
+        custAttr8              : Decimal(13, 3);
+        custAttr9              : Decimal(5, 2);
+        custAttr10             : String(40);
+        pdsInheritedFlag       : String(1);
+        originalHPPN           : String(40);
+}
+
+/*PumoriProductLocation table*/
+entity PumoriProdLoc : managed {
+    key zmpn                 : String(50);
+    key zmpaPartno           : String(50);
+    key locId                : String(20);
+        locType              : String(1)
+        @asset.range enum {
+            PlantorDistributionCenter = 'V';
+            Supplier                  = 'P';
+        };
+    key prodId               : String(40);
+        procurementType      : String(1);
+        grprocessingTime     : Integer;
+        ztargetBuffer        : Integer;
+        zmanuName            : String(100);
+        em                   : Date;
+        zcancelWindow        : String(12);
+        planneddeliveryTime  : Decimal(3, 0);
+        zinHouseLeadTime     : Integer;
+        soleSourceFlag       : String(1);
+        outSource            : String(20);
+        foundry1             : String(100);
+        foundry1Site         : String(40);
+        foundry1Country      : String(20);
+        foundry2             : String(100);
+        foundry2Site         : String(40);
+        foundry2Country      : String(20);
+        waferSize            : String(20);
+        nodeProcess          : String(100);
+        nodeProcessGroup     : String(50);
+        packingHouse1        : String(100);
+        packingHouse1Country : String(40);
+        packingHouse2        : String(100);
+        packingHouse2Country : String(40);
+        packingType          : String(20);
+        pin                  : Integer;
+        packageSize          : String(20);
+        testingHouse1        : String(100);
+        testingHouse1Country : String(40);
+        testingHouse2        : String(100);
+        testingHouse2Country : String(40);
+        markedforDeletion    : String(1);
+        lvorm                : String(1);
+        reqstrat             : String(2);
+        safetystockMd        : Decimal(31, 0);
+        dzeit                : Decimal(3, 0);
+        fxhor                : String(3);
+        plannerName          : String(4);
+        shflg                : String(1);
+        shzet                : Decimal(2, 0);
+        sobsl                : String(2);
+        ausss                : Decimal(17, 0);
+        mmsta                : String(20);
+        dismm                : String(2);
+        disls                : String(2);
+        fhori                : String(3);
+        bstrf                : Decimal(17, 0);
+        ekgrp                : String(3);
+        kzaus                : String(1);
+        ausdt                : String(8);
+        atpkz                : String(1);
+        bstmi                : Decimal(17, 0);
+        bstma                : Decimal(17, 0);
+        eislo                : Decimal(17, 0);
+        prctr                : String(17);
+        stprs                : Decimal(17, 0);
+        nfmat                : String(40);
+        custAttr1            : String(10);
+        custAttr2            : String(10);
+        custAttr3            : String(10);
+        custAttr4            : Date;
+        custAttr5            : String(20);
+        custAttr6            : String(20);
+        custAttr7            : Integer;
+        custAttr8            : Decimal(13, 3);
+        custAttr9            : Decimal(5, 2);
+        custAttr10           : String(40);
+        mainPlant            : String(30);
+}
+
+/*PumoriTranslane table*/
+entity PumoriTranslane : managed {
+    key prodId            : String(40);
+    key locFr             : String(20);
+        locfrType         : String(1);
+    key locTo             : String(20);
+        loctoType         : String(1);
+    key mot               : String(20);
+        leadTime          : Integer;
+        coO               : String(2);
+        lotSize           : Integer;
+        moq               : Integer;
+        pPriority         : Integer;
+        zQuota            : Integer;
+        spQ               : Integer;
+        sourcingModel     : String(4);
+        markedforDeletion : String(1);
+        custAttr1         : String(10);
+        custAttr2         : String(10);
+        custAttr3         : String(10);
+        custAttr4         : Date;
+        custAttr5         : String(20);
+        custAttr6         : String(20);
+        custAttr7         : Integer;
+        custAttr8         : Decimal(13, 3);
+        custAttr9         : Decimal(5, 2);
+        custAttr10        : String(40);
+    key validTo           : Date;
+    key validFrom         : Date;
+        LSMIN             : Decimal(17, 3);
+        BSTRF             : Decimal(17, 3);
+        BLOCKED           : String(1);
+        EKORG             : String(4);
+        LSMAX             : Decimal(17, 3);
+        ESOKZ             : String(1);
+        BSTMA             : Decimal(17, 3);
+        INFNR             : String(10);
+        SRC_LOC_TZ_X      : String(1);
+        TRANS_CALENDAR    : String(32);
+        FLAG              : String(1);
+        ZERROR            : String(10);
+        mainPlant            : String(30);
+}
+
+/*PumoriUOM table*/
+entity PumoriUOM : managed {
+    key prodId      : String(40);
+    key uomAlt      : String(3);
+        denominator : Decimal(10, 5);
+        numerator   : Decimal(10, 5);
+        custAttr1   : String(10);
+        custAttr2   : String(10);
+        custAttr3   : String(10);
+        custAttr4   : Date;
+        custAttr5   : String(20);
+        custAttr6   : String(20);
+        custAttr7   : Integer;
+        custAttr8   : Decimal(13, 3);
+        custAttr9   : Decimal(5, 2);
+        custAttr10  : String(40);
+}
+
+/**Feature Type,Feature value mapping **/
+entity mappingFtFv : managed {
+    key factoryNumber : String(20)  @Core.Computed: true;
+    key zhfvtypeFac   : String(70) @Core.Computed: true;
+        zhfvtypeHP    : String(70) @Core.Computed: false;
+    key zhfvvalueFac  : String(70) @Core.Computed: true;
+        zhfvvalueHP   : String(70) @Core.Computed: false;
+        default       : String(1)  @Core.Computed: false;
+}
+
+/**FT FV from HP */
+//Need to get from MS4 later on
+entity ms4FTFV {
+    key zhfvtypeHP : String(70);
+//key zhfvvalueHP : String(70);
+}
+
+@cds.persistence.exists
+entity syn_FactoryProducts : managed {
+    key factoryNumber     : String(20);
+    key prodId            : String(50);
+        prodDesc          : String(200);
+    key zmpaPartno        : String(50);
+        zHpPartno         : String(40);
+        baseunitofMeasure : String(3);
+        materialType      : String(4)
+        @asset.range enum {
+            FinishedProduct      = 'FERT';
+            Semi_FinishedProduct = 'HALB';
+            Components           = 'ROH';
+        };
+        zplcStatus        : String(20);
+        unspscCode        : String(9);
+        zhfvType          : String(70);
+        zhfvValue         : String(70);
+        zintroDate        : Date;
+        category          : String(4);
+        materialGroup     : String(9);
+        gatingAttribute   : String(1);
+        markedforDeletion : String(1);
+        custAttr1         : String(10);
+        custAttr2         : String(10);
+        custAttr3         : String(10);
+        custAttr4         : Date;
+        custAttr5         : String(20);
+        custAttr6         : String(20);
+        custAttr7         : Integer;
+        custAttr8         : Decimal(13, 3);
+        custAttr9         : Decimal(5, 2);
+        custAttr10        : String(40);
+        originalHPPN      : String(40);
+}
+
+@cds.persistence.exists
+entity syn_BTPCompSequence {
+        seq           : Integer;
+    key zbtpComp      : String(40);
+    key factoryNumber : String(20);
+    key prodId        : String(50);
+    key zmpaPartno    : String(50);
+        zHpPartno     : String(40);
+        zoldbtpComp   : String(40);
+        master        : String(10);
+        status        : String(20);
+        suggest       : String(40);
+}
+
+/*LocationProducts table*/
+@cds.persistence.exists
+entity syn_LocationProducts : managed {
+    key factoryNumber        : String(20);
+    key locId                : String(20);
+    key prodId               : String(50);
+        zmanuName            : String(100);
+        em                   : Date;
+        procurementType      : String(1);
+        grprocessingTime     : Integer;
+        ztargetBuffer        : Integer;
+        zcancelWindow        : String(12);
+        planneddeliveryTime  : Integer;
+        zinHouseLeadTime     : Integer;
+        soleSourceFlag       : String(1);
+        outSource            : String(20);
+        foundry1             : String(100);
+        foundry1Site         : String(40);
+        foundry1Country      : String(20);
+        foundry2             : String(100);
+        foundry2Site         : String(40);
+        foundry2Country      : String(20);
+        waferSize            : String(20);
+        nodeProcess          : String(100);
+        nodeProcessGroup     : String(50);
+        packingHouse1        : String(100);
+        packingHouse1Country : String(40);
+        packingHouse2        : String(100);
+        packingHouse2Country : String(40);
+        packingType          : String(20);
+        pin                  : Integer;
+        packageSize          : String(20);
+        testingHouse1        : String(100);
+        testingHouse1Country : String(40);
+        testingHouse2        : String(100);
+        testingHouse2Country : String(40);
+        markedforDeletion    : String(1);
+        custAttr1            : String(10);
+        custAttr2            : String(10);
+        custAttr3            : String(10);
+        custAttr4            : Date;
+        custAttr5            : String(20);
+        custAttr6            : String(20);
+        custAttr7            : Integer;
+        custAttr8            : Decimal(13, 3);
+        custAttr9            : Decimal(5, 2);
+        custAttr10           : String(40);
+}
+
+/* Factory T-Lane Table*/
+@cds.persistence.exists
+entity syn_Translane : managed {
+    key factoryNumber     : String(20);
+    key prodId            : String(50);
+    key locFr             : String(20);
+    key locfrType         : String(1)
+        @assert.notNull
+        @assert.range enum {
+            ShippedByVendor       = 'V';
+            ShippedByAnotherPlant = 'P';
+        };
+    key locTo             : String(20);
+    key loctoType         : String(1);
+    key mot               : String(20);
+        leadTime          : Integer;
+        coO               : String(40);
+        lotSize           : Integer;
+        moq               : Integer;
+        pPriority         : Integer;
+        zQuota            : Integer;
+        spQ               : Integer;
+        sourcingModel     : String(4);
+        markedforDeletion : String(1);
+        custAttr1         : String(10);
+        custAttr2         : String(10);
+        custAttr3         : String(10);
+        custAttr4         : Date;
+        custAttr5         : String(20);
+        custAttr6         : String(20);
+        custAttr7         : Integer;
+        custAttr8         : Decimal(13, 3);
+        custAttr9         : Decimal(5, 2);
+        custAttr10        : String(40);
+    key validFrom          : Date;
+    key validTo             : Date;
+}
+
+/*UoM conversion Table */
+@cds.persistence.exists
+entity syn_UOMConversion : managed {
+    key factoryNumber       : String(20); //LocationID
+    key prodId              : String(50); //MPN
+        zbtpComp            : String(40); //generatedhppn
+    key uomAlt              : String(3);
+        fbaseunitofMeasure  : String(3);
+        hpbaseunitofMeasure : String(3);
+        denominator         : Decimal(5, 0);
+        numerator           : Decimal(5, 0);
+}
+
+/*UOM Table*/
+@cds.persistence.exists
+entity syn_UOM : managed {
+    key factoryNumber : String(20);
+    key prodId        : String(50);
+    key uomAlt        : String(3);
+        denominator   : Decimal(5, 0);
+        numerator     : Decimal(5, 0);
+        custAttr1     : String(10);
+        custAttr2     : String(10);
+        custAttr3     : String(10);
+        custAttr4     : Date;
+        custAttr5     : String(20);
+        custAttr6     : String(20);
+        custAttr7     : Integer;
+        custAttr8     : Decimal(13, 3);
+        custAttr9     : Decimal(5, 2);
+        custAttr10    : String(40);
+}
+
+/*Manage Flag table*/
+entity manageflag : managed {
+    key zhfvType          : String(70);
+        Strategicautoflag : String(1);
+        dsp               : String(1);
+        response          : String(1);
+}
+
+/* Product Transformation*/
+@cds.persistence.exists
+entity syn_ProductTransformation {
+    key factoryNumber       : String(20);
+    key prodId              : String(50);
+        zmpaPartno          : String(50);
+        zbtpComp            : String(40);
+        prodDesc            : String(200);
+        zhfvType            : String(70);
+        zhfvValue           : String(70);
+        fbaseunitofMeasure  : String(3);
+        hpbaseunitofMeasure : String(3);
+        markedforDeletion   : String(1);
+        originalHPPN        : String(40);
+}
+
+
+/*LocationProducts Transformation Table*/
+@cds.persistence.exists
+entity syn_LocationProductsTransformation {
+    key factoryNumber     : String(20);
+    key prodId            : String(50);
+    key locId             : String(20);
+        zbtpComp          : String(40);
+        procurementType   : String(1);
+        markedforDeletion : String(1);
+}
+
+/*Tlane Transformation Table*/
+@cds.persistence.exists
+entity syn_TlaneTransformation {
+    key pumoriPN          : String(40);
+    key locFr             : String(20);
+        locfrType         : String(1);
+    key locTo             : String(20);
+        loctoType         : String(1);
+        leadTime          : Integer;
+        zQuota            : Integer;
+        markedforDeletion : String(1);
+    key validFrom         : Date;
+    key validTo           : Date;
+    key mot               : String(20);
+}
+
+/*HP Products View*/
+@cds.persistence.exists
+entity syn_HPProducts {
+    key ZHPPARTNO              : String(40);
+        PRODDESC               : String(40);
+        BASEUNITOFMEASURE      : String(3);
+        MATERIALTYPE           : String(4);
+        ZPLCSTATUS             : String(20);
+        MARKEDFORDELETION      : String(1);
+        ZHFVTYPE               : String(70);
+        ZHFVVALUE              : String(70);
+        ZCONTROLCODE           : String(40);
+        MATERIALGROUP          : String(10);
+        ZMHBIGSERIES           : String(70);
+        ZMHBIGSERIESDESC       : String(70);
+        ZMHCATEGORY            : String(70);
+        ZMHCATEGORYDESC        : String(70);
+        ZMHMODEL               : String(70);
+        ZMHMODELDESC           : String(70);
+        ZMHSERIES              : String(70);
+        ZMHSERIESDESC          : String(70);
+        ZMHSUBCATEGORY         : String(70);
+        ZMHSUBCATEGORYDESC     : String(70);
+        ZMHTYPE                : String(70);
+        ZMHTYPEDESC            : String(70);
+        ZPCHBUSINESSGRP        : String(40);
+        ZPCHBUSINESSGRPDESC    : String(40);
+        ZPCHBUSINESSSUBGRP     : String(30);
+        ZPCHBUSINESSSUBGRPDESC : String(40);
+        ZPCHEXTSEGMENT         : String(30);
+        ZPCHEXTSEGMENTDESC     : String(40);
+        ZPCHGBU                : String(40);
+        ZPCHGBUDESC            : String(40);
+        ZPCHHPCOMPANY          : String(40);
+        ZPCHHPCOMPANYDESC      : String(40);
+        ZPCHPRDCATEGORYDESC    : String(40);
+        ZPCHPROFITCENTER       : String(10);
+        ZPCHPROFITCENTERDESC   : String(40);
+        ZSPPL                  : String(20);
+        LANGUAGEKEY            : String(1);
+        ZPLCODE                : String(2);
+        CUST_ATTR1             : String(10);
+        CUST_ATTR2             : String(10);
+        CUST_ATTR3             : String(10);
+        CUST_ATTR4             : String(8);
+        CUST_ATTR5             : String(20);
+        CUST_ATTR6             : String(20);
+        CUST_ATTR7             : Integer;
+        CUST_ATTR8             : Decimal(13, 3);
+        CUST_ATTR9             : Decimal(5, 2);
+        CUST_ATTR10            : String(40);
+        REPLICATIONDATETIME    : Timestamp;
+        PLANNING_CATEGORY      : String(30);
+}
+
+
+/*HP LocationProducts View*/
+@cds.persistence.exists
+entity syn_hpLocationProducts {
+    key zHpPartno           : String(40);
+    key locId               : String(20);
+        locType             : String(1);
+        grprocessingTime    : String(10);
+        planneddeliveryTime : Decimal(3, 0);
+        safetystockMd       : Decimal(31, 0);
+        lvorm               : String(1);
+        procurementType     : String(1);
+        reqstrat            : String(2);
+        dzeit               : Decimal(3, 0);
+        fxhor               : String(3);
+        plannerName         : String(4);
+        shflg               : String(1);
+        shzet               : Decimal(2, 0);
+        sobsl               : String(2);
+        ausss               : Decimal(17, 0);
+        mmsta               : String(20);
+        dismm               : String(2);
+        disls               : String(2);
+        fhori               : String(3);
+        bstrf               : Decimal(17, 0);
+        ekgrp               : String(3);
+        kzaus               : String(1);
+        ausdt               : String(8);
+        atpkz               : String(1);
+        bstmi               : Decimal(17, 0);
+        bstma               : Decimal(17, 0);
+        eislo               : Decimal(17, 0);
+        prctr               : String(17);
+        stprs               : Decimal(17, 0);
+        nfmat               : String(40);
+        zstrflg             : String(1);
+        replicationDateTime : Timestamp;
+}
+
+
+/*FactoryProductsHistory table*/
+entity FactoryProductsHistory : managed {
+    key factoryNumber     : String(20);
+    key prodId            : String(50);
+        prodDesc          : String(200);
+    key zmpaPartno        : String(50);
+        zHpPartno         : String(40);
+        baseunitofMeasure : String(3);
+        materialType      : String(4)
+        @asset.range enum {
+            FinishedProduct      = 'FERT';
+            Semi_FinishedProduct = 'HALB';
+            Components           = 'ROH';
+        };
+        zplcStatus        : String(20);
+        unspscCode        : String(9);
+        zhfvType          : String(70);
+        zhfvValue         : String(70);
+        zintroDate        : Date;
+        category          : String(4);
+        materialGroup     : String(9);
+        gatingAttribute   : String(1);
+        markedforDeletion : String(1);
+        custAttr1         : String(10);
+        custAttr2         : String(10);
+        custAttr3         : String(10);
+        custAttr4         : Date;
+        custAttr5         : String(20);
+        custAttr6         : String(20);
+        custAttr7         : Integer;
+        custAttr8         : Decimal(13, 3);
+        custAttr9         : Decimal(5, 2);
+        custAttr10        : String(40);
+    key snapshotDate      : Date;
+        hideData          : String(1);
+        originalHPPN      : String(40);
+}
+
+/*LocationProductsHistory table*/
+entity LocationProductsHistory : managed {
+    key factoryNumber        : String(20);
+    key locId                : String(20);
+    key prodId               : String(50);
+        zmanuName            : String(100);
+        em                   : Date;
+        procurementType      : String(1);
+        grprocessingTime     : Integer;
+        ztargetBuffer        : Integer;
+        zcancelWindow        : String(12);
+        planneddeliveryTime  : Integer;
+        zinHouseLeadTime     : Integer;
+        soleSourceFlag       : String(1);
+        outSource            : String(20);
+        foundry1             : String(100);
+        foundry1Site         : String(40);
+        foundry1Country      : String(20);
+        foundry2             : String(100);
+        foundry2Site         : String(40);
+        foundry2Country      : String(20);
+        waferSize            : String(20);
+        nodeProcess          : String(100);
+        nodeProcessGroup     : String(50);
+        packingHouse1        : String(100);
+        packingHouse1Country : String(40);
+        packingHouse2        : String(100);
+        packingHouse2Country : String(40);
+        packingType          : String(20);
+        pin                  : Integer;
+        packageSize          : String(20);
+        testingHouse1        : String(100);
+        testingHouse1Country : String(40);
+        testingHouse2        : String(100);
+        testingHouse2Country : String(40);
+        markedforDeletion    : String(1);
+        custAttr1            : String(10);
+        custAttr2            : String(10);
+        custAttr3            : String(10);
+        custAttr4            : Date;
+        custAttr5            : String(20);
+        custAttr6            : String(20);
+        custAttr7            : Integer;
+        custAttr8            : Decimal(13, 3);
+        custAttr9            : Decimal(5, 2);
+        custAttr10           : String(40);
+    key snapshotDate         : Date;
+        hideData          : String(1);
+}
+
+/* FactoryLocationsHistory Table */
+entity FactoryLocationsHistory : managed {
+    key factoryNumber        : String(20);
+    key locId                : String(20);
+        locDescr             : String(100);
+    key locType              : String(1)
+        @assert.notNull
+        @assert.range enum {
+            PlantORDistributioncenter = 'P';
+            Supplier                  = 'V';
+        };
+        zplantType           : String(40);
+        locRegion            : String(20);
+        locationAddress1     : String(200);
+        locationAddress2     : String(80);
+        city                 : String(35);
+        state                : String(35);
+        country              : String(40);
+        countryCode          : String(3);
+        zipcode              : String(10);
+        locationContact1Name : String(80);
+        locationEmail1       : String(80);
+        locationContact2Name : String(80);
+        locationEmail2       : String(80);
+        markedforDeletion    : String(1);
+        custAttr1            : String(10);
+        custAttr2            : String(10);
+        custAttr3            : String(10);
+        custAttr4            : Date;
+        custAttr5            : String(20);
+        custAttr6            : String(20);
+        custAttr7            : Integer;
+        custAttr8            : Decimal(13, 3);
+        custAttr9            : Decimal(5, 2);
+        custAttr10           : String(40);
+    key snapshotDate         : Date;
+        hideData          : String(1);
+}
+
+/*UOMHistory table*/
+entity UOMHistory : managed {
+    key factoryNumber : String(20);
+    key prodId        : String(50);
+    key uomAlt        : String(3);
+        denominator   : Decimal(5, 0);
+        numerator     : Decimal(5, 0);
+        custAttr1     : String(10);
+        custAttr2     : String(10);
+        custAttr3     : String(10);
+        custAttr4     : Date;
+        custAttr5     : String(20);
+        custAttr6     : String(20);
+        custAttr7     : Integer;
+        custAttr8     : Decimal(13, 3);
+        custAttr9     : Decimal(5, 2);
+        custAttr10    : String(40);
+    key snapshotDate  : Date;
+        hideData          : String(1);
+}
+
+/* Factory T-LaneHistory Table*/
+entity TranslaneHistory : managed {
+    key factoryNumber     : String(20);
+    key prodId            : String(50);
+    key locFr             : String(20);
+    key locfrType         : String(1)
+        @assert.notNull
+        @assert.range enum {
+            ShippedByVendor       = 'V';
+            ShippedByAnotherPlant = 'P';
+        };
+    key locTo             : String(20);
+    key loctoType         : String(1);
+    key mot               : String(20);
+        leadTime          : Integer;
+        coO               : String(40);
+        lotSize           : Integer;
+        moq               : Integer;
+        pPriority         : Integer;
+        zQuota            : Integer;
+        spQ               : Integer;
+        sourcingModel     : String(4);
+        markedforDeletion : String(1);
+        custAttr1         : String(10);
+        custAttr2         : String(10);
+        custAttr3         : String(10);
+        custAttr4         : Date;
+        custAttr5         : String(20);
+        custAttr6         : String(20);
+        custAttr7         : Integer;
+        custAttr8         : Decimal(13, 3);
+        custAttr9         : Decimal(5, 2);
+        custAttr10        : String(40);
+        key validTo           : Date;
+        key validFrom         : Date;
+    key snapshotDate      : Date;
+        hideData          : String(1);
+}
+
+/*FactoryLocations table data*/
+@cds.persistence.exists
+entity syn_FactoryLocations : managed {
+    key factoryNumber        : String(20);
+    key locId                : String(20);
+        locDescr             : String(100);
+    key locType              : String(1)
+        @assert.notNull
+        @assert.range enum {
+            PlantORDistributioncenter = 'P';
+            Supplier                  = 'V';
+        };
+        zplantType           : String(40);
+        locRegion            : String(20);
+        locationAddress1     : String(200);
+        locationAddress2     : String(80);
+        city                 : String(35);
+        state                : String(35);
+        country              : String(40);
+        countryCode          : String(3);
+        zipcode              : String(10);
+        locationContact1Name : String(80);
+        locationEmail1       : String(80);
+        locationContact2Name : String(80);
+        locationEmail2       : String(80);
+        markedforDeletion    : String(1);
+        custAttr1            : String(10);
+        custAttr2            : String(10);
+        custAttr3            : String(10);
+        custAttr4            : Date;
+        custAttr5            : String(20);
+        custAttr6            : String(20);
+        custAttr7            : Integer;
+        custAttr8            : Decimal(13, 3);
+        custAttr9            : Decimal(5, 2);
+        custAttr10           : String(40);
+}
+
+/* Transformation table */
+@cds.persistence.exists
+entity syn_FaclocTransformation : managed {
+    key Factory           : String(20);
+    key VendorId          : String(20);
+    key locType           : String(1)
+        @assert.notNull
+        @assert.range enum {
+            PlantORDistributioncenter = 'P';
+            Supplier                  = 'V';
+        };
+        VendorName        : String(100);
+        VendorGroup       : String(20);
+        Keeperflag        : String(1);
+        markedforDeletion : String(1);
+}
+
+/* Pumori Location table */
+@cds.persistence.exists
+entity syn_PumoriLocations : managed {
+    key locId                : String(20);
+        locDescr             : String(100);
+    key locType              : String(1);
+        Keeperflag           : String(1);
+        plantType            : String(3);
+        zplantType           : String(40);
+        locRegion            : String(20);
+        locationAddress1     : String(200);
+        locationAddress2     : String(80);
+        city                 : String(35);
+        state                : String(35);
+        country              : String(40);
+        countryCode          : String(2);
+        zipcode              : String(10);
+        locationContact1Name : String(80);
+        locationEmail1       : String(80);
+        locationContact2Name : String(80);
+        locationEmail2       : String(80);
+        locationContact3Name : String(80);
+        locationContact4Name : String(80);
+        STRAS                : String(35);
+        TIME_ZONE            : String(6);
+        TELF1                : String(16);
+        PLIFZ                : Decimal(3);
+        vendorGroup          : String(20);
+        FABKL                : String(32);
+        LIFNR                : String(10);
+        KUNNR                : String(10);
+        ACTIVE_FLAG          : String(1);
+        PSTLZ                : String(10);
+        PSTL2                : String(10);
+        BUSINESS_UNIT        : String(2);
+        KUKLA                : String(2);
+        longitude            : Decimal(17);
+        latitude             : Decimal(17);
+        DUMMY_TS_LOC         : String(1);
+        ETA_ETD              : String(10);
+        WERKS                : String(4);
+        Dabnode_Flag         : String(1);
+        PA_Name              : String(4);
+        markedforDeletion    : String(1);
+        custAttr1            : String(10);
+        custAttr2            : String(10);
+        custAttr3            : String(10);
+        custAttr4            : Date;
+        custAttr5            : String(20);
+        custAttr6            : String(20);
+        custAttr7            : Integer;
+        custAttr8            : Decimal(13, 3);
+        custAttr9            : Decimal(5, 2);
+        custAttr10           : String(40);
+        mainPlant            : String(30);
+}
+
+@cds.persistence.exists
+entity syn_BaseUOM : managed {
+    key uomAlt            : String(3);
+        baseunitofMeasure : String(3);
+}
+
+//---------------------- Views------------------------//
+/* MPN Value History help */
+view MPNValueHistoryHelp as
+    select from FactoryProductsHistoryView distinct {
+        key prodId,
+            factoryNumber,
+            zmpaPartno,
+            zHpPartno,
+            zhfvType,
+            zhfvValue
+    };
+
+
+/* Factory Number History Value help */
+view prodIdHistoryValueHelp as
+    select from MPNValueHistoryHelp distinct {
+        key prodId
+    };
+
+/* Factory Number History Value help */
+view FactoryNumberHistoryValueHelp as
+    select from MPNValueHistoryHelp distinct {
+        key factoryNumber
+    };
+
+/* Factory Part Number History Value help */
+view FactoryPartNumberHistoryValueHelp as
+    select from MPNValueHistoryHelp distinct {
+        key zmpaPartno
+    };
+
+view FeatureTypeFillValueHelp as
+    select from MPNValueHistoryHelp distinct {
+        key zhfvType
+    };
+
+view FeatureValueFillValueHelp as
+    select from MPNValueHistoryHelp distinct {
+        key zhfvValue
+    };
+
+
+
+/* Hp Part Number History Value help */
+view HpPartNumberHistoryValueHelp as
+    select from MPNValueHistoryHelp distinct {
+        key zHpPartno
+    };
+
+/*FactoryProductsHistory View*/
+view FactoryProductsHistoryView as
+    select
+            a.createdAt,
+            a.createdBy,
+            a.modifiedAt,
+            a.modifiedBy,
+        key a.factoryNumber,
+        key a.prodId,
+        key a.zmpaPartno,
+            b.zbtpComp,
+            prodDesc,
+            a.zHpPartno,
+            baseunitofMeasure,
+            case a.materialType
+                when
+                    'FERT'
+                then
+                    'FERT'
+                when
+                    'HALB'
+                then
+                    'HALB'
+                when
+                    'ROH'
+                then
+                    'ROH'
+            end as materialTypeText : String(20),
+            zplcStatus,
+            unspscCode,
+            zhfvType,
+            zhfvValue,
+            zintroDate,
+            materialGroup,
+            gatingAttribute,
+            category,
+            markedforDeletion,
+        key snapshotDate : String,
+            originalHPPN
+    from FactoryProductsHistory as a
+    inner join syn_BTPCompSequence as b
+        on a.prodId = b.prodId
+        and a.factoryNumber = b.factoryNumber
+        where hideData != 'X';
+
+
+/*FactoryProductsHistoryView value helps for all fileds*/
+view materialTypeValueHelp as select distinct key materialTypeText from FactoryProductsHistoryView;
+
+view zbtpCompValueHelp as select distinct key zbtpComp from FactoryProductsHistoryView;
+
+view prodDescValueHelp as select distinct key prodDesc from FactoryProductsHistoryView;
+
+view baseunitofMeasureValueHelp as select distinct key baseunitofMeasure from FactoryProductsHistoryView;
+
+view zplcStatusValueHelp as select distinct key zplcStatus from FactoryProductsHistoryView;
+
+view unspscCodeValueHelp as select distinct key unspscCode from FactoryProductsHistoryView;
+
+view materialGroupValueHelp as select distinct key materialGroup from FactoryProductsHistoryView;
+
+view gatingAttributeValueHelp as select distinct key gatingAttribute from FactoryProductsHistoryView;
+
+view categoryValueHelp as select distinct key category from FactoryProductsHistoryView;
+
+/*End of FactoryProductsHistoryView value helps for all fileds*/
+
+/*PumoriProducts View*/
+view PumoriProductsView as
+    select
+            createdAt,
+            createdBy,
+            modifiedAt,
+            modifiedBy,
+        key prodId,
+            prodDesc,
+            baseunitofMeasure,
+            materialType,
+            case
+                when
+                    PumoriProducts.strategicautoFlag is null
+
+                then
+                    ''
+                when
+                    PumoriProducts.strategicautoFlag = 'X'
+
+                then
+                    'X'
+                when
+                    PumoriProducts.strategicautoFlag = ''
+
+                then
+                    ''
+                when
+                    PumoriProducts.strategicautoFlag = 'x'
+
+                then
+                    'X'
+            end as strategicautoFlag : String(1),
+            markedforDeletion,
+            zhfvType,
+            zhfvValue,
+            zplcStatus,
+            unspscCode,
+            zintroDate,
+            category,
+            materialGroup,
+            gatingAttribute,
+            zcontrolCode,
+            zmhbigSeries,
+            zmhbigseriesDesc,
+            zmhCategory,
+            zmhcategoryDesc,
+            zmhModel,
+            zmhmodelDesc,
+            zmhSeries,
+            zmhseriesDesc,
+            zmhsubCategory,
+            zmhsubcategoryDesc,
+            zmhType,
+            zmhtypeDesc,
+            zpchbusinessGrp,
+            zpchbusinessgrpDesc,
+            zpchbusinesssubgrp,
+            zpchbusinesssubgrpDesc,
+            zpchextSegment,
+            zpchextsegmentDesc,
+            zpchgBu,
+            zpchgBuDesc,
+            zpchhpCompany,
+            zpchhpcompanyDesc,
+            zpchprdcategoryDesc,
+            zpchprofitCenter,
+            zpchprofitcenterDesc,
+            zspPl,
+            languagekey,
+            keeperFlag,
+             case
+                when
+                    PumoriProducts.response is null
+
+                then
+                    ''
+                when
+                    PumoriProducts.response = 'R'
+
+                then
+                    'R'
+                when
+                    PumoriProducts.response = 'D'
+
+                then
+                    'D'
+
+                when
+                    PumoriProducts.response = ''
+
+                then
+                    ''
+
+                when
+                    PumoriProducts.response = 'r'
+
+                then
+                    'R'
+
+                when
+                    PumoriProducts.response = 'd'
+
+                then
+                    'D'
+            end as response : String(1),
+            originalHPPN : String(40)
+    from PumoriProducts;
+/*PumoriProducts View value helps*/
+
+view prodDescValueHelppp as select distinct key prodDesc from PumoriProductsView;
+view baseunitofMeasureValueHelppp as select distinct key baseunitofMeasure from PumoriProductsView;
+view zplcStatusValueHelppp as select distinct key zplcStatus from PumoriProductsView;
+view unspscCodeValueHelppp as select distinct key unspscCode from PumoriProductsView;
+view categoryValueHelppp as select distinct key category from PumoriProductsView;
+view materialGroupValueHelppp as select distinct key materialGroup from PumoriProductsView;
+view gatingAttributeValueHelppp as select distinct key gatingAttribute from PumoriProductsView;
+view zcontrolCodeValueHelppp as select distinct key zcontrolCode from PumoriProductsView;
+view zmhbigSeriesValueHelppp as select distinct key zmhbigSeries from PumoriProductsView;
+view zmhbigseriesDescValueHelppp as select distinct key zmhbigseriesDesc from PumoriProductsView;
+view zmhCategoryValueHelppp as select distinct key zmhCategory from PumoriProductsView;
+view zmhcategoryDescValueHelppp as select distinct key zmhcategoryDesc from PumoriProductsView;
+view zmhModelValueHelppp as select distinct key zmhModel from PumoriProductsView;
+view zmhmodelDescValueHelppp as select distinct key zmhmodelDesc from PumoriProductsView;
+view zmhSeriesValueHelppp as select distinct key zmhSeries from PumoriProductsView;
+view zmhseriesDescValueHelppp as select distinct key zmhseriesDesc from PumoriProductsView;
+view zmhsubCategoryValueHelppp as select distinct key zmhsubCategory from PumoriProductsView;
+view zmhsubcategoryDescValueHelppp as select distinct key zmhsubcategoryDesc from PumoriProductsView;
+view zmhTypeValueHelppp as select distinct key zmhType from PumoriProductsView;
+view zmhtypeDescValueHelppp as select distinct key zmhtypeDesc from PumoriProductsView;
+view zpchbusinessGrpValueHelppp as select distinct key zpchbusinessGrp from PumoriProductsView;
+view zpchbusinessgrpDescValueHelppp as select distinct key zpchbusinessgrpDesc from PumoriProductsView;
+view zpchbusinesssubgrpValueHelppp as select distinct key zpchbusinesssubgrp from PumoriProductsView;
+view zpchbusinesssubgrpDescValueHelppp as select distinct key zpchbusinesssubgrpDesc from PumoriProductsView;
+view zpchextSegmentValueHelppp as select distinct key zpchextSegment from PumoriProductsView;
+view zpchextsegmentDescValueHelppp as select distinct key zpchextsegmentDesc from PumoriProductsView;
+view zpchgBuValueHelppp as select distinct key zpchgBu from PumoriProductsView;
+view zpchgBuDescValueHelppp as select distinct key zpchgBuDesc from PumoriProductsView;
+view zpchhpCompanyValueHelppp as select distinct key zpchhpCompany from PumoriProductsView;
+view zpchhpcompanyDescValueHelppp as select distinct key zpchhpcompanyDesc from PumoriProductsView;
+view zpchprdcategoryDescValueHelppp as select distinct key zpchprdcategoryDesc from PumoriProductsView;
+view zpchprofitCenterValueHelppp as select distinct key zpchprofitCenter from PumoriProductsView;
+view zpchprofitcenterDescValueHelppp as select distinct key zpchprofitcenterDesc from PumoriProductsView;
+view zspPlValueHelppp as select distinct key zspPl from PumoriProductsView;
+view languagekeyValueHelppp as select distinct key languagekey from PumoriProductsView;
+
+/*PumoriLocationProducts View*/
+view PumoriLocationProductsView as
+    select
+            createdAt,
+            createdBy,
+            modifiedAt,
+            modifiedBy,
+        key locId,
+        key prodId,
+        key zmpn,
+        key zmpaPartno,
+            locType,
+            case PumoriProdLoc.locType
+                when
+                    'P'
+                then
+                    'P (Plant or Distribution Center)'
+                when
+                    'V'
+                then
+                    'V (Supplier)'
+            end as LOCTYPETEXT : String(20),
+            procurementType,
+            grprocessingTime,
+            ztargetBuffer,
+            zmanuName,
+            em,
+            zcancelWindow,
+            planneddeliveryTime,
+            zinHouseLeadTime,
+            soleSourceFlag,
+            outSource,
+            foundry1,
+            foundry1Site,
+            foundry1Country,
+            foundry2,
+            foundry2Site,
+            foundry2Country,
+            waferSize,
+            nodeProcess,
+            nodeProcessGroup,
+            packingHouse1,
+            packingHouse1Country,
+            packingHouse2,
+            packingHouse2Country,
+            packingType,
+            pin,
+            packageSize,
+            testingHouse1,
+            testingHouse1Country,
+            testingHouse2,
+            testingHouse2Country,
+            markedforDeletion,
+            lvorm,
+            reqstrat,
+            safetystockMd,
+            dzeit,
+            fxhor,
+            plannerName,
+            shflg,
+            shzet,
+            sobsl,
+            ausss,
+            mmsta,
+            dismm,
+            disls,
+            fhori,
+            bstrf,
+            ekgrp,
+            kzaus,
+            ausdt,
+            atpkz,
+            bstmi,
+            bstma,
+            eislo,
+            prctr,
+            stprs,
+            nfmat,
+            mainPlant
+    from PumoriProdLoc;
+
+    view zmpnValueHelp as select distinct key zmpn from PumoriLocationProductsView;
+    view zmpaPartnoValueHelp as select distinct key zmpaPartno from PumoriLocationProductsView;
+    view procurementTypeValueHelp as select distinct key procurementType from PumoriLocationProductsView;
+    view zmanuNameValueHelp as select distinct key zmanuName from PumoriLocationProductsView;
+    view zcancelWindowValueHelp as select distinct key zcancelWindow from PumoriLocationProductsView;
+    view soleSourceFlagValueHelp as select distinct key soleSourceFlag from PumoriLocationProductsView;
+    view outSourceValueHelp as select distinct key outSource from PumoriLocationProductsView;
+    view foundry1ValueHelp as select distinct key foundry1 from PumoriLocationProductsView;
+    view foundry1SiteValueHelp as select distinct key foundry1Site from PumoriLocationProductsView;
+    view foundry1CountryValueHelp as select distinct key foundry1Country from PumoriLocationProductsView;
+    view foundry2ValueHelp as select distinct key foundry2 from PumoriLocationProductsView;
+    view foundry2SiteValueHelp as select distinct key foundry2Site from PumoriLocationProductsView;
+    view foundry2CountryValueHelp as select distinct key foundry2Country from PumoriLocationProductsView;
+    view waferSizeValueHelp as select distinct key waferSize from PumoriLocationProductsView;
+    view nodeProcessValueHelp as select distinct key nodeProcess from PumoriLocationProductsView;
+    view nodeProcessGroupValueHelp as select distinct key nodeProcessGroup from PumoriLocationProductsView;
+    view packingHouse1ValueHelp as select distinct key packingHouse1 from PumoriLocationProductsView;
+    view packingHouse1CountryValueHelp as select distinct key packingHouse1Country from PumoriLocationProductsView;
+    view packingHouse2ValueHelp as select distinct key packingHouse2 from PumoriLocationProductsView;
+    view packingHouse2CountryValueHelp as select distinct key packingHouse2Country from PumoriLocationProductsView;
+    view packingTypeValueHelp as select distinct key packingType from PumoriLocationProductsView;
+    view packageSizeValueHelp as select distinct key packageSize from PumoriLocationProductsView;
+    view testingHouse1ValueHelp as select distinct key testingHouse1 from PumoriLocationProductsView;
+    view testingHouse1CountryValueHelp as select distinct key testingHouse1Country from PumoriLocationProductsView;
+    view testingHouse2ValueHelp as select distinct key testingHouse2 from PumoriLocationProductsView;
+    view testingHouse2CountryValueHelp as select distinct key testingHouse2Country from PumoriLocationProductsView;
+    view lvormValueHelp as select distinct key lvorm from PumoriLocationProductsView;
+    view reqstratValueHelp as select distinct key reqstrat from PumoriLocationProductsView;
+    view fxhorValueHelp as select distinct key fxhor from PumoriLocationProductsView;
+    view plannerNameValueHelp as select distinct key plannerName from PumoriLocationProductsView;
+    view shflgValueHelp as select distinct key shflg from PumoriLocationProductsView;
+    view sobslValueHelp as select distinct key sobsl from PumoriLocationProductsView;
+    view mmstaValueHelp as select distinct key mmsta from PumoriLocationProductsView;
+    view dismmValueHelp as select distinct key dismm from PumoriLocationProductsView;
+    view dislsValueHelp as select distinct key disls from PumoriLocationProductsView;
+    view fhoriValueHelp as select distinct key fhori from PumoriLocationProductsView;
+    view ekgrpValueHelp as select distinct key ekgrp from PumoriLocationProductsView;
+    view kzausValueHelp as select distinct key kzaus from PumoriLocationProductsView;
+    view ausdtValueHelp as select distinct key ausdt from PumoriLocationProductsView;
+    view atpkzValueHelp as select distinct key atpkz from PumoriLocationProductsView;
+    view prctrValueHelp as select distinct key prctr from PumoriLocationProductsView;
+    view nfmatValueHelp as select distinct key nfmat from PumoriLocationProductsView;
+    view zmpaPartnotValueHelp as select distinct key zmpaPartno from PumoriTranslaneView;
+
+/*PumoriTranslane table*/
+view PumoriTranslaneView as
+    select distinct
+            a.createdAt,
+            a.createdBy,
+            a.modifiedAt,
+            a.modifiedBy,
+        key a.prodId,
+        key a.locFr,
+            locfrType,
+        key a.locTo,
+        key b.zmpaPartno,
+            loctoType,
+        key mot,
+            leadTime,
+            coO,
+            lotSize,
+            moq,
+            pPriority,
+            zQuota,
+            spQ,
+            sourcingModel,
+            a.markedforDeletion,
+            a.custAttr1,
+            a.custAttr2,
+            a.custAttr3,
+            a.custAttr4,
+            a.custAttr5,
+            a.custAttr6,
+            a.custAttr7,
+            a.custAttr8,
+            a.custAttr9,
+            a.custAttr10,
+        key validTo,
+        key validFrom,
+            LSMIN,        
+            BSTRF,        
+            BLOCKED,       
+            EKORG,         
+            LSMAX,         
+            ESOKZ,         
+            BSTMA,         
+            INFNR,         
+            SRC_LOC_TZ_X,  
+            TRANS_CALENDAR,
+            FLAG,          
+            ZERROR,
+            mainPlant        
+    from PumoriTranslane as a
+    left outer join syn_BTPCompSequence as b
+    on a.prodId = b.zbtpComp
+    and a.locTo = b.factoryNumber;
+
+
+    view EKORGValueHelp as select distinct key EKORG from PumoriTranslaneView;
+    view INFNRValueHelp as select distinct key INFNR from PumoriTranslaneView;
+    view TRANS_CALENDARValueHelp as select distinct key TRANS_CALENDAR from PumoriTranslaneView;
+
+/*PumoriUOM table*/
+view PumoriUOMView as
+    select
+            createdAt,
+            createdBy,
+            modifiedAt,
+            modifiedBy,
+        key prodId,
+        key uomAlt,
+            denominator,
+            numerator
+    from PumoriUOM;
+
+//---------------------- value helps------------------------//
+
+
+/*PumoriUOM table value*/
+/* PumoriProductLocation Value help */
+view PumoriProdLocationValueHelp as
+    select from PumoriProdLoc distinct {
+        key locId,
+            prodId
+    };
+
+
+view PumoriProdTlaneValueHelp as
+    select from PumoriTranslaneView distinct {
+        key prodId
+    };
+
+
+view ProdIdProdLocationValueHelp as
+    select from PumoriProdLocationValueHelp distinct {
+        key prodId
+    };
+
+view LocIdProdLocationValueHelp as
+    select from PumoriProdLocationValueHelp distinct {
+        key locId
+    };
+/* PumoriTlane Value help */
+view PumoriTlaneValueHelp as
+    select from PumoriTranslane distinct {
+        key mot,
+            prodId,
+            locFr,
+            locfrType,
+            locTo,
+            loctoType,
+            validTo,
+            validFrom
+    };
+
+view motTlaneValueHelp as
+    select from PumoriTlaneValueHelp distinct {
+        key mot
+    };
+
+view prodIdTlaneValueHelp as
+    select from PumoriTlaneValueHelp distinct {
+        key prodId
+    };
+
+view locFrTlaneValueHelp as
+    select from PumoriTlaneValueHelp distinct {
+        key locFr
+    };
+
+view locFrTypeTlaneValueHelp as
+    select from PumoriTlaneValueHelp distinct {
+        key locfrType
+    };
+
+view locToTlaneValueHelp as
+    select from PumoriTlaneValueHelp distinct {
+        key locTo
+    };
+
+view loctoTypeTlaneValueHelp as
+    select from PumoriTlaneValueHelp distinct {
+        key loctoType
+    };
+
+view validToTlaneValueHelp as
+    select from PumoriTlaneValueHelp distinct {
+        key validTo
+    };
+
+view validFromTlaneValueHelp as
+    select from PumoriTlaneValueHelp distinct {
+        key validFrom
+    };
+
+/* PumoriUOM Value help */
+view PumoriUOMValueHelp as
+    select from PumoriUOM distinct {
+        key uomAlt,
+            prodId
+    };
+
+view ProdIdUOMValueHelp as
+    select from PumoriUOMValueHelp distinct {
+        key prodId
+    };
+
+/* ------- value help -------------*/
+
+/* GenHPPN Value help */
+view GenHPPNValueHelp as
+    select distinct
+        key prodId,
+            prodDesc
+    from PumoriProducts;
+
+/* MPN Value help */
+// view MPNValueHelp as select distinct key zmpn from PumoriProducts;
+// view MPAPartNumValueHelp as select distinct key zmpaPartno from PumoriProducts;
+// view HPPNPartNumValueHelp as select distinct key zHpPartno from PumoriProducts;
+
+
+view mappingFtFvView as
+    select distinct
+        key factoryNumber,
+            zhfvtypeFac,
+            zhfvtypeHP,
+            zhfvvalueFac,
+            zhfvvalueHP
+    from mappingFtFv;
+
+    /**Factory FT mappingFtFv Value help **/   
+view zhfvtypeFacMappingFtFvValueHelp as
+    select from mappingFtFvView distinct {
+        key zhfvtypeFac
+    };
+
+/**Factory FV mappingFtFv Value help **/      
+view zhfvvalueFacMappingFtFvValueHelp as
+    select from mappingFtFvView distinct {
+        key zhfvvalueFac
+    };
+
+ /**HP FT mappingFtFv Value help **/   
+view zhfvtypeHPMappingFtFvValueHelp as
+    select from mappingFtFvView distinct {
+        key zhfvtypeHP
+    };   
+
+/**HP FV mappingFtFv Value help **/   
+view zhfvvalueHPMappingFtFvValueHelp as
+    select from mappingFtFvView distinct {
+        key zhfvvalueHP
+    };
+
+view factoryNumbermappingFtFvValueHelp as select distinct key factoryNumber from mappingFtFv;
+view viewmanageflagfthelp as select distinct key zhfvType from manageflag;
+view MPNValueHelp as
+    select from synFactoryProductsView distinct {
+        key prodId,
+            factoryNumber,
+            zmpaPartno,
+            zHpPartno
+    };
+
+view synprodIdValueHelp as
+    select from MPNValueHelp distinct {
+        key prodId
+    };
+/* Factory Number Value help */
+view synFactoryNumberValueHelp as
+    select from MPNValueHelp distinct {
+        key factoryNumber
+    };
+
+/* Factory Part Number Value help */
+view FactoryPartNumberValueHelp as
+    select from MPNValueHelp distinct {
+        key zmpaPartno
+    };
+/* Hp Part Number Value help */
+view HpPartNumberValueHelp as
+    select from MPNValueHelp distinct {
+        key zHpPartno
+    };
+view materialTypeTexthelp as select distinct key materialTypeText from synFactoryProductsView;
+view FTTexthelp as select distinct key zhfvType from synFactoryProductsView;
+view FVTexthelp as select distinct key zhfvValue from synFactoryProductsView;
+view synFactoryProductsView as
+    select
+            a.createdAt,
+            a.createdBy,
+            a.modifiedAt,
+            a.modifiedBy,
+        key a.factoryNumber,
+        key a.prodId,
+        key a.zmpaPartno,
+            b.zbtpComp,
+            prodDesc,
+            a.zHpPartno,
+            baseunitofMeasure,
+            case a.materialType
+                when
+                    'FERT'
+                then
+                    'FERT'
+                when
+                    'HALB'
+                then
+                    'HALB'
+                when
+                    'ROH'
+                then
+                    'ROH'
+            end as materialTypeText : String(20),
+            zplcStatus,
+            unspscCode,
+            zhfvType,
+            zhfvValue,
+            zintroDate,
+            materialGroup,
+            gatingAttribute,
+            category,
+            markedforDeletion
+    from syn_FactoryProducts as a
+    inner join syn_BTPCompSequence as b
+        on a.prodId = b.prodId
+        and a.factoryNumber = b.factoryNumber;
+
+view synLocationProductsView as
+    select
+            createdAt,
+            createdBy,
+            modifiedAt,
+            modifiedBy,
+        key factoryNumber,
+        key locId,
+        key prodId,
+            zmanuName,
+            em,
+            procurementType,
+            grprocessingTime,
+            ztargetBuffer,
+            zcancelWindow,
+            planneddeliveryTime,
+            zinHouseLeadTime,
+            soleSourceFlag,
+            outSource,
+            foundry1,
+            foundry1Site,
+            foundry1Country,
+            foundry2,
+            foundry2Site,
+            foundry2Country,
+            waferSize,
+            nodeProcess,
+            nodeProcessGroup,
+            packingHouse1,
+            packingHouse1Country,
+            packingHouse2,
+            packingHouse2Country,
+            packingType,
+            pin,
+            packageSize,
+            testingHouse1,
+            testingHouse1Country,
+            testingHouse2,
+            testingHouse2Country,
+            markedforDeletion
+    from syn_LocationProducts;
+
+view synTranslaneView as
+    select
+            createdAt,
+            createdBy,
+            modifiedAt,
+            modifiedBy,
+        key factoryNumber,
+        key prodId,
+        key locFr,
+        key locfrType,
+        key locTo,
+        key loctoType,
+        key mot,
+            leadTime,
+            coO,
+            lotSize,
+            moq,
+            pPriority,
+            zQuota,
+            spQ,
+            sourcingModel,
+            markedforDeletion,
+        key validFrom,
+        key validTo
+    from syn_Translane;
+
+view synUOMConversionView as
+    select
+            createdAt,
+            createdBy,
+            modifiedAt,
+            modifiedBy,
+        key factoryNumber,
+        key prodId,
+        key uomAlt,
+            zbtpComp,
+            fbaseunitofMeasure,
+            hpbaseunitofMeasure,
+            denominator,
+            numerator
+    from syn_UOMConversion;
+
+view LoctypeTextValueHelp as select distinct key LOCTYPETEXT from PumoriLocationProductsView;
+view strategicautoFlagValueHelp as select distinct key strategicautoFlag from PumoriProductsView;
+view FTValueHelp as select distinct key zhfvType from PumoriProductsView;
+view FVValueHelp as select distinct key zhfvValue from PumoriProductsView;
+view matTypeValueHelp as select distinct key materialType from PumoriProductsView;
+
+
+/*Factory Location history*/
+view FactoryLocationsHistoryView as
+    select
+            createdAt,
+            createdBy,
+            modifiedAt,
+            modifiedBy,
+        key factoryNumber,
+        key locId,
+            locDescr,
+        key locType,
+            case FactoryLocationsHistory.locType
+                when
+                    'P'
+                then
+                    'P(Plant or Distribution center)'
+                when
+                    'V'
+                then
+                    'V(Supplier)'
+            end as locTypeText : String(20),
+            zplantType,
+            locRegion,
+            locationAddress1,
+            locationAddress2,
+            city,
+            state,
+            country,
+            countryCode,
+            zipcode,
+            locationContact1Name,
+            locationEmail1,
+            locationContact2Name,
+            locationEmail2,
+            markedforDeletion,
+        key snapshotDate: String
+    from FactoryLocationsHistory
+    where hideData != 'X';
+
+/*Factory Location*/
+view synFactoryLocationView as
+    select
+            createdAt,
+            createdBy,
+            modifiedAt,
+            modifiedBy,
+        key factoryNumber,
+        key locId,
+            locDescr,
+        key locType,
+            case syn_FactoryLocations.locType
+                when
+                    'P'
+                then
+                    'P(Plant or Distribution center)'
+                when
+                    'V'
+                then
+                    'V(Supplier)'
+            end as locTypeText : String(20),
+            zplantType,
+            locRegion,
+            locationAddress1,
+            locationAddress2,
+            city,
+            state,
+            country,
+            countryCode,
+            zipcode,
+            locationContact1Name,
+            locationEmail1,
+            locationContact2Name,
+            locationEmail2,
+            markedforDeletion
+    from syn_FactoryLocations;
+
+/* Location Factory Number Value Help  */
+view synFactoryNoLocValueHelp as select distinct key factoryNumber from synFactoryLocationView;
+/* Location Factory Number History Value Help */
+view FactoryNoHistoryLocValueHelp as select distinct key factoryNumber from FactoryLocationsHistoryView;
+
+
+/* VALUE HELPS FOR FactoryLocationsHistoryView */
+
+view locIdValueHelp as select distinct key locId from FactoryLocationsHistoryView;
+
+view locDescrValueHelp as select distinct key locDescr from FactoryLocationsHistoryView;
+
+view locTypeValueHelp as select distinct key locType from FactoryLocationsHistoryView;
+
+view zplantTypeValueHelp as select distinct key zplantType from FactoryLocationsHistoryView;
+
+view locRegionValueHelp as select distinct key locRegion from FactoryLocationsHistoryView;
+
+view locationAddress1ValueHelp as select distinct key locationAddress1 from FactoryLocationsHistoryView;
+
+view locationAddress2ValueHelp as select distinct key locationAddress2 from FactoryLocationsHistoryView;
+
+view cityValueHelp as select distinct key city from FactoryLocationsHistoryView;
+
+view stateValueHelp as select distinct key state from FactoryLocationsHistoryView;
+
+view countryValueHelp as select distinct key country from FactoryLocationsHistoryView;
+
+view countryCodeValueHelp as select distinct key countryCode from FactoryLocationsHistoryView;
+
+view zipcodeValueHelp as select distinct key zipcode from FactoryLocationsHistoryView;
+
+view locationContact1NameValueHelp as select distinct key locationContact1Name from FactoryLocationsHistoryView;
+
+view locationEmail1ValueHelp as select distinct key locationEmail1 from FactoryLocationsHistoryView;
+
+view locationContact2NameValueHelp as select distinct key locationContact2Name from FactoryLocationsHistoryView;
+
+view locationEmail2ValueHelp as select distinct key locationEmail2 from FactoryLocationsHistoryView;
+
+/* END OF VALUE HELPS FOR FactoryLocationsHistoryView */

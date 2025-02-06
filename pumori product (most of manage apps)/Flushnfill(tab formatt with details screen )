@@ -1,0 +1,2271 @@
+app/flushandfillui/webapp/view/FillDetails.view.xml
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Flush And Fill  
+ RICEFW No                : 
+ Release                  :   M1 Release  
+ Author                   :   Sreenivas, Samudrala
+ Date                     :   18.04.2024
+ Description              :   Flush And Fill 
+ *Descriptions: Flush And Fill Product In-Detailed Screen  
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<mvc:View 
+    controllerName="pumorips.pumoriproduct.flushandfillui.controller.FillDetails"
+    xmlns:mvc="sap.ui.core.mvc"
+    displayBlock="true"
+    xmlns="sap.m" 
+    xmlns:uxap="sap.uxap"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar" 
+    xmlns:core="sap.ui.core"
+	xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:smartForm="sap.ui.comp.smartform"
+    xmlns:smartField="sap.ui.comp.smartfield" 	
+    xmlns:l="sap.ui.layout"
+    height="100%"
+>
+
+    <uxap:ObjectPageLayout id="ObjectPageLayout" useIconTabBar="false">
+        <uxap:sections>
+            <uxap:ObjectPageSection id="ObjectionPageSectionForBasicDetails" titleUppercase="true"  title="{i18n>bscDtl}" showTitle="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="ObjectionPageSubSectionForDisplayValues">
+                        <smartForm:SmartForm id="smartForm" editTogglable="false" editToggled="handleEditToggled">
+                            <smartForm:Group id="smartFormGroup1">
+                                <smartForm:GroupElement id="GroupElement1" label="{i18n>facNum}">
+                                    <smartField:SmartField id="Field1" value="{factoryNumber}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement2" label="{i18n>mpn}">
+                                    <smartField:SmartField id="Field2" value="{prodId}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement3" label="{i18n>prdDesc}">
+                                    <smartField:SmartField id="Field3" value="{prodDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement4" label="{i18n>prtNum}">
+                                    <smartField:SmartField id="Field4" value="{zmpaPartno}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement5" label="{i18n>hpPart}">
+                                    <smartField:SmartField id="Field5" value="{zHpPartno}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                            </smartForm:Group>
+
+                            <smartForm:Group id="smartGroup2">
+                                <smartForm:GroupElement id="GroupElement6" label="{i18n>matType}">
+                                    <smartField:SmartField id="Field6" value="{materialTypeText}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement7" label="{i18n>buom}">
+                                    <smartField:SmartField id="Field7" value="{baseunitofMeasure}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement8" label="{i18n>zplcStatus}">
+                                    <smartField:SmartField id="Field8" value="{zplcStatus}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement9" label="{i18n>snapShotDate}">
+                                    <smartField:SmartField id="Field9" value="{snapshotDate}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                            </smartForm:Group>
+                        </smartForm:SmartForm>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <uxap:ObjectPageSection id="ObjectPageSectionForUOM" titleUppercase="false"  title="{i18n>uom}" showTitle="false">
+				<uxap:subSections>
+					<uxap:ObjectPageSubSection id="ObjectPageSubSectionForDisplayValues">
+						<smartTable:SmartTable id="idPMSmrtUomTblFill" demandPopin="true" smartFilterId="smartFilterBar" tableType="ResponsiveTable"  entitySet="UOMHistory" useVariantManagement="true"  
+                            header="{i18n>uom}" showRowCount="true" useExportToExcel="true"  
+                            enableAutoBinding="true" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindUomTableFill"   >
+                            <Table id="idPMUomTabFill" mode="None"  sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="5" >					
+                            </Table>
+			            </smartTable:SmartTable>
+					</uxap:ObjectPageSubSection>
+				</uxap:subSections>
+			</uxap:ObjectPageSection>
+
+            <uxap:ObjectPageSection id="ObjectPageSectionForProdLocDetails" titleUppercase="false"  title="{i18n>prodlocAttr}" showTitle="false">
+				<uxap:subSections>
+					<uxap:ObjectPageSubSection id="ObjectPageSubSectionForDisplayValuesOfProdLocDetails">
+						<smartTable:SmartTable id="idPMSmrtProdLocDetailsTblFill" demandPopin="true" smartFilterId="smartFilterBar" tableType="ResponsiveTable"  entitySet="LocationProductsHistory" useVariantManagement="true"  
+                            header="{i18n>prodlocAttr}" showRowCount="true" useExportToExcel="true"  
+                            enableAutoBinding="true" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindProdLocTableFill"   >
+                            <Table id="idPMProdLocDetailsTabFill" mode="None"  sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="5" >					
+                            </Table>
+			            </smartTable:SmartTable>
+					</uxap:ObjectPageSubSection>
+				</uxap:subSections>
+			</uxap:ObjectPageSection>
+
+            <uxap:ObjectPageSection id="ObjectPageSectionForTlane" titleUppercase="false"  title="{i18n>tlane}" showTitle="false">
+				<uxap:subSections>
+					<uxap:ObjectPageSubSection id="ObjectPageSubSectionForDisplayValuesOfTlane">
+						<smartTable:SmartTable id="idPMSmrtTlaneTblFill" demandPopin="true" smartFilterId="smartFilterBar" tableType="ResponsiveTable"  entitySet="TransLaneHistory" useVariantManagement="true"  
+                            header="{i18n>tlane}" showRowCount="true" useExportToExcel="true"  
+                            enableAutoBinding="true" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindTlaneTableFill"   >
+                            <Table id="idPMTlaneTabFill" mode="None"  sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="5" >					
+                            </Table>
+			            </smartTable:SmartTable>
+					</uxap:ObjectPageSubSection>
+				</uxap:subSections>
+			</uxap:ObjectPageSection>
+        </uxap:sections>
+    </uxap:ObjectPageLayout>
+
+</mvc:View>
+
+
+
+app/flushandfillui/webapp/view/FlushAndFill.view.xml
+
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Flush And Fill  
+ RICEFW No                : 
+ Release                  :   M1 Release  
+ Author                   :   Samudrala, Sreenivas
+ Date                     :   18.04.2024
+ Description              :   Flush And Fill 
+ *Descriptions: Flush And Fill Product details  
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+
+<mvc:View controllerName="pumorips.pumoriproduct.flushandfillui.controller.FlushAndFill"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:customData="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+	xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:table="sap.ui.table">
+    <IconTabBar id="idIconTabBar" stretchContentHeight="true" >
+        <items>
+            <IconTabFilter id="idIconTabFilterFlush" text="{i18n>fushProd}" >
+                <ScrollContainer id="scrollContainerId" horizontal="false" vertical="true" height="100%" width="100%">
+                    <smartFilterBar:SmartFilterBar id="smartFilterBarFlush" persistencyKey="SmartFilterPKey" showMessages="true" showClearOnFB="true" entitySet="synFactoryProductsView" search=".onSFBSearchFlush">
+                    
+                    </smartFilterBar:SmartFilterBar>
+                    
+                    <smartTable:SmartTable id="idSmartTableFlush"  smartFilterId="smartFilterBarFlush" tableType="ResponsiveTable" editable="false" entitySet="synFactoryProductsView" useVariantManagement="true" showVariantManagement="true" 
+                                header="{i18n>headerFlushProd}" showRowCount="true" enableExport="true"  requestAtLeastFields="factoryNumber" demandPopin="true"
+                                enableAutoBinding="false" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindTable"   persistencyKey="SmartTablePersistencyKey"
+                    >
+                        <smartTable:customToolbar>
+                                <OverflowToolbar id="idOverflowToolBar">
+                                    <ToolbarSpacer id="toolbarSpaceId"/>
+                                    <Button id="idDelete" enabled="false" icon="sap-icon://delete" tooltip="{i18n>actionsht}" class="sapUiSmallMargin" press=".onActionPress" ariaHasPopup="Menu" visible="false">
+                                    </Button>
+                                </OverflowToolbar>
+                        </smartTable:customToolbar>
+                        
+                        <Table id="idTable" mode="MultiSelect" selectionChange="onItemSelect" sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="5">
+                            <items>
+                                <ColumnListItem type="Navigation" press="handlePress" id="idColList"></ColumnListItem>
+                            </items>
+                        </Table> 
+                    </smartTable:SmartTable>
+                </ScrollContainer>
+            </IconTabFilter>
+            
+            <IconTabFilter id="idIconTabFilterFill" text="{i18n>fillProd}">
+                <ScrollContainer id="scrollContainerIdFill" horizontal="false" vertical="true" height="100%" width="100%">
+                    <smartFilterBar:SmartFilterBar id="idSmartFilterBarFill" persistencyKey="SmartFilterPKey" showMessages="true" showClearOnFB="true" clear="onClearPress" entitySet="FactoryProductsHistoryView" search=".onSFBSearchFill">
+                    </smartFilterBar:SmartFilterBar>
+                    <smartTable:SmartTable id="idSmartTableFill"  smartFilterId="idSmartFilterBarFill" tableType="ResponsiveTable" editable="false" entitySet="FactoryProductsHistoryView" useVariantManagement="true" showVariantManagement="true" 
+                                header="{i18n>headerFillProd}" showRowCount="true" enableExport="true"  requestAtLeastFields="factoryNumber" demandPopin="true"
+                                enableAutoBinding="false" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindTableFill"   persistencyKey="SmartTablePersistencyKey" 
+                    >
+                        <smartTable:customToolbar>
+                                <OverflowToolbar id="idOverflowToolBarFill">
+                                    <ToolbarSpacer id="toolbarSpaceIdFill"/>
+                                    <Button id="idSave" enabled="false" visible="false" icon="sap-icon://save"  tooltip="{i18n>actionshtSave}" class="sapUiSmallMargin" press=".onActionPressFill" ariaHasPopup="Menu">
+                                    </Button>
+                                </OverflowToolbar>
+                        </smartTable:customToolbar>
+                        
+                        <Table id="idTableFill" mode="MultiSelect" selectionChange="onItemSelectFill" sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="5">
+                            <items>
+                                <ColumnListItem type="Navigation" press="handlePressFill" id="idColListFill"></ColumnListItem>
+                            </items>
+                        </Table>
+                    </smartTable:SmartTable>
+                </ScrollContainer>
+            </IconTabFilter>
+            <IconTabFilter id="idIconTabFilterFlushLoc" text="{i18n>fushLoc}" >
+                <ScrollContainer id="scrollContainerIdLoc" horizontal="false" vertical="true" height="100%" width="100%">
+                    <smartFilterBar:SmartFilterBar id="smartFilterBarFlushLoc" persistencyKey="SmartFilterPKey" showMessages="true" showClearOnFB="true" entitySet="synFactoryLocationView" >
+                    
+                    </smartFilterBar:SmartFilterBar>
+                    
+                    <smartTable:SmartTable id="idSmartTableFlushLoc"  smartFilterId="smartFilterBarFlushLoc" tableType="ResponsiveTable" editable="false" entitySet="synFactoryLocationView" useVariantManagement="true" showVariantManagement="true" 
+                                header="{i18n>headerFlushLoc}" showRowCount="true" enableExport="true"  requestAtLeastFields="factoryNumber" ignoredFields="markedforDeletion" demandPopin="true"
+                                enableAutoBinding="false" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindTable"   persistencyKey="SmartTablePersistencyKey"
+                    >
+                        <smartTable:customToolbar>
+                                <OverflowToolbar id="idOverflowToolBarLoc">
+                                    <ToolbarSpacer id="toolbarSpaceIdLoc"/>
+                                    <Button id="idDeleteLoc" enabled="false" visible="false" icon="sap-icon://delete" tooltip="{i18n>actionsht}" class="sapUiSmallMargin" press=".onActionPressFushLoc" ariaHasPopup="Menu">
+                                    </Button>
+                                </OverflowToolbar>
+                        </smartTable:customToolbar>
+                        
+                        <Table id="idTableLoc" mode="MultiSelect" selectionChange="onItemSelectFlushLoc" sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="5">
+                            <items>
+                                <ColumnListItem type="Navigation" press="handlePressFlushLoc" id="idColListLoc"></ColumnListItem>
+                            </items>
+                        </Table> 
+                    </smartTable:SmartTable>
+                </ScrollContainer>
+            </IconTabFilter>
+            
+            <IconTabFilter id="idIconTabFilterFillLoc" text="{i18n>fillLoc}">
+                <ScrollContainer id="scrollContainerIdFillLoc" horizontal="false" vertical="true" height="100%" width="100%">
+                    <smartFilterBar:SmartFilterBar id="idSmartFilterBarFillLoc" persistencyKey="SmartFilterPKey" showMessages="true" showClearOnFB="true" clear="onClearPress" entitySet="FactoryLocationsHistoryView">
+                    </smartFilterBar:SmartFilterBar>
+                    <smartTable:SmartTable id="idSmartTableFillLoc"  smartFilterId="idSmartFilterBarFillLoc" tableType="ResponsiveTable" editable="false" entitySet="FactoryLocationsHistoryView" useVariantManagement="true" showVariantManagement="true" 
+                                header="{i18n>headerFillLoc}" showRowCount="true" enableExport="true"  requestAtLeastFields="factoryNumber" ignoredFields="markedforDeletion" demandPopin="true"
+                                enableAutoBinding="false" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindTableFill"   persistencyKey="SmartTablePersistencyKey" 
+                    >
+                        <smartTable:customToolbar>
+                                <OverflowToolbar id="idOverflowToolBarFillLoc">
+                                    <ToolbarSpacer id="toolbarSpaceIdFillLoc"/>
+                                    <Button id="idSaveLoc" enabled="false" visible="false" icon="sap-icon://save"  tooltip="{i18n>actionshtSave}" class="sapUiSmallMargin" press=".onActionPressFillLoc" ariaHasPopup="Menu">
+                                    </Button>
+                                </OverflowToolbar>
+                        </smartTable:customToolbar>
+                        
+                        <Table id="idTableFillLoc" mode="MultiSelect" selectionChange="onItemSelectFillLoc" sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="5">
+                            <items>
+                                <ColumnListItem type="Navigation" press="handlePressFillLoc" id="idColListFillLoc"></ColumnListItem>
+                            </items>
+                        </Table>
+                    </smartTable:SmartTable>
+                </ScrollContainer>
+            </IconTabFilter>
+        </items>
+    </IconTabBar>
+</mvc:View>
+
+
+
+app/flushandfillui/webapp/view/FlushAndFillLocDetails.view.xml
+
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Flush And Fill  
+ RICEFW No                : 
+ Release                  :   M1 Release  
+ Author                   :   Chowdhary,Mamtha
+ Date                     :   18.04.2024
+ Description              :   Flush And Fill 
+ *Descriptions: Flush And Fill Location details  
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<mvc:View 
+    controllerName="pumorips.pumoriproduct.flushandfillui.controller.FlushAndFillLocDetails"
+    xmlns:mvc="sap.ui.core.mvc"
+    displayBlock="true"
+    xmlns="sap.m" 
+    xmlns:core="sap.ui.core"
+    height="100%"
+>
+<Page id="pageid" showHeader="false">
+<content> 
+</content>
+</Page>
+    
+</mvc:View>
+
+
+
+app/flushandfillui/webapp/view/FlushDetails.view.xml
+
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Flush And Fill  
+ RICEFW No                : 
+ Release                  :   M1 Release  
+ Author                   :   Sreenivas, Samudrala
+ Date                     :   18.04.2024
+ Description              :   Flush And Fill 
+ *Descriptions: Flush And Fill Product In-Detailed Screen  
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<mvc:View 
+    controllerName="pumorips.pumoriproduct.flushandfillui.controller.FlushDetails"
+    xmlns:mvc="sap.ui.core.mvc"
+    displayBlock="true"
+    xmlns="sap.m" 
+    xmlns:uxap="sap.uxap"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar" 
+    xmlns:core="sap.ui.core"
+	xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:smartForm="sap.ui.comp.smartform"
+    xmlns:smartField="sap.ui.comp.smartfield" 	
+    xmlns:l="sap.ui.layout"
+    height="100%"
+>
+
+    <uxap:ObjectPageLayout id="ObjectPageLayout" useIconTabBar="false">
+        <uxap:sections>
+            <uxap:ObjectPageSection id="ObjectionPageSectionForBasicDetails" titleUppercase="true"  title="{i18n>bscDtl}" showTitle="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="ObjectionPageSubSectionForDisplayValues">
+                        <smartForm:SmartForm id="smartForm" editTogglable="false" editToggled="handleEditToggled">
+                            <smartForm:Group id="smartFormGroup1">
+                                <smartForm:GroupElement id="GroupElement1" label="{i18n>facNum}">
+                                    <smartField:SmartField id="Field1" value="{factoryNumber}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement2" label="{i18n>mpn}">
+                                    <smartField:SmartField id="Field2" value="{prodId}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement3" label="{i18n>prdDesc}">
+                                    <smartField:SmartField id="Field3" value="{prodDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement4" label="{i18n>prtNum}">
+                                    <smartField:SmartField id="Field4" value="{zmpaPartno}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement5" label="{i18n>hpPart}">
+                                    <smartField:SmartField id="Field5" value="{zHpPartno}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                            </smartForm:Group>
+
+                            <smartForm:Group id="smartGroup2">
+                                <smartForm:GroupElement id="GroupElement6" label="{i18n>matType}">
+                                    <smartField:SmartField id="Field6" value="{materialType}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement7" label="{i18n>buom}">
+                                    <smartField:SmartField id="Field7" value="{baseunitofMeasure}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement8" label="{i18n>zplcStatus}">
+                                    <smartField:SmartField id="Field8" value="{zplcStatus}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                            </smartForm:Group>
+                        </smartForm:SmartForm>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <uxap:ObjectPageSection id="ObjectPageSectionForUOM" titleUppercase="false"  title="{i18n>uom}" showTitle="false">
+				<uxap:subSections>
+					<uxap:ObjectPageSubSection id="ObjectPageSubSectionForDisplayValues">
+						<smartTable:SmartTable id="idPMSmrtUomTbl" demandPopin="true" smartFilterId="smartFilterBar" tableType="ResponsiveTable"  entitySet="synUOMConversionView" useVariantManagement="true"  
+                            header="{i18n>uom}" showRowCount="true" useExportToExcel="true"  
+                            enableAutoBinding="true" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindUomTable"   >
+                            <Table id="idPMUomTab" mode="None"  sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="5" >					
+                            </Table>
+			            </smartTable:SmartTable>
+					</uxap:ObjectPageSubSection>
+				</uxap:subSections>
+			</uxap:ObjectPageSection>
+
+            <uxap:ObjectPageSection id="ObjectPageSectionForProdLocDetails" titleUppercase="false"  title="{i18n>prodlocAttr}" showTitle="false">
+				<uxap:subSections>
+					<uxap:ObjectPageSubSection id="ObjectPageSubSectionForDisplayValuesOfProdLocDetails">
+						<smartTable:SmartTable id="idPMSmrtProdLocDetailsTbl" demandPopin="true" smartFilterId="smartFilterBar" tableType="ResponsiveTable"  entitySet="synLocationProductsView" useVariantManagement="true"  
+                            header="{i18n>prodlocAttr}" showRowCount="true" useExportToExcel="true"  
+                            enableAutoBinding="true" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindProdLocTable"   >
+                            <Table id="idPMProdLocDetailsTab" mode="None"  sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="5" >					
+                            </Table>
+			            </smartTable:SmartTable>
+					</uxap:ObjectPageSubSection>
+				</uxap:subSections>
+			</uxap:ObjectPageSection>
+
+            <uxap:ObjectPageSection id="ObjectPageSectionForTlane" titleUppercase="false"  title="{i18n>tlane}" showTitle="false">
+				<uxap:subSections>
+					<uxap:ObjectPageSubSection id="ObjectPageSubSectionForDisplayValuesOfTlane">
+						<smartTable:SmartTable id="idPMSmrtTlaneTbl" demandPopin="true" smartFilterId="smartFilterBar" tableType="ResponsiveTable"  entitySet="synTranslaneView" useVariantManagement="true"  
+                            header="{i18n>tlane}" showRowCount="true" useExportToExcel="true"  
+                            enableAutoBinding="true" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindTlaneTable"   >
+                            <Table id="idPMTlaneTab" mode="None"  sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="5" >					
+                            </Table>
+			            </smartTable:SmartTable>
+					</uxap:ObjectPageSubSection>
+				</uxap:subSections>
+			</uxap:ObjectPageSection>
+        </uxap:sections>
+    </uxap:ObjectPageLayout>
+
+</mvc:View>
+
+
+
+
+app/flushandfillui/webapp/view/fragments/FillLoc.fragment.xml
+
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :    Flush And Fill
+ RICEFW No                : 
+ Release                  :    M1 Release
+ Author                   :    Chowdhary,Mamtha
+ Date                     :    18.04.2024
+ Description              :    Factory Location Fill Smart form fragment
+ *Descriptions:   
+ ****************************************************************
+Change Log:
+    Date       |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<core:FragmentDefinition
+	xmlns:smartForm="sap.ui.comp.smartform" 
+    xmlns:smartField="sap.ui.comp.smartfield" 
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout">
+	<!-- <VBox fitContainer="true" id="vBoxId"> -->
+    <smartForm:SmartForm id="smartFormFillLoc" 
+			editTogglable="false" editToggled="handleEditToggled" >
+					<smartForm:Group title="{i18n>BasicDtls}" id="grpBas">
+						<smartForm:layoutData>
+							<l:GridData span="L7 M7 S12" id="gridLay"/>
+						</smartForm:layoutData>
+						<smartForm:GroupElement label="{i18n>LocId}" id="idLoc">
+							<smartField:SmartField value="{locId}"  enabled="false" id="idLocV"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>FacNum}" id="idFac">
+							<smartField:SmartField value="{factoryNumber}"  enabled="false"  id="ID_FACTNum" width="50%"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>locDesc}" id="idLocDes">
+							<smartField:SmartField value="{locDescr}" id="idfactdesc"  width="50%"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>plntType}" id="idplntTypeL">
+							<smartField:SmartField value="{zplantType}" id="idplntType"  width="50%"/>
+						</smartForm:GroupElement>
+					</smartForm:Group>
+					<smartForm:Group title=" " id="idGrp">
+						<smartForm:GroupElement label="{i18n>cntry}" id="idCntry">
+							<smartField:SmartField value="{country}" id="idcntry" width="80%"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>cntryCode}" id="idCntryCodeL">
+							<smartField:SmartField value="{countryCode}" id="idcntryCode" width="80%"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>locType}" id="idLocTyp">
+							<smartField:SmartField  value="{locTypeText}" id="idLocText" />
+						</smartForm:GroupElement>
+					</smartForm:Group>
+					<smartForm:Group title="{i18n>AddDtls}" id="idAddD">
+						<smartForm:layoutData>
+							<l:GridData span="L6 M6 S12" id="idAddGrid"/>
+						</smartForm:layoutData>
+						<smartForm:GroupElement label="{i18n>LocRgn}" id="idLocRegL">
+							<smartField:SmartField value="{locRegion}" width="50%" id="idlocReg"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>locAdd1}" id="idlocAdd1L">
+							<smartField:SmartField id="idlocaddr" value="{locationAddress1}" mandatory="true"  width="50%"></smartField:SmartField>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>locAdd2}" id="idlocAdd2L">
+							<smartField:SmartField value="{locationAddress2}" width="50%" id="idlocAdd2"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>cty}" id="idCityL">
+							<smartField:SmartField value="{city}" width="50%" id="idCity"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>Stprvnc}" id="idStateL">
+							<smartField:SmartField value="{state}" width="50%" id="idState"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>zipcd}" id="idZipL">
+							<smartField:SmartField value="{zipcode}" width="50%" id="idZip"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>LocContName1}" id="idLocNameL">
+							<smartField:SmartField value="{locationContact1Name}" width="50%" id="idLocName"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>snapShotDate}" id="idsnapDL">
+							<smartField:SmartField value="{snapshotDate}" width="50%" id="idsnapD"/>
+						</smartForm:GroupElement>
+					</smartForm:Group>
+					<smartForm:Group title=" " id="idTitle">
+						<smartForm:layoutData>
+							<l:GridData span="L6 M6 S12" id="idGrid"/>
+						</smartForm:layoutData>
+						<smartForm:GroupElement label="{i18n>LocEmail1}" id="idLocEmL" >
+							<smartField:SmartField value="{locationEmail1}" width="50%" id="idLocEm"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>LoConName2}" id="idLocName2L">
+							<smartField:SmartField value="{locationContact2Name}" width="50%" id="idLocName2"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>LocEmail2}" id="idLocEm2L">
+							<smartField:SmartField value="{locationEmail2}" width="50%"  id="idLocEm2"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>crtBy}" id="idCrtByL" >
+							<smartField:SmartField value="{createdBy}" width="50%" enabled="false" id="idCrtBy" />
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>crtDate}" id="idCrDteL">
+							<smartField:SmartField value="{createdAt}" width="50%" enabled="false" id="idCrDte"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>updtBy}" id="idModByL">
+							<smartField:SmartField value="{modifiedBy}" width="50%" enabled="false" id="idModBy"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>updtDate}" id="idModAtL">
+							<smartField:SmartField value="{modifiedAt}" width="50%" enabled="false" id="idModAt"/>
+						</smartForm:GroupElement>
+					</smartForm:Group>
+	</smartForm:SmartForm>
+	<!-- </VBox> -->
+</core:FragmentDefinition>
+
+
+
+
+app/flushandfillui/webapp/view/fragments/FlushLoc.fragment.xml
+
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :    Flush And Fill
+ RICEFW No                : 
+ Release                  :    M1 Release
+ Author                   :    Chowdhary,Mamtha
+ Date                     :    18.04.2024
+ Description              :    Factory Location Flush Smart form fragment
+ *Descriptions:   
+ ****************************************************************
+Change Log:
+    Date       |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<core:FragmentDefinition
+	xmlns:smartForm="sap.ui.comp.smartform" 
+    xmlns:smartField="sap.ui.comp.smartfield" 
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout">
+    <smartForm:SmartForm id="smartFormFlushLoc" 
+			editTogglable="false" editToggled="handleEditToggled" >
+					<smartForm:Group title="{i18n>BasicDtls}" id="grpBasFlush">
+						<smartForm:layoutData>
+							<l:GridData span="L7 M7 S12" id="gridLayFlush"/>
+						</smartForm:layoutData>
+						<smartForm:GroupElement label="{i18n>LocId}" id="idLocFlush">
+							<smartField:SmartField value="{locid}"  enabled="false" id="idLocVFlush"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>FacNum}" id="idFacFlush">
+							<smartField:SmartField value="{factoryNumber}"  enabled="false"  id="ID_FACTNumFlush" width="50%"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>locDesc}" id="idLocDesFlush">
+							<smartField:SmartField value="{locDescr}" id="idfactdescFlush"  width="50%"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>plntType}" id="idplntTypeLFlush">
+							<smartField:SmartField value="{zplantType}" id="idplntTypeFlush"  width="50%"/>
+						</smartForm:GroupElement>
+					</smartForm:Group>
+					<smartForm:Group title=" " id="idGrpFlush">
+						<smartForm:GroupElement label="{i18n>cntry}" id="idCntryFlush">
+							<smartField:SmartField value="{country}" id="idcntryFlush" width="80%"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>cntryCode}" id="idCntryCodeLFlush">
+							<smartField:SmartField value="{countryCode}" id="idcntryCodeFlush" width="80%"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>loctype}" id="idLocTypFlush">
+							<smartField:SmartField  value="{locTypeText}" id="idLocTextFlush" />
+						</smartForm:GroupElement>
+					</smartForm:Group>
+					<smartForm:Group title="{i18n>AddDtls}" id="idAddDFlush">
+						<smartForm:layoutData>
+							<l:GridData span="L6 M6 S12" id="idAddGridFlush"/>
+						</smartForm:layoutData>
+						<smartForm:GroupElement label="{i18n>LocRgn}" id="idLocRegLFlush">
+							<smartField:SmartField value="{locRegion}" width="50%" id="idlocRegFlush"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>locAdd1}" id="idlocAdd1LFlush">
+							<smartField:SmartField id="idlocaddrFlush" value="{locationAddress1}" mandatory="true"  width="50%"></smartField:SmartField>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>locAdd2}" id="idlocAdd2LFlush">
+							<smartField:SmartField value="{locationAddress2}" width="50%" id="idlocAdd2Flush"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>cty}" id="idCityLFlush">
+							<smartField:SmartField value="{city}" width="50%" id="idCityFlush"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>Stprvnc}" id="idStateLFlush">
+							<smartField:SmartField value="{state}" width="50%" id="idStateFlush"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>zipcd}" id="idZipLFlush">
+							<smartField:SmartField value="{zipcode}" width="50%" id="idZipFlush"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>LocContName1}" id="idLocNameLFlush">
+							<smartField:SmartField value="{locationContact1Name}" width="50%" id="idLocNameFlush"/>
+						</smartForm:GroupElement>
+					</smartForm:Group>
+					<smartForm:Group title=" " id="idTitleFlush">
+						<smartForm:layoutData>
+							<l:GridData span="L6 M6 S12" id="idGridFlush"/>
+						</smartForm:layoutData>
+						<smartForm:GroupElement label="{i18n>LocEmail1}" id="idLocEmLFlush" >
+							<smartField:SmartField value="{locationEmail1}" width="50%" id="idLocEmFlush"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>LoConName2}" id="idLocName2LFlush">
+							<smartField:SmartField value="{locationContact2Name}" width="50%" id="idLocName2Flush"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>LocEmail2}" id="idLocEm2LFlush">
+							<smartField:SmartField value="{locationEmail2}" width="50%"  id="idLocEm2Flush"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>crtBy}" id="idCrtByLFlush" >
+							<smartField:SmartField value="{createdBy}" width="50%" enabled="false" id="idCrtByFlush" />
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>crtDate}" id="idCrDteLFlush">
+							<smartField:SmartField value="{createdAt}" width="50%" enabled="false" id="idCrDteFlush"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>updtBy}" id="idModByLFlush">
+							<smartField:SmartField value="{modifiedBy}" width="50%" enabled="false" id="idModByFlush"/>
+						</smartForm:GroupElement>
+						<smartForm:GroupElement label="{i18n>updtDate}" id="idModAtLFlush">
+							<smartField:SmartField value="{modifiedAt}" width="50%" enabled="false" id="idModAtFlush"/>
+						</smartForm:GroupElement>
+					</smartForm:Group>
+	</smartForm:SmartForm>
+</core:FragmentDefinition>
+
+
+
+app/flushandfillui/webapp/controller/BaseController.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Flush And Fill 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Flush And Fill
+//-----------------------------------------------------------------------------------*
+//Descriptions: Contains all the re-usable functions
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/core/UIComponent",
+    "sap/m/MessageBox"
+], function (Controller, UIComponent, MessageBox) {
+    "use strict";
+
+    return Controller.extend("pumorips.pumoriproduct.flushandfillui.controller.BaseController", {
+		/**
+		 * Convenience method for accessing the router.
+		 * @public
+		 * @returns {sap.ui.core.routing.Router} the router for this component
+		 */
+
+        getRouter: function () {
+            return UIComponent.getRouterFor(this);
+        },
+
+		/**
+		 * Convenience method for getting the view model by name.
+		 * @public
+		 * @param {string} [sName] the model name
+		 * @returns {sap.ui.model.Model} the model instance
+		 */
+        getModel: function (sName) {
+            return this.getView().getModel(sName);
+        },
+
+		/**
+		 * Convenience method for setting the view model.
+		 * @public
+		 * @param {sap.ui.model.Model} oModel the model instance
+		 * @param {string} sName the model name
+		 * @returns {sap.ui.mvc.View} the view instance
+		 */
+        setModel: function (oModel, sName) {
+            return this.getView().setModel(oModel, sName);
+        },
+
+		/**
+		 * Getter for the resource bundle.
+		 * @public
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundle: function () {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
+        },
+        /**
+		 * Getter for the resource bundle text.
+		 * @public
+         * @param 
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundleText: function (sTextProperty) {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle().getText(sTextProperty);
+        },
+		/**
+		 * Convenience method for displaying error messages
+		 * @public
+		 */
+        //method to show error message
+        showMsgBoxError: function (message) {
+            var title = this.getResourceBundle().getText("ErrorDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.ERROR,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+
+        },
+        //method to show success message
+        showMsgBoxSuccess: function (message) {
+            var title = this.getResourceBundle().getText("SuccessDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.SUCCESS,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show warning message
+        showMsgBoxWarning: function (message) {
+            var title = this.getResourceBundle().getText("WarningDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.WARNING,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show information message
+        showMsgBoxInformation: function (message) {
+            var title = "Information"
+            var title = this.getResourceBundle().getText("InformationDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.INFORMATION,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        /**            * 
+          * function to fetch the logged in user details             *  
+          **/
+         _getUserInfoService: function () {
+            return new Promise(resolve => sap.ui.require([
+                "sap/ushell/library"
+            ], oSapUshellLib => {
+                const oContainer = oSapUshellLib.Container;
+                const pService = (oContainer) ? oContainer.getServiceAsync("UserInfo") : ""; // .getService is deprecated!
+                resolve(pService);
+            }));
+        },
+		
+
+    });
+
+});
+
+
+
+app/flushandfillui/webapp/controller/FillDetails.controller.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Flush And Fill 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Flush And Fill
+//-----------------------------------------------------------------------------------*
+//Descriptions: Fill page functionality
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
+], 
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function(BaseController, Filter, FilterOperator) {
+        'use strict';
+
+        return BaseController.extend("pumorips.pumoriproduct.flushandfillui.controller.FillDetails",{
+            /* =========================================================== */
+            /* lifecycle methods                                           */
+            /* =========================================================== */
+            /**
+            * This method will trigger once during app initialization
+            * **/
+            onInit: function(){
+                this.FlushFillSrv = this.getOwnerComponent().getService('FlushFill');
+                this.getRouter().getRoute("FillDetails").attachPatternMatched(this._onObjectMatched, this);
+            },
+
+            /* =========================================================== */
+            /* internal methods                                            */
+            /* =========================================================== */
+            /**
+            * App view routing pattern change event handler
+            * this method will trigger each time user navigate between views
+            * This method used here to load, initialize home screen 
+            * **/
+            _onObjectMatched: function (oEve) {
+                this.oSelData = JSON.parse(oEve.getParameters().arguments.obj);
+                this.getView().byId("smartForm").bindElement("/FactoryProductsHistoryView(prodId='" + this.oSelData.prdId + "',factoryNumber='" + this.oSelData.factoryNumber + "',zmpaPartno='" + this.oSelData.zmpaPartno + "',snapshotDate='" + this.oSelData.snapshotDate + "')");
+               
+                var oUomSmartTable = this.getView().byId("idPMSmrtUomTblFill");
+                if (oUomSmartTable) {
+                    oUomSmartTable.rebindTable(true);
+                }
+                var oPrdLocSmartTable = this.getView().byId("idPMSmrtProdLocDetailsTblFill");
+                if (oPrdLocSmartTable) {
+                    oPrdLocSmartTable.rebindTable(true);
+                }
+                var oTlaneSmartTable = this.getView().byId("idPMSmrtTlaneTblFill");
+                if (oTlaneSmartTable) {
+                    oTlaneSmartTable.rebindTable(true);
+                }
+                this.getView().byId("ObjectPageLayout").setShowFooter(false);
+            },
+
+            /* =========================================================== */
+            /* event handlers                                              */
+            /* =========================================================== */
+
+            /**
+             * triggers before UOM table data rebind table
+             */
+            onBeforeRebindUomTableFill: function (oEvent) {
+                var smartTable = oEvent.getSource()
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (smartTable) {
+                    var aFilters = [];
+                    aFilters.push(new Filter("prodId", FilterOperator.EQ, decodeURIComponent(this.oSelData.prdId)));
+                    aFilters.push(new Filter("factoryNumber",FilterOperator.EQ, decodeURIComponent(this.oSelData.factoryNumber)));
+                    aFilters.push(new Filter("snapshotDate",FilterOperator.EQ, decodeURIComponent(this.oSelData.snapshotDate)));
+                    if (aFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aFilters, true));
+                    }
+                }
+            },
+            /**
+             * triggers before Product Location table data rebind table
+             */
+            onBeforeRebindProdLocTableFill: function (oEvent) {
+                var smartTable = oEvent.getSource()
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (smartTable) {
+                    var aFilters = [];
+                    aFilters.push(new Filter("prodId", FilterOperator.EQ, decodeURIComponent(this.oSelData.prdId)));
+                    aFilters.push(new Filter("factoryNumber",FilterOperator.EQ, decodeURIComponent(this.oSelData.factoryNumber)));
+                    aFilters.push(new Filter("snapshotDate",FilterOperator.EQ, decodeURIComponent(this.oSelData.snapshotDate)));
+                    if (aFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aFilters, true));
+                    }
+                }
+            },
+            /**
+             * triggers before Translane table data rebind table
+             */
+            onBeforeRebindTlaneTableFill : function (oEvent) {
+                var smartTable = oEvent.getSource()
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (smartTable) {
+                    var aFilters = [];
+                    aFilters.push(new Filter("prodId", FilterOperator.EQ, decodeURIComponent(this.oSelData.prdId)));
+                    aFilters.push(new Filter("factoryNumber",FilterOperator.EQ, decodeURIComponent(this.oSelData.factoryNumber)));
+                    aFilters.push(new Filter("snapshotDate",FilterOperator.EQ, decodeURIComponent(this.oSelData.snapshotDate)));
+                    if (aFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aFilters, true));
+                    }
+                }
+            },
+        });
+    }
+
+);
+
+
+
+app/flushandfillui/webapp/controller/FlushAndFill.controller.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Flush And Fill 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Flush And Fill
+//-----------------------------------------------------------------------------------*
+//Descriptions: Flush And Fill functions
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "sap/m/MessageBox"
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (BaseController, MessageBox) {
+        "use strict";
+
+        return BaseController.extend("pumorips.pumoriproduct.flushandfillui.controller.FlushAndFill", {
+            /* =========================================================== */
+            /* lifecycle methods                                           */
+            /* =========================================================== */
+            /**
+            * This method will trigger once during app initialization
+            * **/
+            onInit: function () {
+                this.FlushFillSrv = this.getOwnerComponent().getService('FlushFill');
+                this.FlushFillState = this.getOwnerComponent().getState('FlushFill');
+                this.getRouter().getRoute("FlushAndFill").attachPatternMatched(this._onObjectMatched, this);
+            },
+
+
+            /* =========================================================== */
+            /* internal methods                                            */
+            /* =========================================================== */
+
+            _onObjectMatched: function (oEve) {
+                this._fetchAuthorizationScopes();
+
+            },
+
+            _fetchAuthorizationScopes: function () {
+                var that = this;
+                this.getView().setBusy(true);
+                this.FlushFillSrv.fetchSecurityAuthScopes().then(
+                    function (oResponse) {
+                        var oSecurityScope = (oResponse.data.value) ? JSON.parse(oResponse.data.value) : JSON.parse(oResponse.data.SecurityAction);
+                        
+                        if (oSecurityScope.WithCost) {
+                            that.getView().byId("idDelete").setVisible(true);   
+                        } 
+                        else if (oSecurityScope.WithoutCost) {
+
+                            that.getView().byId("idDelete").setVisible(true);   
+                        }
+                        else if (oSecurityScope.WithCostview) {
+                            
+                            that.getView().byId("idDelete").setVisible(false);   
+                        }
+                        else if (oSecurityScope.WithoutCostview) {
+
+                            that.getView().byId("idDelete").setVisible(false);   
+
+                        }
+
+
+                        if (oSecurityScope.WithCost) {
+                            that.getView().byId("idSave").setVisible(true);   
+                        } 
+                        else if (oSecurityScope.WithoutCost) {
+
+                            that.getView().byId("idSave").setVisible(true);   
+                        }
+                        else if (oSecurityScope.WithCostview) {
+                            
+                            that.getView().byId("idSave").setVisible(false);   
+                        }
+                        else if (oSecurityScope.WithoutCostview) {
+
+                            that.getView().byId("idSave").setVisible(false);   
+
+                        }
+
+
+                        if (oSecurityScope.WithCost) {
+                            that.getView().byId("idDeleteLoc").setVisible(true);   
+                        } 
+                        else if (oSecurityScope.WithoutCost) {
+
+                            that.getView().byId("idDeleteLoc").setVisible(true);   
+                        }
+                        else if (oSecurityScope.WithCostview) {
+                            
+                            that.getView().byId("idDeleteLoc").setVisible(false);   
+                        }
+                        else if (oSecurityScope.WithoutCostview) {
+
+                            that.getView().byId("idDeleteLoc").setVisible(false);   
+
+                        }
+
+
+                        if (oSecurityScope.WithCost) {
+                            that.getView().byId("idSaveLoc").setVisible(true);   
+                        } 
+                        else if (oSecurityScope.WithoutCost) {
+
+                            that.getView().byId("idSaveLoc").setVisible(true);   
+                        }
+                        else if (oSecurityScope.WithCostview) {
+                            
+                            that.getView().byId("idSaveLoc").setVisible(false);   
+                        }
+                        else if (oSecurityScope.WithoutCostview) {
+
+                            that.getView().byId("idSaveLoc").setVisible(false);   
+
+                        }
+
+
+                        that.getView().setBusy(false);
+                    },
+                    function (error) {
+                        that.showMsgBoxError(JSON.parse(error.responseText).error.message.value);
+                        that.getView().setBusy(false);
+                    });
+
+            },
+
+            /***  Method to perform the save action* **/
+            _SaveSelectedDataLoc: async function (aPriorityData, operation, sTableId, sEditBtnId) {
+                var oView = this.getView();
+                var oUserInfo = await this._getUserInfoService();
+                var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                var oSaveData = { PostingData: aPriorityData, Operation: operation, UserEmail: sModifiedBy }; 
+                oView.setBusy(true);
+
+                return this.FlushFillSrv.fillLocData(oSaveData).then(
+                    function (success) {
+                        this.iMsgCountr++;
+                        oView.setBusy(false);
+                        this.showMsgBoxSuccess(JSON.parse(success.data.flushAndFillLoc)[0].message);
+                        this.getView().byId(sTableId).rebindTable(true);
+                        this.getView().byId(sEditBtnId).setEnabled(false);
+                    }.bind(this),
+                    function (error) {
+                        this.showMsgBoxError(this.getResourceBundleText("saveError"));
+                        oView.setBusy(false);
+                    }.bind(this));
+
+            },
+            /***  Method to perform the delete action* **/
+            _DeleteSelectedDataLoc: async function (aPriorityData, operation, sTableId, sDelBtnId) {
+                var oView = this.getView();
+                var oUserInfo = await this._getUserInfoService();
+                var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                var oDeleteData = { PostingData: aPriorityData, Operation: operation, UserEmail: sModifiedBy };
+                oView.setBusy(true);
+
+                return this.FlushFillSrv.flushLocData(oDeleteData).then(
+                    function (success) {
+                        this.iMsgCountr++;
+                        oView.setBusy(false);
+                        this.showMsgBoxSuccess(JSON.parse(success.data.flushAndFillLoc)[0].message);
+                        this.getView().byId(sTableId).rebindTable(true);
+                        this.getView().byId(sDelBtnId).setEnabled(false);
+                    }.bind(this),
+                    function (error) {
+                        this.showMsgBoxError(this.getResourceBundleText("delError"));
+                        oView.setBusy(false);
+                    }.bind(this));
+
+            },
+            /* =========================================================== */
+            /* event handlers                                              */
+            /* =========================================================== */
+            /**
+             * triggers once user clicks on line item in the Flush table
+             */
+            onSFBSearchFlush: function () {
+                this.getView().byId("idSmartTableFlush").rebindTable();
+            },
+            /**
+             * triggers once user clicks on line item in the Flush table
+             */
+            handlePress: function (oEve) {
+                var oSelObj = oEve.getSource().getBindingContext().getObject();
+                var oPayload = {};
+                oPayload.prdId = encodeURIComponent(oSelObj.prodId);
+                oPayload.factoryNumber = encodeURIComponent(oSelObj.factoryNumber);
+                oPayload.zmpaPartno = encodeURIComponent(oSelObj.zmpaPartno);
+                this.getOwnerComponent().getRouter().navTo("FlushDetails", { obj: JSON.stringify(oPayload) });
+            },
+            /**
+            * triggers once user select line item from table
+            * **/
+            onItemSelect: function (oEvent) {
+                if ((oEvent.getSource().getSelectedItems().length > 0) || (oEvent.mParameters.selectAll === true)) {
+                    this.getView().byId("idDelete").setEnabled(true);
+                }
+                else {
+                    this.getView().byId("idDelete").setEnabled(false);
+                }
+            },
+            /**
+           * triggers once user select line item from table
+           * **/
+            onItemSelectFill: function (oEvent) {
+                if ((oEvent.getSource().getSelectedItems().length > 0) || (oEvent.mParameters.selectAll === true)) {
+                    this.getView().byId("idSave").setEnabled(true);
+                }
+                else {
+                    this.getView().byId("idSave").setEnabled(false);
+                }
+            },
+            /**
+           * triggers after user clicks on any of the action items
+           * **/
+            onActionPress: function (oEvent) {
+                this.iMsgCountr = 0;
+                var aPayload = [];
+                var that = this;
+
+                var aSelData = this.getView().byId("idTable").getSelectedItems();
+                this.operation = "Flush";
+                for (var i = 0; i < aSelData.length; i++) {
+                    var oDeleteData = {};
+                    aSelData[i].getBindingContext().getObject();
+                    oDeleteData.factoryNumber = aSelData[i].getBindingContext().getObject().factoryNumber;
+                    oDeleteData.prodId = aSelData[i].getBindingContext().getObject().prodId;
+                    oDeleteData.snapshotDate = aSelData[i].getBindingContext().getObject().snapshotDate;
+                    aPayload.push(oDeleteData);
+                }
+                MessageBox.confirm(this.getResourceBundleText("delConfirm"), {
+                    icon: "QUESTION",
+                    title: "Confirm",
+                    actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+                    onClose: function (oAction) {
+                        if (oAction === "OK") {
+                            that._DeleteSelectedData(aPayload, that.operation);
+                        }
+                        else {
+                            return;
+                        }
+                    }
+                });
+            },
+            /***  Method to perform the delete action* **/
+            _DeleteSelectedData: async function (aPriorityData, operation) {
+                var oView = this.getView();
+                var oUserInfo = await this._getUserInfoService();
+                var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                var oDeleteData = { PostingData: aPriorityData, Operation: operation, UserEmail: sModifiedBy };
+                oView.setBusy(true);
+
+                return this.FlushFillSrv.flushData(oDeleteData).then(
+                    function (success) {
+                        this.iMsgCountr++;
+                        oView.setBusy(false);
+                        this.showMsgBoxSuccess(JSON.parse(success.data.flushAndFillProd)[0].message);
+                        this.getView().byId("idSmartTableFlush").rebindTable(true);
+                        this.getView().byId("idDelete").setEnabled(false);
+                    }.bind(this),
+                    function (error) {
+                        this.showMsgBoxError(this.getResourceBundleText("delError"));
+                        oView.setBusy(false);
+                    }.bind(this));
+
+            },
+            /**
+             * triggers once user clicks on line item in the Fill table
+             */
+            onSFBSearchFill: function () {
+                this.getView().byId("idSmartTableFill").rebindTable();
+            },
+            /* =========================================================== */
+            /* event handlers                                              */
+            /* =========================================================== */
+            /**
+             * triggers once user clicks on line item in the Fill table
+             */
+            handlePressFill: function (oEve) {
+                var oSelObj = oEve.getSource().getBindingContext().getObject();
+                var oPayload = {};
+                oPayload.prdId = encodeURIComponent(oSelObj.prodId);
+                oPayload.factoryNumber = encodeURIComponent(oSelObj.factoryNumber);
+                oPayload.zmpaPartno = encodeURIComponent(oSelObj.zmpaPartno);
+                oPayload.snapshotDate = encodeURIComponent(oSelObj.snapshotDate);
+                this.getOwnerComponent().getRouter().navTo("FillDetails", { obj: JSON.stringify(oPayload) });
+            },
+            /**
+            * triggers after user clicks on any of the action items
+            * **/
+            onActionPressFill: function (oEvent) {
+                this.iMsgCountr = 0;
+                var aPayload = [];
+                var bUpdate = true;
+
+                this.aSelData = this.getView().byId("idTableFill").getSelectedItems();
+                if (oEvent.getSource().sId.split("--")[2] === "idSave") {
+
+                    var aSelData = this.getView().byId("idTableFill").getSelectedItems();
+                    this.operation = "Fill";
+                    for (var i = 0; i < aSelData.length; i++) {
+                        var oSaveData = {};
+                        aSelData[i].getBindingContext().getObject();
+                        oSaveData.factoryNumber = aSelData[i].getBindingContext().getObject().factoryNumber;
+                        oSaveData.prodId = aSelData[i].getBindingContext().getObject().prodId;
+                        oSaveData.snapshotDate = aSelData[i].getBindingContext().getObject().snapshotDate;
+                        aPayload.push(oSaveData);
+                    }
+                }
+                if (bUpdate) {
+                    var bIndi = true;
+                    var that = this;
+                    //validation if data is more than 1000
+                    if (aPayload.length > 1000) {
+                        bIndi = false;
+                        MessageBox.confirm(this.getResourceBundleText("lengthExcd"), {
+                            icon: "QUESTION",
+                            title: "Confirm",
+                            actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+                            onClose: function (oAction) {
+                                if (oAction === "OK") {
+                                    bIndi = true;
+                                    var aTempLoad = [];
+                                    for (var i = 0; i < 1000; i++) {
+                                        aTempLoad.push(aPayload[i]);
+                                    }
+
+                                    that._SaveSelectedData(aTempLoad, this.operation);
+                                }
+                                else {
+                                    return;
+                                }
+                            }
+                        });
+                    }
+                    //this will be called if data is less than or equal to 1000
+                    if (bIndi)
+                        this._SaveSelectedData(aPayload, this.operation);
+                }
+
+            },
+            /***  Method to perform the save action* **/
+            _SaveSelectedData: async function (aPriorityData, operation) {
+                var oView = this.getView();
+                var oUserInfo = await this._getUserInfoService();
+                var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                var oSaveData = { PostingData: aPriorityData, Operation: operation, UserEmail: sModifiedBy };
+                oView.setBusy(true);
+
+                return this.FlushFillSrv.fillData(oSaveData).then(
+                    function (success) {
+                        this.iMsgCountr++;
+                        oView.setBusy(false);
+                        this.showMsgBoxSuccess(JSON.parse(success.data.flushAndFillProd)[0].message);
+                        this.getView().byId("idSmartTableFill").rebindTable(true);
+                        this.getView().byId("idSave").setEnabled(false);
+                    }.bind(this),
+                    function (error) {
+                        this.showMsgBoxError(this.getResourceBundleText("saveError"));
+                        oView.setBusy(false);
+                    }.bind(this));
+
+            },
+            /**
+             * triggers once user clicks on line item in the Flush table
+             */
+            handlePressFlushLoc: function (oEve) {
+                var oSelObj = oEve.getSource().getBindingContext().getObject();
+                var oPayload = {};
+                oPayload.factoryNumber = encodeURIComponent(oSelObj.factoryNumber);
+                oPayload.locId = encodeURIComponent(oSelObj.locId);
+                oPayload.locType = encodeURIComponent(oSelObj.locType);
+                oPayload.selTable = "FlushLoc";
+                this.getOwnerComponent().getRouter().navTo("FlushAndFillLocDetails", { obj: JSON.stringify(oPayload) });
+            },
+            /**
+            * triggers once user select line item from table
+            * **/
+            onItemSelectFlushLoc: function (oEvent) {
+                if ((oEvent.getSource().getSelectedItems().length > 0) || (oEvent.mParameters.selectAll === true)) {
+                    this.getView().byId("idDeleteLoc").setEnabled(true);
+                }
+                else {
+                    this.getView().byId("idDeleteLoc").setEnabled(false);
+                }
+            },
+            /**
+           * triggers after user clicks on any of the action items
+           * **/
+            onActionPressFushLoc: function (oEvent) {
+                this.iMsgCountr = 0;
+                var aPayload = [];
+                var that = this;
+                var aSelData = this.getView().byId("idTableLoc").getSelectedItems();
+                this.operation = "FlushLoc";
+                for (var i = 0; i < aSelData.length; i++) {
+                    var oDeleteData = {};
+                    aSelData[i].getBindingContext().getObject();
+                    oDeleteData.factoryNumber = aSelData[i].getBindingContext().getObject().factoryNumber;
+                    oDeleteData.locId = aSelData[i].getBindingContext().getObject().locId;
+                    oDeleteData.locType = aSelData[i].getBindingContext().getObject().locType;
+                    oDeleteData.snapshotDate = aSelData[i].getBindingContext().getObject().snapshotDate;
+                    aPayload.push(oDeleteData);
+                }
+
+                MessageBox.confirm(this.getResourceBundleText("delConfirm"), {
+                    icon: "QUESTION",
+                    title: "Confirm",
+                    actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+                    onClose: function (oAction) {
+                        if (oAction === "OK") {
+                            that._DeleteSelectedDataLoc(aPayload, that.operation, "idSmartTableFlushLoc", "idDeleteLoc");
+                        }
+                        else {
+                            return;
+                        }
+                    }
+                });
+
+
+            },
+            /**
+            * triggers once user clicks on line item in the Fill table
+            */
+            handlePressFillLoc: function (oEve) {
+                var oSelObj = oEve.getSource().getBindingContext().getObject();
+                var oPayload = {};
+                oPayload.factoryNumber = encodeURIComponent(oSelObj.factoryNumber);
+                oPayload.locId = encodeURIComponent(oSelObj.locId);
+                oPayload.locType = encodeURIComponent(oSelObj.locType);
+                oPayload.snapshotDate = encodeURIComponent(oSelObj.snapshotDate);
+                oPayload.selTable = "FillLoc";
+                this.getOwnerComponent().getRouter().navTo("FlushAndFillLocDetails", { obj: JSON.stringify(oPayload) });
+            },
+            /**
+            * triggers once user select line item from table
+            * **/
+            onItemSelectFillLoc: function (oEvent) {
+                if ((oEvent.getSource().getSelectedItems().length > 0) || (oEvent.mParameters.selectAll === true)) {
+                    this.getView().byId("idSaveLoc").setEnabled(true);
+                }
+                else {
+                    this.getView().byId("idSaveLoc").setEnabled(false);
+                }
+            },
+            /**
+            * triggers after user clicks on any of the action items
+            * **/
+            onActionPressFillLoc: function (oEvent) {
+                this.iMsgCountr = 0;
+                var aPayload = [];
+                var bUpdate = true;
+
+                this.aSelData = this.getView().byId("idTableFillLoc").getSelectedItems();
+                if (oEvent.getSource().sId.split("--")[2] === "idSaveLoc") {
+
+                    var aSelData = this.getView().byId("idTableFillLoc").getSelectedItems();
+                    this.operation = "FillLoc";
+                    for (var i = 0; i < aSelData.length; i++) {
+                        var oSaveData = {};
+                        aSelData[i].getBindingContext().getObject();
+                        oSaveData.factoryNumber = aSelData[i].getBindingContext().getObject().factoryNumber;
+                        oSaveData.locId = aSelData[i].getBindingContext().getObject().locId;
+                        oSaveData.locType= aSelData[i].getBindingContext().getObject().locType;
+                        oSaveData.snapshotDate = aSelData[i].getBindingContext().getObject().snapshotDate;
+                        aPayload.push(oSaveData);
+                    }
+                }
+                if (bUpdate) {
+                    var bIndi = true;
+                    var that = this;
+                    //validation if data is more than 1000
+                    if (aPayload.length > 1000) {
+                        bIndi = false;
+                        MessageBox.confirm(this.getResourceBundleText("lengthExcd"), {
+                            icon: "QUESTION",
+                            title: "Confirm",
+                            actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+                            onClose: function (oAction) {
+                                if (oAction === "OK") {
+                                    bIndi = true;
+                                    var aTempLoad = [];
+                                    for (var i = 0; i < 1000; i++) {
+                                        aTempLoad.push(aPayload[i]);
+                                    }
+
+                                    that._SaveSelectedDataLoc(aTempLoad, this.operation, "idSmartTableFillLoc", "idSaveLoc");
+                                }
+                                else {
+                                    return;
+                                }
+                            }
+                        });
+                    }
+                    //this will be called if data is less than or equal to 1000
+                    if (bIndi)
+                        this._SaveSelectedDataLoc(aPayload, this.operation, "idSmartTableFillLoc", "idSaveLoc");
+                }
+
+            }
+        });
+    });
+
+
+
+    app/flushandfillui/webapp/controller/FlushAndFillLocDetails.controller.js
+
+
+
+    //-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Flush And Fill 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    19.04.2024
+// Description      :    Flush And Fill
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for display of detail page of the app
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
+], 
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function(BaseController, Filter, FilterOperator) {
+        'use strict';
+
+        return BaseController.extend("pumorips.pumoriproduct.flushandfillui.controller.FlushAndFillLocDetails",{
+            /* =========================================================== */
+            /* lifecycle methods                                           */
+            /* =========================================================== */
+            /**
+            * This method will trigger once during app initialization
+            * **/
+            onInit: function(){
+                this.FlushFillSrv = this.getOwnerComponent().getService('FlushFill');
+                this.getRouter().getRoute("FlushAndFillLocDetails").attachPatternMatched(this._onObjectMatched, this);
+            },
+
+            /* =========================================================== */
+            /* internal methods                                            */
+            /* =========================================================== */
+            /**
+            * App view routing pattern change event handler
+            * this method will trigger each time user navigate between views
+            * This method used here to load, initialize home screen 
+            * **/
+            _onObjectMatched: function (oEve) {
+                this.oSelData = JSON.parse(oEve.getParameters().arguments.obj);
+                this._onFormDisplay(this.oSelData.selTable);
+            },
+
+            /**
+            * This method will trigger once when the view is destroyed
+            * **/
+            onExit: function () {
+                if (this.fillFrag) {
+                    this.fillFrag.destroy();
+                    this.fillFrag = null;
+                }
+                if (this.fushFrag) {
+                    this.fushFrag.destroy();
+                    this.fushFrag = null;
+                }
+            },
+
+             /**
+            * This private method is called inside _onObjectMatched
+            * This method is used to display smart form
+            * **/
+             _onFormDisplay: function (sTable) {
+                this.getView().setBusy(true);
+                var oPage = this.getView().byId("pageid");
+                oPage.removeAllContent();
+                if (sTable === "FillLoc") {
+                    if (!this.fillFrag) {
+                        this.fillFrag = sap.ui.xmlfragment(this.getView().getId(), "pumorips.pumoriproduct.flushandfillui.view.fragments.FillLoc", this);
+                        this.getView().addDependent(this.fillFrag);
+                    }
+                    this.getView().byId("smartFormFillLoc").bindElement("/FactoryLocationsHistoryView(factoryNumber='" + this.oSelData.factoryNumber + "',locId='" + this.oSelData.locId + "',locType='" + this.oSelData.locType + "',snapshotDate='" + this.oSelData.snapshotDate + "')");
+                    this.getView().byId("pageid").addContent(this.fillFrag);
+                }  else {
+                    if (!this.fushFrag) {
+                        this.fushFrag = sap.ui.xmlfragment(this.getView().getId(), "pumorips.pumoriproduct.flushandfillui.view.fragments.FlushLoc", this);
+                        this.getView().addDependent(this.fushFrag);
+                    }
+                    this.getView().byId("smartFormFlushLoc").bindElement("/synFactoryLocationView(factoryNumber='" + this.oSelData.factoryNumber + "',locId='" + this.oSelData.locId + "',locType='" + this.oSelData.locType + "')");
+                    this.getView().byId("pageid").addContent(this.fushFrag);
+                } 
+                this.getView().setBusy(false);
+            }
+            
+        });
+    }
+
+);
+
+
+
+app/flushandfillui/webapp/controller/FlushDetails.controller.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Flush And Fill 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Flush And Fill
+//-----------------------------------------------------------------------------------*
+//Descriptions: Flush functionalties
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
+], 
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function(BaseController, Filter, FilterOperator) {
+        'use strict';
+
+        return BaseController.extend("pumorips.pumoriproduct.flushandfillui.controller.FlushDetails",{
+            /* =========================================================== */
+            /* lifecycle methods                                           */
+            /* =========================================================== */
+            /**
+            * This method will trigger once during app initialization
+            * **/
+            onInit: function(){
+                this.FlushFillSrv = this.getOwnerComponent().getService('FlushFill');
+                this.getRouter().getRoute("FlushDetails").attachPatternMatched(this._onObjectMatched, this);
+            },
+
+            /* =========================================================== */
+            /* internal methods                                            */
+            /* =========================================================== */
+            /**
+            * App view routing pattern change event handler
+            * this method will trigger each time user navigate between views
+            * This method used here to load, initialize home screen 
+            * **/
+            _onObjectMatched: function (oEve) {
+                this.oSelData = JSON.parse(oEve.getParameters().arguments.obj);
+                this.getView().byId("smartForm").bindElement("/synFactoryProductsView(prodId='" + this.oSelData.prdId + "',factoryNumber='" + this.oSelData.factoryNumber + "',zmpaPartno='" + this.oSelData.zmpaPartno + "')");
+               
+                var oUomSmartTable = this.getView().byId("idPMSmrtUomTbl");
+                if (oUomSmartTable) {
+                    oUomSmartTable.rebindTable(true);
+                }
+                var oPrdLocSmartTable = this.getView().byId("idPMSmrtProdLocDetailsTbl");
+                if (oPrdLocSmartTable) {
+                    oPrdLocSmartTable.rebindTable(true);
+                }
+                var oTlaneSmartTable = this.getView().byId("idPMSmrtTlaneTbl");
+                if (oTlaneSmartTable) {
+                    oTlaneSmartTable.rebindTable(true);
+                }
+                this.getView().byId("ObjectPageLayout").setShowFooter(false);
+            },
+
+            /* =========================================================== */
+            /* event handlers                                              */
+            /* =========================================================== */
+
+            /**
+             * triggers before UOM table data rebind table
+             */
+            onBeforeRebindUomTable: function (oEvent) {
+                var smartTable = oEvent.getSource()
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (smartTable) {
+                    var aFilters = [];
+                    aFilters.push(new Filter("prodId", FilterOperator.EQ, decodeURIComponent(this.oSelData.prdId)));
+                    aFilters.push(new Filter("factoryNumber",FilterOperator.EQ, decodeURIComponent(this.oSelData.factoryNumber)));
+                    
+                    if (aFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aFilters, true));
+                    }
+                }
+            },
+            /**
+             * triggers before Product Location table data rebind table
+             */
+            onBeforeRebindProdLocTable: function (oEvent) {
+                var smartTable = oEvent.getSource()
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (smartTable) {
+                    var aFilters = [];
+                    aFilters.push(new Filter("prodId", FilterOperator.EQ, decodeURIComponent(this.oSelData.prdId)));
+                    aFilters.push(new Filter("factoryNumber",FilterOperator.EQ, decodeURIComponent(this.oSelData.factoryNumber)));
+                    
+                    if (aFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aFilters, true));
+                    }
+                }
+            },
+            /**
+             * triggers before Translane table data rebind table
+             */
+            onBeforeRebindTlaneTable : function (oEvent) {
+                var smartTable = oEvent.getSource()
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (smartTable) {
+                    var aFilters = [];
+                    aFilters.push(new Filter("prodId", FilterOperator.EQ, decodeURIComponent(this.oSelData.prdId)));
+                    aFilters.push(new Filter("factoryNumber",FilterOperator.EQ, decodeURIComponent(this.oSelData.factoryNumber)));
+                    
+                    if (aFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aFilters, true));
+                    }
+                }
+            },
+        });
+    }
+
+);
+
+
+
+app/flushandfillui/webapp/service/CoreService.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Flush And Fill 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Flush And Fill
+//-----------------------------------------------------------------------------------*
+//Descriptions: Core Service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object"
+], function (Object) {
+	"use strict";
+
+	return Object.extend("pumorips.pumoriproduct.flushandfillui.service.CoreService", {
+		constructor: function (model) {
+			Object.call(this);
+			if (model) {
+				this.setModel(model);
+			}
+		},
+		setModel: function (model) {
+			this.model = model;
+		},
+		odata: function (url) {
+			var me = this;
+			var core = {
+				ajax: function (type, url, data, parameters) {
+					var promise = new Promise(function (resolve, reject) {
+						var args = [];
+						var params = {};
+						args.push(url);
+						if (data) {
+							args.push(data);
+						}
+						if (parameters) {
+							params = parameters;
+						}
+						params.success = function (result, response) {
+							resolve({
+								data: result,
+								response: response
+							});
+						};
+						params.error = function (error) {
+							reject(error);
+						};
+						args.push(params);
+						me.model[type].apply(me.model, args);
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (params) {
+					return core.ajax('read', url, false, params);
+				},
+				'post': function (data, params) {
+					return core.ajax('create', url, data, params);
+				},
+				'put': function (data, params) {
+					return core.ajax('update', url, data, params);
+				},
+				'delete': function (params) {
+					return core.ajax('remove', url, false, params);
+				}
+			};
+		},
+		http: function (url) {
+			var core = {
+				ajax: function (method, url, headers, args) {
+					var promise = new Promise(function (resolve, reject) {
+						var client = new XMLHttpRequest();
+						var uri = url;
+						if (args && method === 'GET') {
+							uri += '?';
+							var argcount = 0;
+							for (var key in args) {
+								if (args.hasOwnProperty(key)) {
+									if (argcount++) {
+										uri += '&';
+									}
+									uri += encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+								}
+							}
+						}
+						if (args && (method === 'POST' || method === 'PUT')) {
+							var data = {};
+							for (var keyp in args) {
+								if (args.hasOwnProperty(keyp)) {
+									data[keyp] = args[keyp];
+								}
+							}
+						}
+						client.open(method, uri);
+						
+						if (method === 'POST' || method === 'PUT') {
+							client.setRequestHeader("accept", "application/json");
+							client.setRequestHeader("content-type", "application/json");
+						}
+						for (var keyh in headers) {
+							if (headers.hasOwnProperty(keyh)) {
+								client.setRequestHeader(keyh, headers[keyh]);
+							}
+						}
+						if (data) {
+							client.send(JSON.stringify(data));
+						} else {
+							client.send();
+						}
+						client.onload = function () {
+							if (this.status == 200) {
+								resolve(this.response);
+							} else {
+								reject(this.statusText);
+							}
+						};
+						client.onerror = function () {
+							reject(this.statusText);
+						};
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (headers, args) {
+					return core.ajax('GET', url, headers, args);
+				},
+				'post': function (headers, args) {
+					return core.ajax('POST', url, headers, args);
+				},
+				'put': function (headers, args) {
+					return core.ajax('PUT', url, headers, args);
+				},
+				'delete': function (headers, args) {
+					return core.ajax('DELETE', url, headers, args);
+				}
+			};
+		}
+	});
+});
+
+
+
+app/flushandfillui/webapp/service/FlushFillService.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Flush And Fill 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Flush And Fill
+//-----------------------------------------------------------------------------------*
+//Descriptions: Flush And Fill service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./CoreService",
+], function (CoreService) {
+    "use strict";
+
+    var FlushFillService = CoreService.extend("pumorips.pumoriproduct.flushandfillui.service.FlushFillService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        },
+
+        /**
+        * Odata service for Flush Data
+        * **/
+        flushData: function (oDeleteData) {
+            return this.odata("/flushAndFillProd").post(oDeleteData);
+        },  
+        fillData: function (oSaveData) {
+            return this.odata("/flushAndFillProd").post(oSaveData);
+        }, 
+        flushLocData: function (oDeleteData) {
+            return this.odata("/flushAndFillLoc").post(oDeleteData);
+        },  
+        fillLocData: function (oSaveData) {
+            return this.odata("/flushAndFillLoc").post(oSaveData);
+        },
+        fetchSecurityAuthScopes: function () {
+            return this.odata("/SecurityAction").get({});
+        }
+
+    });
+    return FlushFillService;
+});
+
+
+
+app/flushandfillui/webapp/state/BaseState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Flush And Fill 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Flush And Fill
+//-----------------------------------------------------------------------------------*
+//Descriptions: Base State file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object",
+	"sap/ui/model/json/JSONModel"
+], function(Object, JSONModel) {
+	"use strict";
+	return Object.extend("pumorips.pumoriproduct.flushandfillui.state.BaseState", {
+        //method to getmodel
+		getModel: function() {
+			if (!this.model) {
+				this.model = new JSONModel(this.data, true);
+			}
+			return this.model;
+		},
+        //method to update model
+		updateModel: function(bHardRefresh) {
+			if (this.model) {
+				this.model.refresh(bHardRefresh ? true : false);
+			}
+		}
+	});
+});
+
+
+
+app/flushandfillui/webapp/state/FlushFillState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Flush And Fill 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Flush And Fill
+//-----------------------------------------------------------------------------------*
+//Descriptions: Flush And Fill state file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "../state/BaseState",
+], function (BaseState) {
+    "use strict";
+    var FlushFillState = BaseState.extend("pumorips.pumoriproduct.flushandfillui.state.FlushFillState", {
+        constructor: function (oService) {
+            this.data = {
+                display: true,
+                busy: true                
+            };
+            this.FlushFillService = oService;
+            BaseState.call(this);
+        }
+       
+
+    });
+    return FlushFillState;
+});
+
+
+
+app/flushandfillui/webapp/Component.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Flush And Fill 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Flush And Fill
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for model instantiation
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+
+sap.ui.define([
+        "sap/ui/core/UIComponent",
+        "sap/ui/Device",
+        "pumorips/pumoriproduct/flushandfillui/model/models",
+        "./service/FlushFillService",
+        "./state/FlushFillState"
+    ],
+    function (UIComponent, Device, models,FlushFillService,FlushFillState) {
+        "use strict";
+
+        return UIComponent.extend("pumorips.pumoriproduct.flushandfillui.Component", {
+            metadata: {
+                manifest: "json"
+            },
+
+            /**
+             * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
+             * @public
+             * @override
+             */
+            init: function () {
+                // call the base component's init function
+                UIComponent.prototype.init.apply(this, arguments);
+
+                 //Cretae globle object for etag
+                 this.metadataForEtag;
+                 // initialize receive service with the component
+                 this._oFlushFillService = new FlushFillService(this.getModel());
+                 // initialize receive state with the component
+                 this._oFlushFillState = new FlushFillState(this._oFlushFillService);
+
+                // enable routing
+                this.getRouter().initialize();
+
+                // set the device model
+                this.setModel(models.createDeviceModel(), "device");
+                this.setModel(this._oFlushFillState.getModel(), "oJSONModel");
+            },
+             // Return the service name as per parameter
+             getService: function (sService) {
+                return this["_o" + sService + "Service"];
+            },
+             // Return the state name as per parameter
+             getState: function (sState) {
+                return this["_o" + sState + "State"];
+            },
+        });
+    }
+);
+
+
+
+app/flushandfillui/webapp/manifest.json
+
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.pumoriproduct.flushandfillui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.13.1",
+      "toolsId": "34cdcb91-497a-40fa-ad7e-b6cf055d2f6f"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/pumori-product/",
+        "type": "OData",
+        "settings": {
+            "annotations": [],
+            "localUri": "localService/metadata.xml",
+            "odataVersion": "2.0"
+        }
+    }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "flushandfill-Display": {
+          "semanticObject": "flushandfill",
+          "action": "Display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.122.1",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.pumoriproduct.flushandfillui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.pumoriproduct.flushandfillui.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "FlushAndFill",
+          "pattern": "",
+          "target": [
+            "TargetFlushAndFill"
+          ]
+        },
+        {
+          "name": "FlushDetails",
+          "pattern": "FlushDetails/{obj}",
+          "target":[
+            "TargetFlushDetails"
+          ]
+        },
+        {
+          "name": "FillDetails",
+          "pattern": "FillDetails/{obj}",
+          "target":[
+            "TargetFillDetails"
+          ]
+        },
+        {
+          "name": "FlushAndFillLocDetails",
+          "pattern": "FlushAndFillLocDetails/{obj}",
+          "target":[
+            "TargetFlushAndFillLocDetails"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetFlushAndFill": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "FlushAndFill",
+          "viewName": "FlushAndFill"
+        },
+        "TargetFlushDetails":{
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "FlushDetails",
+          "viewName": "FlushDetails"
+        },
+        "TargetFillDetails":{
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "FillDetails",
+          "viewName": "FillDetails"
+        },
+        "TargetFlushAndFillLocDetails":{
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "FlushAndFillLocDetails",
+          "viewName": "FlushAndFillLocDetails"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "pumorips.pumoriproduct.flushandfillui.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSPUMORIPROD"
+  }
+}
+
+
+
+app/flushandfillui/xs-app.json
+
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumoripsproduct-srv-api",
+      "csrfProtection":false,
+      "scope": ["$XSAPPNAME.WithCost","$XSAPPNAME.WithoutCost","$XSAPPNAME.WithCostview","$XSAPPNAME.WithoutCostview"]
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa",
+      "scope": ["$XSAPPNAME.WithCost","$XSAPPNAME.WithoutCost","$XSAPPNAME.WithCostview","$XSAPPNAME.WithoutCostview"]
+    }
+  ]
+}

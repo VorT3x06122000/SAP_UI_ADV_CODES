@@ -1,0 +1,433 @@
+app/pumoriprodlocui/webapp/view/PumProdLoc.view.xml
+
+
+
+<mvc:View controllerName="pumorips.pumoriproduct.pumoriprodlocui.controller.PumProdLoc"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m"
+    xmlns:smartfilterbar="sap.ui.comp.smartfilterbar"
+    xmlns:smarttable="sap.ui.comp.smarttable"
+    xmlns:core="sap.ui.core"
+    xmlns:table="sap.ui.table">
+    <Page id="page" title="{i18n>title}" showHeader="false">
+        <content>
+        <VBox id="Idvbx" fitContainer="true">
+         <smartfilterbar:SmartFilterBar 
+            id="smartfilterbar" showMessages="true" showClearOnFB="true" persistencyKey="SmartFilterPKey" clear="onClearPress"
+            entitySet="PumoriLocationProductsView">
+        </smartfilterbar:SmartFilterBar>
+        
+        <smarttable:SmartTable id="idPrdLocSmartTable" enableAutoColumnWidth="true" smartFilterId="smartfilterbar" tableType="ResponsiveTable" editable="false" entitySet="PumoriLocationProductsView" useVariantManagement="true" showVariantManagement="true" beforeExport="onBeforeExport"
+            header="{i18n>prodLocAttribute}" showRowCount="true" enableExport="true"  ignoredFields="custAttr1,custAttr2,custAttr3,custAttr4,custAttr5,custAttr6,custAttr7,custAttr8,custAttr9,custAttr10" demandPopin="true"
+            enableAutoBinding="false" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindTable"   persistencyKey="SmartTablePersistencyKey" >
+                <!-- <Table id="idPrdLocTable"  sticky="ColumnHeaders,HeaderToolbar" growing="true" growingScrollToLoad="true" growingThreshold="500" >
+		
+				</Table> -->
+
+                <table:Table id="oTable" enableColumnFreeze="false" selectionMode="None" enableColumnReordering="false" rowActionCount="1" threshold="20">
+                <table:rowMode>
+                    <rowmodes:Auto id="idRowM" xmlns:rowmodes="sap.ui.table.rowmodes" minRowCount="5" maxRowCount="5"/>
+                </table:rowMode>
+				</table:Table>
+
+
+        </smarttable:SmartTable>
+        </VBox>
+        </content>
+    </Page>
+</mvc:View>
+
+
+
+app/pumoriprodlocui/webapp/controller/BaseController.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Pumori Product 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Manage Pumori Product
+//-----------------------------------------------------------------------------------*
+//Descriptions: Contains all the re-usable functions
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/core/UIComponent",
+    "sap/m/MessageBox"
+], function (Controller, UIComponent, MessageBox) {
+    "use strict";
+
+    return Controller.extend("pumorips.pumoriproduct.pumoriprodlocui.controller.BaseController", {
+		/**
+		 * Convenience method for accessing the router.
+		 * @public
+		 * @returns {sap.ui.core.routing.Router} the router for this component
+		 */
+
+        getRouter: function () {
+            return UIComponent.getRouterFor(this);
+        },
+
+		/**
+		 * Convenience method for getting the view model by name.
+		 * @public
+		 * @param {string} [sName] the model name
+		 * @returns {sap.ui.model.Model} the model instance
+		 */
+        getModel: function (sName) {
+            return this.getView().getModel(sName);
+        },
+
+		/**
+		 * Convenience method for setting the view model.
+		 * @public
+		 * @param {sap.ui.model.Model} oModel the model instance
+		 * @param {string} sName the model name
+		 * @returns {sap.ui.mvc.View} the view instance
+		 */
+        setModel: function (oModel, sName) {
+            return this.getView().setModel(oModel, sName);
+        },
+
+		/**
+		 * Getter for the resource bundle.
+		 * @public
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundle: function () {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
+        },
+        /**
+		 * Getter for the resource bundle text.
+		 * @public
+         * @param 
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundleText: function (sTextProperty) {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle().getText(sTextProperty);
+        },
+		/**
+		 * Convenience method for displaying error messages
+		 * @public
+		 */
+        //method to show error message
+        showMsgBoxError: function (message) {
+            var title = this.getResourceBundle().getText("ErrorDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.ERROR,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+
+        },
+        //method to show success message
+        showMsgBoxSuccess: function (message) {
+            var title = this.getResourceBundle().getText("SuccessDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.SUCCESS,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show warning message
+        showMsgBoxWarning: function (message) {
+            var title = this.getResourceBundle().getText("WarningDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.WARNING,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show information message
+        showMsgBoxInformation: function (message) {
+            var title = "Information"
+            var title = this.getResourceBundle().getText("InformationDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.INFORMATION,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        /**            * 
+          * function to fetch the logged in user details             *  
+          **/
+         _getUserInfoService: function () {
+            return new Promise(resolve => sap.ui.require([
+                "sap/ushell/library"
+            ], oSapUshellLib => {
+                const oContainer = oSapUshellLib.Container;
+                const pService = (oContainer) ? oContainer.getServiceAsync("UserInfo") : ""; // .getService is deprecated!
+                resolve(pService);
+            }));
+        },
+		
+
+    });
+
+});
+
+
+
+app/pumoriprodlocui/webapp/controller/PumProdLoc.controller.js
+
+
+
+sap.ui.define([
+    "./BaseController",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (BaseController,Filter,FilterOperator) {
+        "use strict";
+
+        return BaseController.extend("pumorips.pumoriproduct.pumoriprodlocui.controller.PumProdLoc", {
+            onInit: function () {
+                var oSmartTable = this.getView().byId("idPrdLocSmartTable");
+                this.PumProdLocService = this.getOwnerComponent().getService('PumProdLoc');
+                this.getRouter().getRoute("PumProdLoc").attachPatternMatched(this._onObjectMatched, this);
+            },
+
+            getZoomLevel: function () {
+
+
+                let currentWidth = window.innerWidth;   // Width of the current window
+                let currentHeight = window.innerHeight; // Height of the current window
+                
+            
+                let totalWidth = screen.width;   // Total screen width
+                let totalHeight = screen.height; // Total screen height
+                
+                // Calculate the resolution percentage
+                let resolutionPercentage = ((currentWidth * currentHeight) / (totalWidth * totalHeight)) * 100;
+            
+                resolutionPercentage=resolutionPercentage/4.1;
+            
+                return resolutionPercentage;
+            
+            },
+
+            _onObjectMatched: function () {
+                let row = this.getView().byId("idRowM");
+                row.setMinRowCount(parseInt(this.getZoomLevel()));
+                row.setMaxRowCount(parseInt(this.getZoomLevel()));
+            },
+
+            /**
+            * triggers on before smart table rebind, adds selected filter to the table
+            */
+            onBeforeRebindTable: function (oEvent) {
+                let row = this.getView().byId("idRowM");
+                row.setMinRowCount(parseInt(this.getZoomLevel()));
+                row.setMaxRowCount(parseInt(this.getZoomLevel()));
+                var smartTable = oEvent.getSource()
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (smartTable) {
+                    var aFilters = [];
+                   
+                    if (aFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aFilters, true));
+                    }
+                }
+            },
+            /**
+             * triggers when clear button clicked
+             */
+            onClearPress:function(){
+                this.getView().byId("idLocType").setSelectedKey();
+            },
+        });
+    });
+
+
+
+    app/pumoriprodlocui/webapp/manifest.json
+
+
+
+    {
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.pumoriproduct.pumoriprodlocui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.12.4",
+      "toolsId": "ef6a0402-45bc-4d87-92d7-a7d402204d58"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/pumori-product/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "pumoripsprodloc-Display": {
+          "semanticObject": "pumoripsprodloc",
+          "action": "Display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.121.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.pumoriproduct.pumoriprodlocui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.pumoriproduct.pumoriprodlocui.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "PumProdLoc",
+          "pattern": "",
+          "target": [
+            "TargetPumProdLoc"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetPumProdLoc": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "PumProdLoc",
+          "viewName": "PumProdLoc"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "pumorips.pumoriproduct.pumoriprodlocui.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSPUMORIPROD"
+  }
+}
+
+
+
+app/pumoriprodlocui/xs-app.json
+
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumoripsproduct-srv-api",
+      "csrfProtection":false
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa"
+    }
+  ]
+}
+
+
+

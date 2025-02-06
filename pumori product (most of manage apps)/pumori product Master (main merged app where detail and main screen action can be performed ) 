@@ -1,0 +1,1692 @@
+app/pumoriprodui/webapp/view/PumPrdList.view.xml
+
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Manage Pumori Product 
+ RICEFW No                : 
+ Release                  :   M1 Release  
+ Author                   :   Samudrala, Sreenivas
+ Date                     :   19.04.2024
+ Description              :   Manage Pumori Product
+ *Descriptions: Display Pumori product details  
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<mvc:View controllerName="pumorips.pumoriproduct.pumoriprodui.controller.PumPrdList"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m"
+    xmlns:plugins="sap.ui.table.plugins"
+    xmlns:table="sap.ui.table"
+    xmlns:core="sap.ui.core"
+	xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+	xmlns:smartTable="sap.ui.comp.smarttable">
+    <Page id="page" title="{i18n>title}" showHeader="false">
+        <content>
+            <VBox id="vBoxId" fitContainer="true">
+                <smartFilterBar:SmartFilterBar id="smartFilterBar"  persistencyKey="SmartFilterPKey" showMessages="true" showClearOnFB="true" clear="onClearPress" entitySet="PumoriProductsView">
+                    <smartFilterBar:controlConfiguration>
+						<smartFilterBar:ControlConfiguration id="idMatTypFltr" key="materialType" label="{i18n>matType}" visibleInAdvancedArea="true" index="3">
+							<smartFilterBar:customControl>
+								<MultiComboBox id="idMatType">   
+									<core:Item key="{i18n>fert}" text="{i18n>fert}" id="idFert"/>
+									<core:Item key="{i18n>halb}" text="{i18n>halb}" id="idHalb" />
+									<core:Item key="{i18n>roh}" text="{i18n>roh}" id="idRoh"/>
+								</MultiComboBox>
+							</smartFilterBar:customControl>
+						</smartFilterBar:ControlConfiguration>
+                        <smartFilterBar:ControlConfiguration id="idGtrAtrr" key="gatingAttribute"  index="3" visibleInAdvancedArea="false">
+					    </smartFilterBar:ControlConfiguration>
+					</smartFilterBar:controlConfiguration>
+                </smartFilterBar:SmartFilterBar>
+
+                <smartTable:SmartTable id="idPMSmrtTable"  smartFilterId="smartFilterBar" tableType="ResponsiveTable" editable="false" entitySet="PumoriProductsView" useVariantManagement="true" showVariantManagement="true" 
+                        header="{i18n>res}" showRowCount="true" enableExport="true"  requestAtLeastFields="factoryNumber" ignoredFields="markedforDeletion" 
+                        enableAutoBinding="false" placeToolbarInTable="true" enableAutoColumnWidth="true" beforeRebindTable="onBeforeRebindTable"   persistencyKey="SmartTablePersistencyKey" demandPopin="true"
+                >
+					<smartTable:customToolbar>
+                        <OverflowToolbar id="overfowId">
+                            <ToolbarSpacer id="toolbarSpaceId"/>
+                            <Button id="idactionbtn" enabled="false" text="{i18n>actionsht}" class="sapUiSmallMargin" press=".onButtonPress" ariaHasPopup="Menu" visible="false">
+                                <dependents>
+                                    <ActionSheet id="actionSheet" title="{i18n>acttit}" showCancelButton="true" placement="Bottom">
+                                        <Button id="idStrtFlg" text="{i18n>stsrFlg}" press="onActionPress"/>
+										<Button id="idStrtunFlg" text="{i18n>stsrunFlg}" press="onActionPress" />
+                                    </ActionSheet>
+                                </dependents>
+                            </Button>
+                            <Button id="idactionResp" enabled="false" text="{i18n>actionResp}" class="sapUiSmallMargin" press=".onRespButtonPress" ariaHasPopup="Menu" visible="false">
+                                <dependents>
+                                    <ActionSheet id="actionSheetResp" title="{i18n>acttit}" showCancelButton="true" placement="Bottom">
+                                        <Button id="idResponse" text="{i18n>response}" press="onActionRespPress"/>
+										<Button id="idRevert" text="{i18n>revert}" press="onActionRespPress" />
+                                    </ActionSheet>
+                                </dependents>
+                            </Button>
+                        </OverflowToolbar>
+                    </smartTable:customToolbar>
+
+                    <table:Table id="idPMtable" threshold="20" rowSelectionChange="onItemSelect" enableColumnFreeze="false" selectionMode="MultiToggle" enableColumnReordering="false" rowActionCount="1">	
+
+
+                        <table:rowMode>
+                            <rowmodes:Auto id="idRowM" xmlns:rowmodes="sap.ui.table.rowmodes" minRowCount="5" maxRowCount="5"/>
+                        </table:rowMode>
+                           
+                       <table:rowActionTemplate>
+                            <table:RowAction id="rowActn">
+                                <table:items >
+                            		<table:RowActionItem id="rowActnItemId"  press="handlePress" type="Navigation"></table:RowActionItem>
+                            	</table:items>
+                        	</table:RowAction>
+                        </table:rowActionTemplate>
+					</table:Table>
+
+
+
+                     <!-- <Table id="idPMtable" mode="MultiSelect" selectionChange="onItemSelect" sticky="ColumnHeaders,HeaderToolbar" growing="true" growingScrollToLoad="true" growingThreshold="20">
+                        <items>
+							<ColumnListItem type="Navigation" press="handlePress" id="idColList"></ColumnListItem>
+						</items>
+                    </Table> -->
+                </smartTable:SmartTable>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>
+
+
+
+app/pumoriprodui/webapp/view/PumPrdDetails.view.xml
+
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Manage Pumori Product 
+ RICEFW No                : 
+ Release                  :   M1 Release  
+ Author                   :   Samudrala, Sreenivas
+ Date                     :   19.04.2024
+ Description              :   Manage Pumori Product
+ *Descriptions: Display UOM details  
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<mvc:View 
+    controllerName="pumorips.pumoriproduct.pumoriprodui.controller.PumPrdDetails"
+    xmlns:mvc="sap.ui.core.mvc"
+    displayBlock="true"
+    xmlns="sap.m" 
+    xmlns:uxap="sap.uxap"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar" 
+    xmlns:core="sap.ui.core"
+	xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:smartForm="sap.ui.comp.smartform"
+    xmlns:smartField="sap.ui.comp.smartfield" 	
+    xmlns:l="sap.ui.layout"
+    height="100%"
+>
+<Page id="page"  showHeader="false">
+<content>
+    <uxap:ObjectPageLayout id="ObjectPageLayout" useIconTabBar="false">
+        <uxap:sections>
+            <uxap:ObjectPageSection id="ObjectionPageSectionForBasicDetails" titleUppercase="true"  title="{i18n>bscDtl}" showTitle="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="ObjectionPageSubSectionForDisplayValues">
+                        <smartForm:SmartForm id="smartForm" editTogglable="false" editToggled="onEdit">
+                            <smartForm:Group id="smartFormGroup1">
+                                <smartForm:GroupElement id="GroupElement1" label="{i18n>prdId}">
+                                    <smartField:SmartField id="Field1" value="{prodId}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement2" label="{i18n>Stratgicatoflg}">
+                                    <smartField:SmartField id="Field2" value="{strategicautoFlag}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement3" label="{i18n>prdDesc}">
+                                    <smartField:SmartField id="Field3" value="{prodDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement4" label="{i18n>zplcStatus}">
+                                    <smartField:SmartField id="Field4" value="{zplcStatus}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement5" label="{i18n>matType}">
+                                    <smartField:SmartField id="Field5" value="{materialType}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement6" label="{i18n>bUom}">
+                                    <smartField:SmartField id="Field6" value="{baseunitofMeasure}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement23" label="{i18n>zcontrolCode}">
+                                    <smartField:SmartField id="Field23" value="{zcontrolCode}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement24" label="{i18n>zhfvType}" >
+                                    <ComboBox id="Field24" items="{path: '/ms4FTFV'}" selectedKey="{zhfvType}" width="50%" enabled="false" value="{zhfvType}" change="chngFT" >    
+                                    <core:ListItem key="{zhfvtypeHP}" text="{zhfvtypeHP}" id="idFeatureTypeCombo"/> 
+                                </ComboBox>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement25" label="{i18n>zhfvValue}">
+                                    <smartField:SmartField id="Field25" value="{zhfvValue}" width="50%" enabled="true" change="chngFV"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement label="{i18n>kepFlg}"   id="idKepflgL">
+					                <smartField:SmartField value="{keeperFlag}" width="50%"  id="idChk" enabled="false">
+						                <smartField:configuration>
+							                <smartField:Configuration controlType="checkBox"
+								                displayBehaviour="OnOff" id="idConfi"/>
+						                    </smartField:configuration>
+						                </smartField:SmartField>
+					            </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement26" label="{i18n>materialGroup}">
+                                    <smartField:SmartField id="Field26" value="{materialGroup}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement27" label="{i18n>category}">
+                                    <smartField:SmartField id="Field27" value="{category}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement7" label="{i18n>unspscCode}">
+                                    <smartField:SmartField id="Field7" value="{unspscCode}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement8" label="{i18n>zintroDate}">
+                                    <smartField:SmartField id="Field8" value="{zintroDate}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="gatAttrL" label="{i18n>gatingAttribute}">
+                                    <smartField:SmartField id="gatAttrV" value="{gatingAttribute}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement10" label="{i18n>mhbigsrs}">
+                                    <smartField:SmartField id="Field10" value="{zmhbigSeries}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement11" label="{i18n>mhbigsrsDesc}">
+                                    <smartField:SmartField id="Field11" value="{zmhbigseriesDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement12" label="{i18n>mhcat}">
+                                    <smartField:SmartField id="Field12" value="{zmhCategory}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement13" label="{i18n>mhcatdesc}">
+                                    <smartField:SmartField id="Field13" value="{zmhcategoryDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement36" label="{i18n>sppl}">
+                                    <smartField:SmartField id="Field36" value="{zspPl}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement38" label="{i18n>gatingAttribute}">
+                                    <smartField:SmartField id="Field38" value="{gatingAttribute}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                            </smartForm:Group>
+
+                            <smartForm:Group id="smartGroup2">
+                                <smartForm:GroupElement id="GroupElement14" label="{i18n>mhmdl}">
+                                    <smartField:SmartField id="Field14" value="{zmhModel}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement15" label="{i18n>mhmdldesc}">
+                                    <smartField:SmartField id="Field15" value="{zmhmodelDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement16" label="{i18n>mhsrs}">
+                                    <smartField:SmartField id="Field16" value="{zmhSeries}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement17" label="{i18n>mhsrsdesc}">
+                                    <smartField:SmartField id="Field17" value="{zmhseriesDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement18" label="{i18n>mhsbct}">
+                                    <smartField:SmartField id="Field18" value="{zmhsubCategory}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement19" label="{i18n>mhsbctdesc}">
+                                    <smartField:SmartField id="Field19" value="{zmhsubcategoryDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement20" label="{i18n>mhtyp}">
+                                    <smartField:SmartField id="Field20" value="{zmhType}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement21" label="{i18n>mhtypdesc}">
+                                    <smartField:SmartField id="Field21" value="{zmhtypeDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement22" label="{i18n>pchbg}">
+                                    <smartField:SmartField id="Field22" value="{zpchbusinessGrp}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement28" label="{i18n>pchbgdesc}">
+                                    <smartField:SmartField id="Field28" value="{zpchbusinessgrpDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement29" label="{i18n>pchGbu}">
+                                    <smartField:SmartField id="Field29" value="{zpchgBu}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement30" label="{i18n>pchGbuDesc}">
+                                    <smartField:SmartField id="Field30" value="{zpchgBuDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement31" label="{i18n>pchHpCom}">
+                                    <smartField:SmartField id="Field31" value="{zpchhpCompany}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement32" label="{i18n>pchHpComDesc}">
+                                    <smartField:SmartField id="Field32" value="{zpchhpcompanyDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement33" label="{i18n>pchPrdDes}">
+                                    <smartField:SmartField id="Field33" value="{zpchprdcategoryDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement34" label="{i18n>prftCntr}">
+                                    <smartField:SmartField id="Field34" value="{zpchprofitCenter}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement35" label="{i18n>prftCntrDesc}">
+                                    <smartField:SmartField id="Field35" value="{zpchprofitcenterDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement37" label="{i18n>lKey}">
+                                    <smartField:SmartField id="Field37" value="{languagekey}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement39" label="{i18n>pchbgsub}">
+                                    <smartField:SmartField id="Field39" value="{zpchbusinesssubgrp}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement40" label="{i18n>pchbgsubdesc}">
+                                    <smartField:SmartField id="Field40" value="{zpchbusinesssubgrpDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement41" label="{i18n>extseg}">
+                                    <smartField:SmartField id="Field41" value="{zpchextSegment}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                                <smartForm:GroupElement id="GroupElement42" label="{i18n>extsegdesc}">
+                                    <smartField:SmartField id="Field42" value="{zpchextsegmentDesc}"  enabled="false"/>
+                                </smartForm:GroupElement>
+                            </smartForm:Group>
+                        </smartForm:SmartForm>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <uxap:ObjectPageSection id="ObjectPageSectionForUOM" titleUppercase="false"  title="{i18n>uom}" showTitle="false">
+				<uxap:subSections>
+					<uxap:ObjectPageSubSection id="ObjectPageSubSectionForDisplayValues">
+						<smartTable:SmartTable id="idPMSmrtUomTbl" demandPopin="true" smartFilterId="smartFilterBar" tableType="ResponsiveTable"  entitySet="PumoriUOM" useVariantManagement="true"  
+                            header="{i18n>uom}" showRowCount="true" enableExport="true"  ignoredFields="custAttr1,custAttr2,custAttr3,custAttr4,custAttr5,custAttr6,custAttr7,custAttr8,custAttr9,custAttr10"
+                            enableAutoBinding="true" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindUomTable"   >
+                            <Table id="idPMUomTab" mode="None"  sticky="ColumnHeaders,HeaderToolbar" growing="true"  growingThreshold="5" >					
+                            </Table>
+			            </smartTable:SmartTable>
+					</uxap:ObjectPageSubSection>
+				</uxap:subSections>
+			</uxap:ObjectPageSection>
+        </uxap:sections>
+    </uxap:ObjectPageLayout>
+    </content>
+    
+        <footer >
+			<OverflowToolbar id="idtoolbar">
+				<ToolbarSpacer id="idtoolsp"/>
+				<Button  id="idsave" text="{i18n>save}" press="onSave"/>
+				<Button  id="idcancel" text="{i18n>cancel}" press="onCancel"/>
+			</OverflowToolbar>
+		</footer>
+	</Page>
+</mvc:View>
+
+
+
+app/pumoriprodui/webapp/controller/BaseController.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Pumori Product 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Manage Pumori Product
+//-----------------------------------------------------------------------------------*
+//Descriptions: Contains all the re-usable functions
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/core/UIComponent",
+    "sap/m/MessageBox"
+], function (Controller, UIComponent, MessageBox) {
+    "use strict";
+
+    return Controller.extend("pumorips.pumoriproduct.pumoriprodui.controller.BaseController", {
+		/**
+		 * Convenience method for accessing the router.
+		 * @public
+		 * @returns {sap.ui.core.routing.Router} the router for this component
+		 */
+
+        getRouter: function () {
+            return UIComponent.getRouterFor(this);
+        },
+
+		/**
+		 * Convenience method for getting the view model by name.
+		 * @public
+		 * @param {string} [sName] the model name
+		 * @returns {sap.ui.model.Model} the model instance
+		 */
+        getModel: function (sName) {
+            return this.getView().getModel(sName);
+        },
+
+		/**
+		 * Convenience method for setting the view model.
+		 * @public
+		 * @param {sap.ui.model.Model} oModel the model instance
+		 * @param {string} sName the model name
+		 * @returns {sap.ui.mvc.View} the view instance
+		 */
+        setModel: function (oModel, sName) {
+            return this.getView().setModel(oModel, sName);
+        },
+
+		/**
+		 * Getter for the resource bundle.
+		 * @public
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundle: function () {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
+        },
+        /**
+		 * Getter for the resource bundle text.
+		 * @public
+         * @param 
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundleText: function (sTextProperty) {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle().getText(sTextProperty);
+        },
+		/**
+		 * Convenience method for displaying error messages
+		 * @public
+		 */
+        //method to show error message
+        showMsgBoxError: function (message) {
+            var title = this.getResourceBundle().getText("ErrorDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.ERROR,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+
+        },
+        //method to show success message
+        showMsgBoxSuccess: function (message) {
+            var title = this.getResourceBundle().getText("SuccessDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.SUCCESS,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show warning message
+        showMsgBoxWarning: function (message) {
+            var title = this.getResourceBundle().getText("WarningDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.WARNING,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show information message
+        showMsgBoxInformation: function (message) {
+            var title = "Information"
+            var title = this.getResourceBundle().getText("InformationDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.INFORMATION,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        /**            * 
+          * function to fetch the logged in user details             *  
+          **/
+         _getUserInfoService: function () {
+            return new Promise(resolve => sap.ui.require([
+                "sap/ushell/library"
+            ], oSapUshellLib => {
+                const oContainer = oSapUshellLib.Container;
+                const pService = (oContainer) ? oContainer.getServiceAsync("UserInfo") : ""; // .getService is deprecated!
+                resolve(pService);
+            }));
+        },
+		
+
+    });
+
+});
+
+
+
+app/pumoriprodui/webapp/controller/PumPrdList.controller.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Pumori Product 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Manage Pumori Product
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for display of inital page of app
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "sap/m/MessageBox",
+    "sap/m/MessageToast"
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (BaseController,Filter,FilterOperator,MessageBox,MessageToast) {
+        "use strict";
+
+        return BaseController.extend("pumorips.pumoriproduct.pumoriprodui.controller.PumPrdList", {
+            onInit: function () {
+                this.PumPrdSrv = this.getOwnerComponent().getService('PumPrd');
+                //this.PumPrdState = this.getOwnerComponent().getState('PumPrd');
+                this.getRouter().getRoute("PumPrdList").attachPatternMatched(this._onObjectMatched, this);
+            },
+
+            getZoomLevel: function () {
+
+
+                let currentWidth = window.innerWidth;   // Width of the current window
+                let currentHeight = window.innerHeight; // Height of the current window
+                
+            
+                let totalWidth = screen.width;   // Total screen width
+                let totalHeight = screen.height; // Total screen height
+                
+                // Calculate the resolution percentage
+                let resolutionPercentage = ((currentWidth * currentHeight) / (totalWidth * totalHeight)) * 100;
+            
+                resolutionPercentage=resolutionPercentage/4.1;
+            
+                return resolutionPercentage;
+            
+            },
+
+            /* =========================================================== */
+            /* internal methods                                            */
+            /* =========================================================== */
+            /**
+            * App view routing pattern change event handler
+            * this method will trigger each time user navigate between views
+            * This method used here to load, initialize home screen 
+            * **/
+            _onObjectMatched: function () {
+                this._fetchAuthorizationScopes();
+                let row = this.getView().byId("idRowM");
+                row.setMinRowCount(parseInt(this.getZoomLevel()));
+                row.setMaxRowCount(parseInt(this.getZoomLevel()));
+                var oSmartTable = this.getView().byId("idPMSmrtTable");
+                var oSmartFilterBar = this.getView().byId(oSmartTable.getSmartFilterId());
+                if (oSmartTable && oSmartFilterBar.isInitialised()) {
+                    oSmartTable.rebindTable(true);
+                }
+            },
+            
+            /**
+            * This private method is called inside _onObjectMatched
+            * This method is used to set the security scope to action buttons in the app
+            * **/
+            _fetchAuthorizationScopes: function () {
+                var that = this;
+                this.getView().setBusy(true);
+                this.PumPrdSrv.fetchSecurityAuthScopes().then(
+                    function (oResponse) {
+                        var oSecurityScope = (oResponse.data.value) ? JSON.parse(oResponse.data.value) : JSON.parse(oResponse.data.SecurityAction);
+                        if (oSecurityScope.WithCost) {
+
+                            that.getView().byId("idactionbtn").setVisible(true);
+                            that.getView().byId("idactionResp").setVisible(true);
+                        } 
+                        else if (oSecurityScope.WithoutCost) {
+
+                            that.getView().byId("idactionbtn").setVisible(true);
+                            that.getView().byId("idactionResp").setVisible(true);
+                        }
+                        else if (oSecurityScope.WithCostview) {
+                            that.getView().byId("idactionbtn").setVisible(false);
+                            that.getView().byId("idactionResp").setVisible(false);
+                        }
+                        else if (oSecurityScope.WithoutCostview) {
+
+                            that.getView().byId("idactionbtn").setVisible(false);
+                            that.getView().byId("idactionResp").setVisible(false);
+                        }
+                        that.getView().setBusy(false);
+                        
+                    },
+                    function (error) {
+                        that.showMsgBoxError(JSON.parse(error.responseText).error.message.value);
+                        that.getView().setBusy(false);
+                    });
+            },
+            
+            /**
+            * triggers on before smart table rebind, adds selected filter to the table
+            */
+            onBeforeRebindTable: function (oEvent) {
+                let row = this.getView().byId("idRowM");
+                row.setMinRowCount(parseInt(this.getZoomLevel()));
+                row.setMaxRowCount(parseInt(this.getZoomLevel()));
+                var smartTable = oEvent.getSource()
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (smartTable) {
+                    var aFilters = [];
+                    var sMattype = this.getView().byId("smartFilterBar").getControlByKey("materialType").getSelectedKeys();
+                    if (sMattype.length > 0) {
+                        var aMatType = sMattype.map(function(matKey){
+                            return new Filter("materialType",FilterOperator.EQ, matKey);
+                        })
+                        aFilters.push(new Filter(aMatType, false));
+                    }
+                   
+                    if (aFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aFilters, true));
+                    }
+                }
+            },
+            /* =========================================================== */
+            /* event handlers                                              */
+            /* =========================================================== */
+            /**
+             * triggers once user clicks on line item in the table
+             */
+            handlePress: function (oEve) {
+                var oSelObj = oEve.getSource().getBindingContext().getObject();
+                var oPayload = {};
+                oPayload.prdId = encodeURIComponent(oSelObj.prodId);
+                oPayload.withCost = this.withCost;
+                this.getOwnerComponent().getRouter().navTo("PumPrdDetails", { obj: JSON.stringify(oPayload) });
+            },
+            /**
+             * triggers when clear button clicked
+             */
+            onClearPress:function(){
+                this.getView().byId("idMatType").setSelectedKey();
+            },
+
+            /**
+           * triggers after user clicks on flag/unflag button
+           * **/
+            onButtonPress: function (oEvent) {
+                var oButton = oEvent.getSource();
+                this.byId("actionSheet").openBy(oButton);
+            },
+
+            /**
+             * triggers after user clicks on Response/Revert button
+             * **/
+            onRespButtonPress: function (oEvent) {
+                var oButton = oEvent.getSource();
+                this.byId("actionSheetResp").openBy(oButton);
+            },
+
+            /**
+            * triggers once user select line item from table
+            * **/
+            onItemSelect: function (oEvent) {
+                if ((oEvent.getSource().getSelectionMode().length > 0) || (oEvent.mParameters.selectAll === true)) {
+                    this.getView().byId("idactionbtn").setEnabled(true);
+                    this.getView().byId("idactionResp").setEnabled(true);
+                }
+                else {
+                    this.getView().byId("idactionbtn").setEnabled(false);
+                    this.getView().byId("idactionResp").setEnabled(false);
+                }
+            },
+            
+            /**
+             * triggers when Upload History Dialog is closed
+             */
+            oncloseUploadStatus: function () {
+                var oThisController = this;
+
+                oThisController.UploadFragmentOpen.close();
+            },
+
+
+            /**
+            * triggers after user clicks on any of the action items
+            * **/
+            onActionPress: function (oEvent) {
+                this.iMsgCountr = 0;
+                var aPayload = [];
+                var bUpdate = true;
+
+                this.aSelData = this.getView().byId("idPMtable").getSelectedIndices();
+                if (oEvent.getSource().sId.split("--")[2] === "idStrtFlg") {
+
+                    var aSelData = this.getView().byId("idPMtable").getSelectedIndices();
+                    for (var i = 0; i < aSelData.length; i++) {
+                        var oSaveData = {};
+                        let index = aSelData[i];
+                        var selectedObject = this.getView().byId("idPMtable").getContextByIndex(index).getObject();
+                        oSaveData.prodId = selectedObject.prodId;
+                        oSaveData.strategicautoFlag = "X";
+                        oSaveData.response = "D";
+                        aPayload.push(oSaveData);
+                    }
+                }
+                else if (oEvent.getSource().sId.split("--")[2] === "idStrtunFlg") {
+
+                    var aSelData = this.getView().byId("idPMtable").getSelectedIndices();
+                    for (var i = 0; i < aSelData.length; i++) {
+                        var oSaveData = {};
+                        let index = aSelData[i];
+                        var selectedObject = this.getView().byId("idPMtable").getContextByIndex(index).getObject();
+                        oSaveData.prodId = selectedObject.prodId;
+                        oSaveData.strategicautoFlag = "";
+                        oSaveData.response = "D";
+                        aPayload.push(oSaveData);
+                    }
+                }
+                if (bUpdate) {
+                    var bIndi = true;
+                    var that = this;
+                    //validation if data is more than 1000
+                    if (aPayload.length > 1000) {
+                        bIndi = false;
+                        MessageBox.confirm(this.getResourceBundleText("lengthExcd"), {
+                            icon: "QUESTION",
+                            title: "Confirm",
+                            actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+                            onClose: function (oAction) {
+                                if (oAction === "OK") {
+                                    bIndi = true;
+                                    var aTempLoad = [];
+                                    for (var i = 0; i < 1000; i++) {
+                                        aTempLoad.push(aPayload[i]);
+                                    }
+                                    // that._UpdatePrdData({ FlagUpdateData: JSON.stringify(aTempLoad) });
+                                    that._UpdatePrdStrategicData(aTempLoad);
+                                }
+                                else {
+                                    return;
+                                }
+                            }
+                        });
+                    }
+                    //this will be called if data is less than or equal to 1000
+                    if (bIndi)
+                        this._UpdatePrdStrategicData(aPayload);
+                }
+
+            },
+            /***  Method to perform the update action* **/
+            _UpdatePrdStrategicData: async function (aPrdData) {
+                var oView = this.getView();
+                var oUserInfo = await this._getUserInfoService();
+                var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                var oSaveData = { UserEmail: sModifiedBy, PostingData: aPrdData };
+                // var oSaveData = {PostingData: aPrdData}
+                oView.setBusy(true);
+
+                return this.PumPrdSrv.updatePrdStrategicData(oSaveData).then(
+                    function (data) {
+                        this.iMsgCountr++;
+                        oView.setBusy(false);
+                        var response = JSON.parse(JSON.parse(data.response.body).d.PumoriStrategic)[0].message;
+                        this.showMsgBoxSuccess(response);
+                        this.getView().byId("idPMSmrtTable").rebindTable(true);
+                        this.getView().byId("idactionbtn").setEnabled(false);
+                        this.getView().byId("idactionResp").setEnabled(false);
+                    }.bind(this),
+                    function (error) {
+                        this.showMsgBoxError(this.getResourceBundleText("ErrorMsge"));
+                        oView.setBusy(false);
+                    }.bind(this));
+
+            },
+
+
+
+             /**
+            * triggers after user clicks on Response/Revert action items
+            * **/
+
+            onActionRespPress: function (oEvent) {
+                this.iMsgCountr = 0;
+                var aPayload = [];
+                var bUpdate = true;
+
+                this.aSelData = this.getView().byId("idPMtable").getSelectedIndices();
+                
+                 if (oEvent.getSource().sId.split("--")[2] === "idResponse") {
+                    var aSelData = this.getView().byId("idPMtable").getSelectedIndices(); 
+                    for (var i = 0; i < aSelData.length; i++) {
+                        var oSaveData = {};
+                        var aSelDataOp = this.getView().byId("idPMtable").getContextByIndex(aSelDataOp[i]).getObject();
+                        if(aSelDataOp.strategicautoFlag === 'X'){
+                            oSaveData.prodId = aSelDataOp.prodId;
+                            oSaveData.response = "R";
+                        }else{
+                            MessageToast.show(this.getResourceBundleText("msgToast1"));
+                            return;
+                        }
+                        aPayload.push(oSaveData);
+                    }
+                }
+                else if (oEvent.getSource().sId.split("--")[2] === "idRevert") {
+                    var aSelData = this.getView().byId("idPMtable").getSelectedIndices();
+                    for (var i = 0; i < aSelData.length; i++) {
+                        var oSaveData = {};
+                        var aSelDataOp = this.getView().byId("idPMtable").getContextByIndex(aSelDataOp[i]).getObject();
+                        if(aSelDataOp.strategicautoFlag === 'X' && aSelDataOp.response === 'R'){
+                            oSaveData.prodId = aSelDataOp.prodId;
+                            oSaveData.response = "D";
+                        }else{
+                            MessageToast.show(this.getResourceBundleText("msgToast2"));
+                            return;
+                            
+                        }
+                        aPayload.push(oSaveData);
+                    }
+                    
+                }
+                if (bUpdate) {
+                    var bIndi = true;
+                    var that = this;
+                    //validation if data is more than 1000
+                    if (aPayload.length > 1000) {
+                        bIndi = false;
+                        MessageBox.confirm(this.getResourceBundleText("lengthExcd"), {
+                            icon: "QUESTION",
+                            title: "Confirm",
+                            actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+                            onClose: function (oAction) {
+                                if (oAction === "OK") {
+                                    bIndi = true;
+                                    var aTempLoad = [];
+                                    for (var i = 0; i < 1000; i++) {
+                                        aTempLoad.push(aPayload[i]);
+                                    }
+                                    
+                                    that._UpdateRespData(aTempLoad);
+                                }
+                                else {
+                                    return;
+                                }
+                            }
+                        });
+                    }
+                    //this will be called if data is less than or equal to 1000
+                    if (bIndi)
+                        this._UpdateRespData(aPayload);
+                }
+                
+
+            },
+
+
+            _UpdateRespData: async function (aRespData) {
+                var oView = this.getView();
+                var oUserInfo = await this._getUserInfoService();
+                var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                var oSaveData = { PostingData: aRespData, UserEmail: sModifiedBy }; 
+                oView.setBusy(true);
+                return this.PumPrdSrv.updateRespData(oSaveData).then(
+                    function (success) {
+                        this.iMsgCountr++;
+                        oView.setBusy(false);
+                        this.showMsgBoxSuccess(JSON.parse(success.data.PumoriProdResponse)[0].message);
+                        this.getView().byId("idPMSmrtTable").rebindTable(true);
+                        this.getView().byId("idactionbtn").setEnabled(false);
+                        this.getView().byId("idactionResp").setEnabled(false);
+                    }.bind(this),
+                    function (error) {
+                        this.showMsgBoxError(this.getResourceBundleText("Error"));
+                        oView.setBusy(false);
+                    }.bind(this));
+
+            },
+
+
+        });
+    });
+
+
+
+    app/pumoriprodui/webapp/controller/PumPrdDetails.controller.js
+
+
+
+    //-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Pumori Product 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Manage Pumori Product
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for display of detailed page of app
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "sap/m/MessagePopover",
+    "sap/m/MessagePopoverItem",
+    "sap/m/MessageBox",
+], 
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function(BaseController, Filter, FilterOperator) {
+        'use strict';
+
+        return BaseController.extend("pumorips.pumoriproduct.pumoriprodui.controller.PumPrdDetails",{
+            /* =========================================================== */
+            /* lifecycle methods                                           */
+            /* =========================================================== */
+            /**
+            * This method will trigger once during app initialization
+            * **/
+            onInit: function(){
+                this.PumPrdSrv = this.getOwnerComponent().getService('PumPrd');
+               // this.PumPrdState = this.getOwnerComponent().getState('PumPrd');
+                this.getOwnerComponent().getRouter().getRoute("PumPrdDetails").attachPatternMatched(this._onObjectMatched, this);
+            },
+
+            /* =========================================================== */
+            /* internal methods                                            */
+            /* =========================================================== */
+            /**
+            * App view routing pattern change event handler
+            * this method will trigger each time user navigate between views
+            * This method used here to load, initialize home screen 
+            * **/
+            _onObjectMatched: function (oEve) {
+                this.oSelData = JSON.parse(oEve.getParameters().arguments.obj);
+                this.getView().byId("smartForm").bindElement("/PumoriProducts(prodId='" + this.oSelData.prdId + "')");
+               
+                var oUomSmartTable = this.getView().byId("idPMSmrtUomTbl");
+                if (oUomSmartTable) {
+                    oUomSmartTable.rebindTable(true);
+                }
+                this.getView().byId("ObjectPageLayout").setShowFooter(false);
+                this.getView().byId("smartForm").getModel().resetChanges();
+                this.getView().byId("smartForm").setEditable(false);
+                this.getView().byId("idsave").setVisible(false);
+                this.getView().byId("idChk").setEnabled(false);
+                this.getView().byId("idcancel").setVisible(false);
+                if(this.oSelData.withCost){
+                    this.getView().byId("gatAttrV").setVisible(true);
+                } else{
+                    this.getView().byId("gatAttrV").setVisible(false);
+                }
+                this.getView().byId("Field24").setEnabled(false);
+                this._fetchAuthorizationScopes();
+            },
+
+
+            _fetchAuthorizationScopes: function () {
+                var that = this;
+                this.getView().setBusy(true);
+                this.PumPrdSrv.fetchSecurityAuthScopes().then(
+                    function (oResponse) {
+                        var oSecurityScope = (oResponse.data.value) ? JSON.parse(oResponse.data.value) : JSON.parse(oResponse.data.SecurityAction);
+                        if (oSecurityScope.WithCost) {
+                            that.getView().byId("smartForm").setEditTogglable(true);   
+                        } 
+                        else if (oSecurityScope.WithoutCost) {
+
+                            that.getView().byId("smartForm").setEditTogglable(true);   
+                        }
+                        if (oSecurityScope.WithCostview) {
+                            
+                            that.getView().byId("smartForm").setEditTogglable(false);   
+                        }
+                        else if (oSecurityScope.WithoutCostview) {
+
+                            that.getView().byId("smartForm").setEditTogglable(false);   
+
+                        }
+                        that.getView().setBusy(false);
+                    },
+                    function (error) {
+                        that.showMsgBoxError(JSON.parse(error.responseText).error.message.value);
+                        that.getView().setBusy(false);
+                    });
+
+            },
+
+
+
+            /* =========================================================== */
+            /* event handlers                                              */
+            /* =========================================================== */
+
+            /**
+             * triggers before UOM table data rebind table
+             */
+            onBeforeRebindUomTable: function (oEvent) {
+                var smartTable = oEvent.getSource()
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (smartTable) {
+                    var aFilters = [];
+                    aFilters.push(new Filter("prodId", FilterOperator.EQ, decodeURIComponent(this.oSelData.prdId)));
+                    if (aFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aFilters, true));
+                    }
+                }
+            },
+            onEdit: function (oEvent) {
+                this.getView().byId("smartForm").getModel().resetChanges();
+                var iSave = this.getView().byId("idsave");
+                var iCancel = this.getView().byId("idcancel");
+                if (oEvent.getParameters().editable) {
+                    iSave.setVisible(true);
+                    iCancel.setVisible(true);
+                    this.getView().byId("Field24").setEnabled(true);
+                } else {
+                    iSave.setVisible(false);
+                    iCancel.setVisible(false);
+                    this.getView().byId("Field24").setEnabled(false);
+                }
+                var oModel = this.getModel("oJSONModel");
+                oModel.setProperty("/ProdData", []);
+        
+                if (this.getView().byId("smartForm").getBindingContext() != undefined) {
+                    this.getView().byId("smartForm").getBindingContext().getObject();
+                    oModel.oData.ProdData.push(this.getView().byId("smartForm").getBindingContext().getObject());
+                }
+            },
+            
+            onSave: async function () {
+                var aErr = this.getView().byId("smartForm").check(true);
+                if (aErr.length > 0) {
+                    this.showMsgBoxError(this.getResourceBundleText("Errmsg"));
+                    return;
+                }
+                var oSaveData = {};
+                var oUserInput = this.getView().byId("smartForm").getBindingContext().getObject();
+                oUserInput.zhfvType = this.getView().byId("Field24").getValue();
+                oSaveData.zhfvType = oUserInput.zhfvType;
+                oUserInput.zhfvValue = this.getView().byId("Field25").getValue();
+                oSaveData.zhfvValue = oUserInput.zhfvValue;
+                oSaveData.prodId = oUserInput.prodId;
+                oSaveData.keeperFlag = this.getView().byId("idChk").getValue() ? 'X': '';
+                var oUserInfo = await this._getUserInfoService();
+                oSaveData.modifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+        
+                var oModel = this.getModel("oJSONModel");
+                var aUpdatedLoc = [];
+        
+                for (var i = 0; i < oModel.oData.ProdData.length; i++) {
+                    if (JSON.stringify(oUserInput) !== JSON.stringify(oModel.oData.ProdData[i])) {
+                        aUpdatedLoc.push(oUserInput);
+                    }
+                }
+        
+                if (aUpdatedLoc.length === 0) {
+                    this.showMsgBoxInformation(this.getResourceBundleText("No Change"));
+                    return;
+                }
+        
+                var oView = this.getView();
+                oView.setBusy(true);
+                return this.PumPrdSrv.updateProdData({ ProdData: JSON.stringify(oSaveData), UserEmail: oSaveData.modifiedBy }).then(
+                    function (success) {
+                        oView.setBusy(false);
+                        this.showMsgBoxSuccess(JSON.parse(JSON.parse(success.response.body).d.UpdatePumoriProdftfv)[0].message);
+                        this.getView().byId("smartForm").setEditable(false);
+                        this.getView().byId("idChk").setEnabled(false);
+                        this.getView().byId("smartForm").getModel().refresh();
+                    }.bind(this),
+                    function (error) {
+                        oView.setBusy(false);
+                        this.showMsgBoxError(this.getResourceBundleText("Error"));
+                    }.bind(this));
+        
+            },
+            
+            onCancel: function () {
+                this.getView().byId("smartForm").getBindingContext().getModel().resetChanges();
+                this.getView().byId("smartForm").setEditable(false);
+                this.getView().byId("idChk").setEnabled(false);
+            },
+            chngFT: function () {
+
+                var oSaveData = {};
+                var oUserInput = this.getView().byId("smartForm").getBindingContext().getObject();
+                oSaveData.oldFT = oUserInput.zhfvType;
+                var FTVal =oSaveData.oldFT;
+                oSaveData.newFT = this.getView().byId("Field24").getValue();
+                var FTValchng = oSaveData.newFT
+
+                if(FTVal != FTValchng){
+                    this.getView().byId("idChk").setEnabled(true);
+
+                }
+                else{
+                    this.getView().byId("idChk").setEnabled(false);
+                }
+
+                
+
+            },
+            chngFV: function () {
+
+
+                var oSaveData = {};
+                var oUserInput = this.getView().byId("smartForm").getBindingContext().getObject();
+                oSaveData.oldFV = oUserInput.zhfvValue;
+                var FVVal =oSaveData.oldFV;
+                oSaveData.newFV = this.getView().byId("Field25").getValue();
+                var FVValchng = oSaveData.newFV
+
+                if(FVVal != FVValchng){
+                    this.getView().byId("idChk").setEnabled(true);
+                    
+
+
+                }
+                else{
+                    this.getView().byId("idChk").setEnabled(false);
+                }
+
+
+                
+
+            },
+        });
+    },
+    
+
+);
+
+
+
+app/pumoriprodui/webapp/service/CoreService.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Pumori Product 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Manage Pumori Product
+//-----------------------------------------------------------------------------------*
+//Descriptions: Core Service file 
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object"
+], function (Object) {
+	"use strict";
+
+	return Object.extend("pumorips.pumoriproduct.pumoriprodui.service.CoreService", {
+		constructor: function (model) {
+			Object.call(this);
+			if (model) {
+				this.setModel(model);
+			}
+		},
+		setModel: function (model) {
+			this.model = model;
+		},
+		odata: function (url) {
+			var me = this;
+			var core = {
+				ajax: function (type, url, data, parameters) {
+					var promise = new Promise(function (resolve, reject) {
+						var args = [];
+						var params = {};
+						args.push(url);
+						if (data) {
+							args.push(data);
+						}
+						if (parameters) {
+							params = parameters;
+						}
+						params.success = function (result, response) {
+							resolve({
+								data: result,
+								response: response
+							});
+						};
+						params.error = function (error) {
+							reject(error);
+						};
+						args.push(params);
+						me.model[type].apply(me.model, args);
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (params) {
+					return core.ajax('read', url, false, params);
+				},
+				'post': function (data, params) {
+					return core.ajax('create', url, data, params);
+				},
+				'put': function (data, params) {
+					return core.ajax('update', url, data, params);
+				},
+				'delete': function (params) {
+					return core.ajax('remove', url, false, params);
+				}
+			};
+		},
+		http: function (url) {
+			var core = {
+				ajax: function (method, url, headers, args) {
+					var promise = new Promise(function (resolve, reject) {
+						var client = new XMLHttpRequest();
+						var uri = url;
+						if (args && method === 'GET') {
+							uri += '?';
+							var argcount = 0;
+							for (var key in args) {
+								if (args.hasOwnProperty(key)) {
+									if (argcount++) {
+										uri += '&';
+									}
+									uri += encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+								}
+							}
+						}
+						if (args && (method === 'POST' || method === 'PUT')) {
+							var data = {};
+							for (var keyp in args) {
+								if (args.hasOwnProperty(keyp)) {
+									data[keyp] = args[keyp];
+								}
+							}
+						}
+						client.open(method, uri);
+						
+						if (method === 'POST' || method === 'PUT') {
+							client.setRequestHeader("accept", "application/json");
+							client.setRequestHeader("content-type", "application/json");
+						}
+						for (var keyh in headers) {
+							if (headers.hasOwnProperty(keyh)) {
+								client.setRequestHeader(keyh, headers[keyh]);
+							}
+						}
+						if (data) {
+							client.send(JSON.stringify(data));
+						} else {
+							client.send();
+						}
+						client.onload = function () {
+							if (this.status == 200) {
+								resolve(this.response);
+							} else {
+								reject(this.statusText);
+							}
+						};
+						client.onerror = function () {
+							reject(this.statusText);
+						};
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (headers, args) {
+					return core.ajax('GET', url, headers, args);
+				},
+				'post': function (headers, args) {
+					return core.ajax('POST', url, headers, args);
+				},
+				'put': function (headers, args) {
+					return core.ajax('PUT', url, headers, args);
+				},
+				'delete': function (headers, args) {
+					return core.ajax('DELETE', url, headers, args);
+				}
+			};
+		}
+	});
+});
+
+
+
+app/pumoriprodui/webapp/service/PumPrdService.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Pumori Product 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Manage Pumori Product
+//-----------------------------------------------------------------------------------*
+//Descriptions: Application service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./CoreService",
+], function (CoreService) {
+    "use strict";
+
+    var PumPrdService = CoreService.extend("pumorips.pumoriproduct.pumoriprodui.service.PumPrdService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        },
+        /**
+        * Odata service for strategic flag update
+        * **/
+        updatePrdStrategicData: function (oSaveData) {
+            return this.odata("/PumoriStrategic").post(oSaveData);
+        },
+        /**
+        * Odata service for strategic flag update
+        * **/
+        updateRespData: function (oSaveData) {
+            return this.odata("/PumoriProdResponse").post(oSaveData);
+        }, 
+        /**
+        * Odata service for update FT and FV values
+        * **/
+        updateProdData: function (oSaveData) {
+            return this.odata("/UpdatePumoriProdftfv").post(oSaveData);
+        }, 
+        /**
+            *  method for Security service call
+        */
+        fetchSecurityAuthScopes: function () {
+            return this.odata("/SecurityAction").get({});
+        }
+
+    });
+    return PumPrdService;
+});
+
+
+
+app/pumoriprodui/webapp/state/BaseState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Pumori Product 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Manage Pumori Product
+//-----------------------------------------------------------------------------------*
+//Descriptions: Base State file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object",
+	"sap/ui/model/json/JSONModel"
+], function(Object, JSONModel) {
+	"use strict";
+	return Object.extend("pumorips.pumoriproduct.pumoriprodui.state.BaseState", {
+        //method to getmodel
+		getModel: function() {
+			if (!this.model) {
+				this.model = new JSONModel(this.data, true);
+			}
+			return this.model;
+		},
+        //method to update model
+		updateModel: function(bHardRefresh) {
+			if (this.model) {
+				this.model.refresh(bHardRefresh ? true : false);
+			}
+		}
+	});
+});
+
+
+
+app/pumoriprodui/webapp/state/PumPrdState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Pumori Product 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Manage Pumori Product
+//-----------------------------------------------------------------------------------*
+//Descriptions: Application state file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "../state/BaseState",
+], function (BaseState) {
+    "use strict";
+    var PumPrdState = BaseState.extend("pumorips.pumoriproduct.pumoriprodui.state.PumPrdState", {
+        constructor: function (oService) {
+            this.data = {
+                display: true,
+                busy: true                
+            };
+            this.PumPrdService = oService;
+            BaseState.call(this);
+        }
+       
+
+    });
+    return PumPrdState;
+});
+
+
+
+app/pumoriprodui/webapp/Component.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Pumori Product 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    19.04.2024
+// Description      :    Manage Pumori Product 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for model instantiation
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+        "sap/ui/core/UIComponent",
+        "sap/ui/Device",
+        "pumorips/pumoriproduct/pumoriprodui/model/models",
+        "./service/PumPrdService",
+        "./state/PumPrdState",
+    ],
+    function (UIComponent, Device, models,PumPrdService,PumPrdState) {
+        "use strict";
+
+        return UIComponent.extend("pumorips.pumoriproduct.pumoriprodui.Component", {
+            metadata: {
+                manifest: "json"
+            },
+
+            /**
+             * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
+             * @public
+             * @override
+             */
+            init: function () {
+                // call the base component's init function
+                UIComponent.prototype.init.apply(this, arguments);
+
+                //Cretae globle object for etag
+                this.metadataForEtag;
+                // initialize receive service with the component
+                this._oPumPrdService = new PumPrdService(this.getModel());
+                // initialize receive state with the component
+                this._oPumPrdState = new PumPrdState(this._oPumPrdService);
+
+                // enable routing
+                this.getRouter().initialize();
+
+                // set the device model
+                this.setModel(models.createDeviceModel(), "device");
+                this.setModel(this._oPumPrdState.getModel(), "oJSONModel");
+            },
+            // Return the service name as per parameter
+            getService: function (sService) {
+                return this["_o" + sService + "Service"];
+            },
+             // Return the state name as per parameter
+             getState: function (sState) {
+                return this["_o" + sState + "State"];
+            },
+        });
+    }
+);
+
+
+
+app/pumoriprodui/webapp/manifest.json
+
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.pumoriproduct.pumoriprodui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.12.4",
+      "toolsId": "081dcff6-4225-462b-8307-e4249cc2d252"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/pumori-product/",
+        "type": "OData",
+        "settings": {
+            "annotations": [],
+            "localUri": "localService/metadata.xml",
+            "odataVersion": "2.0"
+        }
+    }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "pumoripsproduct-display": {
+          "semanticObject": "pumoripsproduct",
+          "action": "display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.120.8",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.pumoriproduct.pumoriprodui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.pumoriproduct.pumoriprodui.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "PumPrdList",
+          "pattern": "",
+          "target": [
+            "TargetPumPrdList"
+          ]
+        },
+        {
+            "name": "PumPrdDetails",
+            "pattern": "PumPrdDetails/{obj}",
+            "target": [
+              "TargetPumPrdDetails"
+            ]
+          }
+      ],
+      "targets": {
+        "TargetPumPrdList": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "PumPrdList",
+          "viewName": "PumPrdList"
+        },
+        "TargetPumPrdDetails": {
+            "viewType": "XML",
+            "transition": "slide",
+            "clearControlAggregation": false,
+            "viewId": "PumPrdDetails",
+            "viewName": "PumPrdDetails"
+          }
+      }
+    },
+    "rootView": {
+      "viewName": "pumorips.pumoriproduct.pumoriprodui.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSPUMORIPROD"
+  }
+}
+
+
+
+app/pumoriprodui/xs-app.json
+
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumoripsproduct-srv-api",
+      "csrfProtection": false,
+      "scope": ["$XSAPPNAME.WithCost","$XSAPPNAME.WithoutCost","$XSAPPNAME.WithCostview","$XSAPPNAME.WithoutCostview"]
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa",
+      "scope": ["$XSAPPNAME.WithCost","$XSAPPNAME.WithoutCost","$XSAPPNAME.WithCostview","$XSAPPNAME.WithoutCostview"]
+    }
+  ]
+}
+

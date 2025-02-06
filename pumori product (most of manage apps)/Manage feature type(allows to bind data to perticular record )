@@ -1,0 +1,953 @@
+app/mapftfvui/webapp/view/MapFtFvDetails.view.xml
+
+
+
+<mvc:View controllerName="pumorips.pumoriproduct.mapftfvui.controller.MapFtFvDetails"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:customData="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+	xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:table="sap.ui.table">
+    <Page id="page" title="{i18n>title}" showHeader="false">
+        <content>
+            <VBox id="vBoxId" fitContainer="true">
+                <smartFilterBar:SmartFilterBar id="smartFilterBar" persistencyKey="SmartFilterPKey" showMessages="true" showClearOnFB="true" clear="onClearPress" entitySet="mappingFtFv" search=".onSFBSearch">
+                </smartFilterBar:SmartFilterBar>
+
+
+                <smartTable:SmartTable id="idSmartTable"  smartFilterId="smartFilterBar" tableType="ResponsiveTable" editable="false" editTogglable="false"  entitySet="mappingFtFv" useVariantManagement="true" showVariantManagement="true" 
+                        header="{i18n>title}" showRowCount="true"   requestAtLeastFields="factoryNumber,zhfvtypeFac" customData:useSmartToggle="true" customData:useSmartField="true"
+                        enableAutoBinding="false" enableAutoColumnWidth="true" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindTable"   persistencyKey="SmartTablePersistencyKey" initiallyVisibleFields="zhfvtypeFac,zhfvvalueFac,zhfvvalueHP" demandPopin="true"
+
+                >
+                <smartTable:customToolbar>
+                        <OverflowToolbar id="overflowToolBar" design="Transparent">
+                            <ToolbarSpacer id="toolbarSpaceId"/>
+                            <Button id="idAddHpFt" text="{i18n>AddHpFtFv}" tooltip="Add HP FT/FV" class="sapUiSmallMargin" press="onAddHpFtFv" visible="{=${sm4rtM0d3l>/editable} === false}"  /> 
+                            <Button id="idSave" text="{i18n>save}" tooltip="Save Changes" class="sapUiSmallMargin" press=".onSave" visible="{=${sm4rtM0d3l>/editable} === true}"  />
+                        </OverflowToolbar>
+                    </smartTable:customToolbar>
+                    <table:Table id="idPMTable" selectionBehavior="RowSelector" selectionMode="None" >
+                    <table:rowMode>
+                    <rowmodes:Auto id="idRowM" xmlns:rowmodes="sap.ui.table.rowmodes" minRowCount="5" maxRowCount="5"/>
+                    </table:rowMode>
+                        <table:columns>
+                            <table:Column id="idHpvalue" hAlign="Begin" width="16rem" filterProperty="zhfvtypeHP" sortProperty="zhfvtypeHP">
+                                <table:customData>
+                                    <core:CustomData key="p13nData" value='\{"columnKey":"zhfvtypeHP","leadingProperty":"zhfvtypeHP", "columnIndex":"3"}'/>
+                                </table:customData>
+                                <Label id="idHpvalueLabel" text="HP FT" />
+                                <table:template>
+                                    <HBox id="hboxHpvalue" class="zCoreSelectColumns" alignItems="Center" justifyContent="Start">
+                                        <items>
+                                            <Text id="txtHpvalue" text="{path:'zhfvtypeHP'}" visible="{=${sm4rtM0d3l>/editable} === false}"></Text>
+                                            <ComboBox id="ComboHpvalue" items="{path:'/ms4FTFV'}" visible="{=${sm4rtM0d3l>/editable} === true}" selectedKey="{zhfvtypeHP}" change="handleChange">
+                                                <core:Item id="coreItemsHpvalue" key="{zhfvtypeHP}" text="{zhfvtypeHP}" />
+                                            </ComboBox>
+                                        </items>
+                                    </HBox>
+                                </table:template>   
+                            </table:Column>
+
+                            <table:Column id="idHpvalueInput" hAlign="Begin" width="13rem" filterProperty="zhfvvalueHP" sortProperty="zhfvvalueHP">
+                                <table:customData>
+                                    <core:CustomData key="p13nData" value='\{"columnKey":"zhfvvalueHP","leadingProperty":"zhfvvalueHP", "columnIndex":"4"}'/>
+                                </table:customData>
+                                <Label id="idHpvalueLabelInput" text="HP FV" />
+                                <table:template>
+                                    <HBox id="hboxHpvalueInput" class="zCoreSelectColumns" alignItems="Center" justifyContent="Start">
+                                        <items>
+                                            <Text id="txtHpvalueInput" text="{path:'zhfvvalueHP'}" visible="{=${sm4rtM0d3l>/editable} === false}"></Text>
+                                            <Input id="idInputHpvalueInput" value="{path:'zhfvvalueHP'}" visible="{=${sm4rtM0d3l>/editable} === true}"></Input>
+                                        </items>
+                                    </HBox>
+                                </table:template>  
+                            </table:Column>
+                        </table:columns>
+                    </table:Table>
+                </smartTable:SmartTable>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>
+
+
+
+app/mapftfvui/webapp/Fragments/AddHpFtFv.fragment.xml
+
+
+
+<core:FragmentDefinition xmlns:customData="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1" xmlns:table="sap.ui.table"
+        xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:smartForm="sap.ui.comp.smartform" xmlns:smartField="sap.ui.comp.smartfield"
+        xmlns:core="sap.ui.core" xmlns:common="sap.suite.ui.commons">
+    <Dialog id="idAddHpFtFv" contentHeight="18%" contentWidth="30%" draggable="true" class="zAddHpFtFv"
+            title="Add HP FT" resizable="true" showHeader="true" type="Standard" afterClose=".onAfterDialogClose">
+        <content>
+            <smartForm:SmartForm id="smartUpdateForm" entityType="" editable="true">
+                <smartForm:Group id="idSmartFormGroup">
+                    <smartForm:GroupElement id="idzhfvtypeHP" label="{i18n>zhfvtypeHP}">
+                        <Input xmlns="sap.m" id="inputzhfvtypeHP" required="true"></Input>
+                    </smartForm:GroupElement>
+                </smartForm:Group>
+            </smartForm:SmartForm>
+        </content> 
+
+        <beginButton>
+            <Button xmlns="sap.m" text="Save" id="btnOK" press=".onAddHpFtFvAccept" type="Emphasized"></Button>
+        </beginButton>
+        <endButton>
+            <Button id="btnCancel" text="Cancel" press="onCloseDialog"></Button>
+        </endButton>     
+    </Dialog>
+</core:FragmentDefinition>
+
+
+
+app/mapftfvui/webapp/controller/BaseController.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Feature Type 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    26.03.2024
+// Description      :    Manage Feature Type
+//-----------------------------------------------------------------------------------*
+//Descriptions: Contains all the re-usable functions
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/core/UIComponent",
+    "sap/m/MessageBox"
+], function (Controller, UIComponent, MessageBox) {
+    "use strict";
+
+    return Controller.extend("pumorips.pumoriproduct.mapftfvui.controller.BaseController", {
+		/**
+		 * Convenience method for accessing the router.
+		 * @public
+		 * @returns {sap.ui.core.routing.Router} the router for this component
+		 */
+
+        getRouter: function () {
+            return UIComponent.getRouterFor(this);
+        },
+
+		/**
+		 * Convenience method for getting the view model by name.
+		 * @public
+		 * @param {string} [sName] the model name
+		 * @returns {sap.ui.model.Model} the model instance
+		 */
+        getModel: function (sName) {
+            return this.getView().getModel(sName);
+        },
+
+		/**
+		 * Convenience method for setting the view model.
+		 * @public
+		 * @param {sap.ui.model.Model} oModel the model instance
+		 * @param {string} sName the model name
+		 * @returns {sap.ui.mvc.View} the view instance
+		 */
+        setModel: function (oModel, sName) {
+            return this.getView().setModel(oModel, sName);
+        },
+
+		/**
+		 * Getter for the resource bundle.
+		 * @public
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundle: function () {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
+        },
+        /**
+		 * Getter for the resource bundle text.
+		 * @public
+         * @param 
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundleText: function (sTextProperty) {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle().getText(sTextProperty);
+        },
+		/**
+		 * Convenience method for displaying error messages
+		 * @public
+		 */
+        //method to show error message
+        showMsgBoxError: function (message) {
+            var title = this.getResourceBundle().getText("ErrorDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.ERROR,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+
+        },
+        //method to show success message
+        showMsgBoxSuccess: function (message) {
+            var title = this.getResourceBundle().getText("SuccessDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.SUCCESS,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show warning message
+        showMsgBoxWarning: function (message) {
+            var title = this.getResourceBundle().getText("WarningDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.WARNING,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show information message
+        showMsgBoxInformation: function (message) {
+            var title = "Information"
+            var title = this.getResourceBundle().getText("InformationDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.INFORMATION,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        /**            * 
+          * function to fetch the logged in user details             *  
+          **/
+         _getUserInfoService: function () {
+            return new Promise(resolve => sap.ui.require([
+                "sap/ushell/library"
+            ], oSapUshellLib => {
+                const oContainer = oSapUshellLib.Container;
+                const pService = (oContainer) ? oContainer.getServiceAsync("UserInfo") : ""; // .getService is deprecated!
+                resolve(pService);
+            }));
+        },
+		
+
+    });
+
+});
+
+
+
+app/mapftfvui/webapp/controller/MapFtFvDetails.controller.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Feature Type 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Samudrala,Sreenivas
+// Date             :    26.03.2024
+// Description      :    Manage Feature Type
+//-----------------------------------------------------------------------------------*
+//Descriptions: Manage Feature Type functionalities
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "sap/ui/core/Fragment",
+    "sap/m/MessageToast",
+    "sap/ui/core/library",
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (BaseController,Fragment,MessageToast,coreLibrary) {
+        "use strict";
+        var ValueState = coreLibrary.ValueState;
+        return BaseController.extend("pumorips.pumoriproduct.mapftfvui.controller.MapFtFvDetails", {
+            onInit: function () {
+                this.MapFtFvSrv = this.getOwnerComponent().getService('MapFtFv');
+                this.MapFtFvState = this.getOwnerComponent().getState('MapFtFv');
+                let oDataModel = this.getOwnerComponent().getModel();
+                oDataModel.setSizeLimit(5000);
+                this.getRouter().getRoute("RouteMapFtFvDetails").attachPatternMatched(this._onObjectMatched, this);
+            },
+
+            getZoomLevel: function () {
+
+
+                let currentWidth = window.innerWidth;   // Width of the current window
+                let currentHeight = window.innerHeight; // Height of the current window
+                
+            
+                let totalWidth = screen.width;   // Total screen width
+                let totalHeight = screen.height; // Total screen height
+                
+                // Calculate the resolution percentage
+                let resolutionPercentage = ((currentWidth * currentHeight) / (totalWidth * totalHeight)) * 100;
+            
+                resolutionPercentage=resolutionPercentage/4.1;
+            
+                return resolutionPercentage;
+            
+            },
+            /**
+            * App view routing pattern change event handler
+            * this method will trigger each time user navigate between views
+            * This method used here to load, initialize home screen
+            * **/
+            _onObjectMatched: function () {
+                this._fetchAuthorizationScopes();
+                let row = this.getView().byId("idRowM");
+                row.setMinRowCount(parseInt(this.getZoomLevel()));
+                row.setMaxRowCount(parseInt(this.getZoomLevel()));
+
+           },
+           onBeforeRebindTable: function (oEvent) {
+            let row = this.getView().byId("idRowM");
+            row.setMinRowCount(parseInt(this.getZoomLevel()));
+            row.setMaxRowCount(parseInt(this.getZoomLevel()));
+           },
+           /**
+           * This private method is called inside _onObjectMatched
+           * This method is used to set the security scope to action buttons in the app
+           * **/
+           _fetchAuthorizationScopes: function () {
+               var that = this;
+               this.getView().setBusy(true);
+               this.MapFtFvSrv.fetchSecurityAuthScopes().then(
+                   function (oResponse) {
+                       var oSecurityScope = (oResponse.data.value) ? JSON.parse(oResponse.data.value) : JSON.parse(oResponse.data.SecurityAction);
+                    
+                       if (oSecurityScope.WithCost) {
+                        that.getView().byId("idSmartTable").setEditTogglable(true);
+                           that.getView().byId("idAddHpFt").setVisible(true);  
+                        } 
+                        else if (oSecurityScope.WithoutCost) {
+
+                        that.getView().byId("idSmartTable").setEditTogglable(true);
+                           that.getView().byId("idAddHpFt").setVisible(true);   
+                        }
+                        else if (oSecurityScope.WithCostview) {
+                        
+                        that.getView().byId("idAddHpFt").setVisible(false);
+                           that.getView().byId("idSmartTable").setEditTogglable(false);   
+                        }
+                        else if (oSecurityScope.WithoutCostview) {
+
+                        that.getView().byId("idAddHpFt").setVisible(false);
+                           that.getView().byId("idSmartTable").setEditTogglable(false);   
+
+                        }
+
+
+                       that.getView().setBusy(false);
+                   },
+                   function (error) {
+                       that.showMsgBoxError(JSON.parse(error.responseText).error.message.value);
+                       that.getView().setBusy(false);
+                   });
+           },
+
+            onSFBSearch: function(){
+                this.getView().byId("idSmartTable").rebindTable();
+            },
+            /**
+             * triggers once user clicks on Add HP FT button
+             */
+            onAddHpFtFv:function(){
+                Fragment.load({name:"pumorips.pumoriproduct.mapftfvui.Fragments.AddHpFtFv", controller:this}).then(function name(oFragment){
+                    this.oDialogAddHpFtFv = oFragment;
+                    this.getView().addDependent(this.oDialogAddHpFtFv);
+                    this.oDialogAddHpFtFv.open();
+                }.bind(this));
+            },
+            /**
+             * triggers once user clicks on close on fragment
+             */
+            onCloseDialog:function(){
+                this.oDialogAddHpFtFv.close();
+            },
+            /**
+             * triggers once user clicks on close on fragment, destroying for re-action
+             */
+            onAfterDialogClose:function(){
+                this.oDialogAddHpFtFv.destroy();
+            },
+            /**
+             * triggers once user clicks on save in fragment, 
+             * values gets saved in manage flag entity and ms4FTFV entity
+             */
+            onAddHpFtFvAccept: async function(oEvent) {
+                let oDataModel = this.getOwnerComponent().getModel();
+                this.getView().setModel(oDataModel);
+                oDataModel.setDeferredGroups(["MainLine"]);
+                oDataModel.setRefreshAfterChange(false);
+                var inputValue1 = sap.ui.getCore().byId("inputzhfvtypeHP").getValue();
+                if(inputValue1.length === 0){
+                    this.showMsgBoxError(this.getResourceBundleText("checkValueExits"));
+                    return;
+                }
+                if(inputValue1.length > 70){
+                    this.showMsgBoxError(this.getResourceBundleText("checkLength"));
+                    return;
+                }
+                oDataModel.create("/ms4FTFV", {zhfvtypeHP : inputValue1},{
+                    changeSetId: "save1",
+                    groupId: "HpFtFv"
+                });
+                oDataModel.create("/manageflag",{zhfvType: inputValue1, Strategicautoflag: null, dsp: null, response: null},{
+                    changeSetId : "save2" ,
+                    groupId : "ManageFlag"
+                });
+                oDataModel.submitChanges({
+                    groupId: ["HpFtFv", "ManageFlag"],
+                    success:function(oData,resp){
+                        this.showMsgBoxSuccess(this.getResourceBundleText("saved"));
+                        this.getView().getModel().refresh(true);
+                    }.bind(this),
+                    error: function(oError){
+                        that.getView().setBusy(false);
+                        that.odataCommonErrorDisplay(oError);
+                        this.getView().byId("idSmartTable").rebindTable();
+                    }
+                });
+                this.onCloseDialog();
+
+            },
+            /**
+             * triggers once user provides an unkown values in combo box
+             */
+            handleChange:function(oEvent){
+                var oValidatedComboBox = oEvent.getSource(),
+				sSelectedKey = oValidatedComboBox.getSelectedKey(),
+				sValue = oValidatedComboBox.getValue();
+
+                if (!sSelectedKey && sValue) {
+                    oValidatedComboBox.setValueState(ValueState.Error);
+                    oValidatedComboBox.setValueStateText(this.getResourceBundleText("checkDropDownValue"));
+                    oValidatedComboBox.setValue("");
+                    MessageToast.show(this.getResourceBundleText("checkDropDownValue"));
+                    this.getView().byId("idSave").setEnabled(false);
+                } else {
+                    oValidatedComboBox.setValueState(ValueState.None);
+                    this.getView().byId("idSave").setEnabled(true);
+                }
+            },
+            /**
+             * triggers once user clicks on Save button
+             */
+            onSave:async function(oEvent){
+                let oModel = this.getView().byId("idSmartTable").getModel();
+                this.getView().setBusy(true);
+                oModel.submitChanges({
+                    groupId:"changes",
+                    success:function(oRetrievedResult, response){
+                        this.getView().setBusy(false);
+                        this.showMsgBoxSuccess(this.getResourceBundleText("saved"));
+                        this.getView().byId("idSmartTable").rebindTable();
+                        this.getView().byId("idSmartTable")._oEditButton.firePress();
+                        this.getView().byId("idSmartTable").getModel("sm4rtM0d3l").setProperty("/editable", false);
+                    }.bind(this),
+                    error:function(oError){
+                        this.getView().setBusy(false);
+                        this.raiseBackendException(oError);
+                        this.sessionProgram=[];
+                    }.bind(this)
+                },this);
+            },
+            /**
+             * Error messaging
+             */
+            raiseBackendException:function(oError){
+                let message="";
+                try{
+                    let errorResp = JSON.parse(oError.responseText);
+                    message = errorResp.error.message.value;
+                }catch(e){
+                    message = oError.responseText;
+
+                    if(!message && oError.message){
+                        message = oError.message;
+                    }
+                }
+                this.showMsgBoxError(message);
+            },
+        });
+    });
+
+
+
+    app/mapftfvui/webapp/service/CoreService.js
+
+
+
+    sap.ui.define([
+	"sap/ui/base/Object"
+], function (Object) {
+	"use strict";
+
+	return Object.extend("pumorips.pumoriproduct.mapftfvui.service.CoreService", {
+		constructor: function (model) {
+			Object.call(this);
+			if (model) {
+				this.setModel(model);
+			}
+		},
+		setModel: function (model) {
+			this.model = model;
+		},
+		odata: function (url) {
+			var me = this;
+			var core = {
+				ajax: function (type, url, data, parameters) {
+					var promise = new Promise(function (resolve, reject) {
+						var args = [];
+						var params = {};
+						args.push(url);
+						if (data) {
+							args.push(data);
+						}
+						if (parameters) {
+							params = parameters;
+						}
+						params.success = function (result, response) {
+							resolve({
+								data: result,
+								response: response
+							});
+						};
+						params.error = function (error) {
+							reject(error);
+						};
+						args.push(params);
+						me.model[type].apply(me.model, args);
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (params) {
+					return core.ajax('read', url, false, params);
+				},
+				'post': function (data, params) {
+					return core.ajax('create', url, data, params);
+				},
+				'put': function (data, params) {
+					return core.ajax('update', url, data, params);
+				},
+				'delete': function (params) {
+					return core.ajax('remove', url, false, params);
+				}
+			};
+		},
+		http: function (url) {
+			var core = {
+				ajax: function (method, url, headers, args) {
+					var promise = new Promise(function (resolve, reject) {
+						var client = new XMLHttpRequest();
+						var uri = url;
+						if (args && method === 'GET') {
+							uri += '?';
+							var argcount = 0;
+							for (var key in args) {
+								if (args.hasOwnProperty(key)) {
+									if (argcount++) {
+										uri += '&';
+									}
+									uri += encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+								}
+							}
+						}
+						if (args && (method === 'POST' || method === 'PUT')) {
+							var data = {};
+							for (var keyp in args) {
+								if (args.hasOwnProperty(keyp)) {
+									data[keyp] = args[keyp];
+								}
+							}
+						}
+						client.open(method, uri);
+						
+						if (method === 'POST' || method === 'PUT') {
+							client.setRequestHeader("accept", "application/json");
+							client.setRequestHeader("content-type", "application/json");
+						}
+						for (var keyh in headers) {
+							if (headers.hasOwnProperty(keyh)) {
+								client.setRequestHeader(keyh, headers[keyh]);
+							}
+						}
+						if (data) {
+							client.send(JSON.stringify(data));
+						} else {
+							client.send();
+						}
+						client.onload = function () {
+							if (this.status == 200) {
+								resolve(this.response);
+							} else {
+								reject(this.statusText);
+							}
+						};
+						client.onerror = function () {
+							reject(this.statusText);
+						};
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (headers, args) {
+					return core.ajax('GET', url, headers, args);
+				},
+				'post': function (headers, args) {
+					return core.ajax('POST', url, headers, args);
+				},
+				'put': function (headers, args) {
+					return core.ajax('PUT', url, headers, args);
+				},
+				'delete': function (headers, args) {
+					return core.ajax('DELETE', url, headers, args);
+				}
+			};
+		}
+	});
+});
+
+
+
+app/mapftfvui/webapp/service/MapFtFvService.js
+
+
+
+sap.ui.define([
+    "./CoreService",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+], function (CoreService) {
+    "use strict";
+
+    var MapFtFvService = CoreService.extend("pumorips.pumoriproduct.mapftfvui.service.MapFtFvService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        },
+        /**
+            *  method for Security service call
+        */
+        fetchSecurityAuthScopes: function () {
+            return this.odata("/SecurityAction").get({});
+        }
+
+    });
+    return MapFtFvService;
+});
+
+
+
+app/mapftfvui/webapp/state/BaseState.js
+
+
+
+sap.ui.define([
+	"sap/ui/base/Object",
+	"sap/ui/model/json/JSONModel"
+], function(Object, JSONModel) {
+	"use strict";
+	return Object.extend("pumorips.pumoriproduct.mapftfvui.state.BaseState", {
+        //method to getmodel
+		getModel: function() {
+			if (!this.model) {
+				this.model = new JSONModel(this.data, true);
+			}
+			return this.model;
+		},
+        //method to update model
+		updateModel: function(bHardRefresh) {
+			if (this.model) {
+				this.model.refresh(bHardRefresh ? true : false);
+			}
+		}
+	});
+});
+
+
+
+app/mapftfvui/webapp/state/MapFtFvState.js
+
+
+
+sap.ui.define([
+    "../state/BaseState",
+], function (BaseState) {
+    "use strict";
+    var MapFtFvState = BaseState.extend("pumorips.pumoriproduct.mapftfvui.state.MapFtFvState", {
+        constructor: function (oService) {
+            this.data = {
+                display: true,
+                busy: true                
+            };
+            this.MapFtFvService = oService;
+            BaseState.call(this);
+        }
+       
+
+    });
+    return MapFtFvState;
+});
+
+
+
+app/mapftfvui/webapp/Component.js
+
+
+
+/**
+ * eslint-disable @sap/ui5-jsdocs/no-jsdoc
+ */
+
+sap.ui.define([
+        "sap/ui/core/UIComponent",
+        "sap/ui/Device",
+        "pumorips/pumoriproduct/mapftfvui/model/models",
+        "./service/MapFtFvService",
+        "./state/MapFtFvState"
+    ],
+    function (UIComponent, Device, models,MapFtFvService,MapFtFvState) {
+        "use strict";
+
+        return UIComponent.extend("pumorips.pumoriproduct.mapftfvui.Component", {
+            metadata: {
+                manifest: "json"
+            },
+
+            /**
+             * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
+             * @public
+             * @override
+             */
+            init: function () {
+                // call the base component's init function
+                UIComponent.prototype.init.apply(this, arguments);
+
+                //Cretae globle object for etag
+                this.metadataForEtag;
+                // initialize receive service with the component
+                this._oMapFtFvService = new MapFtFvService(this.getModel());
+                // initialize receive state with the component
+                this._oMapFtFvState = new MapFtFvState(this._oMapFtFvService);
+
+                // enable routing
+                this.getRouter().initialize();
+
+                // set the device model
+                this.setModel(models.createDeviceModel(), "device");
+            },
+
+            // Return the service name as per parameter
+            getService: function (sService) {
+                return this["_o" + sService + "Service"];
+            },
+             // Return the state name as per parameter
+             getState: function (sState) {
+                return this["_o" + sState + "State"];
+            },
+        });
+    }
+);
+
+
+
+app/mapftfvui/webapp/manifest.json
+
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.pumoriproduct.mapftfvui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.13.0",
+      "toolsId": "6cfc91bc-511e-43e8-a474-8227a91379a7"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/pumori-product/",
+        "type": "OData",
+        "settings": {
+            "annotations": [],
+            "localUri": "localService/metadata.xml",
+            "odataVersion": "2.0"
+        }
+    }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "mapftfv-Display": {
+          "semanticObject": "mapftfv",
+          "action": "Display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.122.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.pumoriproduct.mapftfvui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true,
+          "defaultBindingMode": "TwoWay"
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.pumoriproduct.mapftfvui.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "RouteMapFtFvDetails",
+          "pattern": "",
+          "target": [
+            "TargetMapFtFvDetails"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetMapFtFvDetails": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewName": "MapFtFvDetails"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "pumorips.pumoriproduct.mapftfvui.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSPUMORIPROD"
+  }
+}
+
+
+
+app/mapftfvui/xs-app.json
+
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumoripsproduct-srv-api",
+      "csrfProtection": false,
+      "scope": ["$XSAPPNAME.WithCost","$XSAPPNAME.WithoutCost","$XSAPPNAME.WithCostview","$XSAPPNAME.WithoutCostview"]
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa",
+      "scope": ["$XSAPPNAME.WithCost","$XSAPPNAME.WithoutCost","$XSAPPNAME.WithCostview","$XSAPPNAME.WithoutCostview"]
+    }
+  ]
+}
+
+
+

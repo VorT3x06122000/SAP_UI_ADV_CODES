@@ -1,0 +1,69 @@
+{
+  "name": "pumorips_product",
+  "version": "1.0.0",
+  "description": "CAP project for Manage Pumori Product.",
+  "repository": "https://github.azc.ext.hp.com/HP-Supply-Chain-Planning/BTP-pumori_ps_manage_pumoriproductmaster.git",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap/cds": "^6",
+    "@sap/cds-hana": "^2",
+    "@sap/cds-odata-v2-adapter-proxy": "^1.9.21",
+    "@sap/hana-client": "^2.19.21",
+    "@sap/hdbext": "^7.6.5",
+    "@sap/hdi-deploy": "^4.9.2",
+    "@sap/textbundle": "^4.1.0",
+    "@sap/xsenv": "^4.2.0",
+    "@sap/xssec": "3.6.1",
+    "axios": "^0.27.2",
+    "express": "^4",
+    "hdb": "^0.19.8",
+    "jwt-decode": "^4.0.0",
+    "passport": "^0",
+    "sap-hdbext-promisfied": "^2.202208.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@sap/cds-dk": "^7",
+    "@sap/ux-specification": "^1.120.6",
+    "rimraf": "^3.0.2"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch-pumoriprodui": "cds watch --open pumoriprodui/webapp/index.html?sap-ui-xx-viewCache=false",
+    "undeploy": "cf undeploy pumorips_product --delete-services --delete-service-keys --delete-service-brokers",
+    "build": "rimraf resources mta_archives && mbt build --mtar archive",
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 1",
+    "watch-pumoriprodlocui": "cds watch --open pumoriprodlocui/webapp/index.html?sap-ui-xx-viewCache=false",
+    "watch-pumoriprodtlane": "cds watch --open pumoriprodtlane/webapp/index.html?sap-ui-xx-viewCache=false",
+    "watch-mapftfvui": "cds watch --open mapftfvui/webapp/index.html?sap-ui-xx-viewCache=false",
+    "watch-flushandfillui": "cds watch --open flushandfillui/webapp/index.html?sap-ui-xx-viewCache=false",
+    "watch-manageflagui": "cds watch --open manageflagui/webapp/index.html?sap-ui-xx-viewCache=false"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "hana"
+      },
+      "uaa": {
+        "kind": "xsuaa"
+      }
+    },
+    "auth": {
+      "passport": {
+        "strategy": "JWT"
+      }
+    },
+    "hana": {
+      "deploy-format": "hdbtable"
+    }
+  },
+  "sapux": [
+    "app/flushandfillui",
+    "app/manageflagui",
+    "app/mapftfvui",
+    "app/pumoriprodlocui",
+    "app/pumoriprodtlane",
+    "app/pumoriprodui"
+  ]
+}
