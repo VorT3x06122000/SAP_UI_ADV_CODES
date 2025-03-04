@@ -1,0 +1,1581 @@
+app/pspumorilocui/webapp/view/PumLocList.view.xml
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Manage Location Mapping 
+ RICEFW No                : 
+ Release                  :   M1 Release  
+ Author                   :   Chowdhary,Mamtha
+ Date                     :   18.04.2024
+ Description              :   Manage Location Mapping
+ *Descriptions: Displays master data list filter bar and table  
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<mvc:View xmlns:valuehelpdialog="sap.ui.comp.valuehelpdialog" controllerName="pumorips.pumorilocation.pspumorilocui.controller.PumLocList"
+	xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+	xmlns="sap.ui.table"
+	xmlns:m="sap.m"
+	xmlns:smartfilter="sap.ui.comp.smartfilterbar"
+    xmlns:smarttable="sap.ui.comp.smarttable"
+    xmlns:core="sap.ui.core"
+	height="100%">
+	<m:Page id="pageid" title="{i18n>title}" showHeader="false">
+		<m:content>
+			<m:VBox fitContainer="true" id="idVboxpsloc">
+				<smartfilter:SmartFilterBar id="smartFilterBar"  entitySet="PumoriLocationsView" showClearOnFB="true" clear="onClearPress" persistencyKey="SmartFilterPKey">
+					<smartfilter:controlConfiguration>
+						<smartfilter:ControlConfiguration key="locType" label="{i18n>locType}" visibleInAdvancedArea="true" index="3" id="idLoctyp">
+							<smartfilter:customControl>
+								<m:ComboBox id="idloccombo">
+									<core:Item key="P" text="{i18n>Plant}" id="idLocP"/>
+									<core:Item key="V" text="{i18n>Sup}" id="idLocV"/>
+								</m:ComboBox>
+							</smartfilter:customControl>
+						</smartfilter:ControlConfiguration>
+						<smartfilter:ControlConfiguration key="plantType" label="{i18n>plaType}" visibleInAdvancedArea="false" index="2" id="idPlTy">
+							<smartfilter:customControl>
+								<m:ComboBox id="idplacombo">
+									<core:Item key="PL" text="{i18n>Prod}" id="idPL"/>
+									<core:Item key="DC" text="{i18n>Dist}" id="idDC"/>
+								</m:ComboBox>
+							</smartfilter:customControl>
+						</smartfilter:ControlConfiguration>
+						<smartfilter:ControlConfiguration key="zplantType" label="{i18n>zPlaType}" visibleInAdvancedArea="false" index="3" id="idZplTp">
+							<smartfilter:customControl>
+								<m:ComboBox id="idzplacombo">
+									<core:Item key="HP" text="{i18n>Hp}" id="idHP"/>
+									<core:Item key="Factories" text="{i18n>Fac}" id="idFac"/>
+									<core:Item key="Suppliers" text="{i18n>Supp}" id="idSupp"/>
+								</m:ComboBox>
+							</smartfilter:customControl>
+						</smartfilter:ControlConfiguration>
+					</smartfilter:controlConfiguration>
+				</smartfilter:SmartFilterBar>
+				<smarttable:SmartTable id="pumLocTable" smartFilterId="smartFilterBar" tableType="Table" editable="false" 
+					ignoredFields="locType,plantType,markedforDeletion,custAttr1,custAttr2,custAttr3,custAttr4,custAttr5,custAttr6,custAttr7,custAttr8,custAttr9,custAttr10"
+                    requestAtLeastFields="locType,plantType" initiallyVisibleFields="locId,locDescr,locTypeText" enableAutoColumnWidth="true" 
+					entitySet="PumoriLocationsView" showRowCount="true" enableAutoBinding="false" header="{i18n>res}"
+					beforeRebindTable="onBeforeRebindTable" enableExport="true" useVariantManagement="true" showVariantManagement="true" 
+                    persistencyKey="SmartTablePersistencyKey"  editTogglable="false" editToggled="onEdit">
+					<smarttable:customToolbar>
+                    <m:OverflowToolbar id="IDovrflwtoolbr">
+                        <m:ToolbarSpacer id="IDtoolbrspcr"/>
+                        <m:Button id="idconsolidate" enabled="false" visible="false" text="{i18n>consolidate}" type="Emphasized" press="onPrsConsolidateLID"/>
+                    </m:OverflowToolbar>
+                </smarttable:customToolbar>
+					
+					<Table id="oTable" enableColumnFreeze="false" rowSelectionChange="onItemSelect" selectionBehavior="Row" selectionMode="Multi" enableColumnReordering="false" rowActionCount="1" threshold="20" >	
+
+						<rowMode>
+                            <rowmodes:Auto id="idRowM" xmlns:rowmodes="sap.ui.table.rowmodes" minRowCount="5" maxRowCount="5"/>
+                        </rowMode>
+                           
+                        <rowActionTemplate>
+                            <RowAction id="rowActn">
+                                <items >
+                            		<RowActionItem id="rowActnItemId"  press="onRowPress" type="Navigation" ></RowActionItem>
+                            	</items>
+                        	</RowAction>
+                        </rowActionTemplate>
+
+					</Table>
+				</smarttable:SmartTable>
+			</m:VBox>
+		</m:content>
+		<!-- <m:footer >
+			<m:OverflowToolbar id="idovrflwtoolbar">
+				<m:ToolbarSpacer id="idtoolspcr"/>
+				<m:Button  id="idsavesss" text="{i18n>save}" press="onSave" enabled="false"/>
+				<m:Button  id="idcancelbtn" text="{i18n>cancel}" press="onCancel" enabled="false"/>
+			</m:OverflowToolbar>
+		</m:footer> -->
+	</m:Page>
+</mvc:View>
+
+
+
+app/pspumorilocui/webapp/view/PumLocDetail.view.xml
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Manage Location Mapping 
+ RICEFW No                : 
+ Release                  :   M1 Release  
+ Author                   :   Chowdhary,Mamtha
+ Date                     :   18.04.2024
+ Description              :   Manage Location Mapping
+ *Descriptions: Display Location Mapping details  
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<mvc:View
+  controllerName="pumorips.pumorilocation.pspumorilocui.controller.PumLocDetail"
+	xmlns:mvc="sap.ui.core.mvc"
+  displayBlock="true"
+	xmlns="sap.m"
+	xmlns:smartform="sap.ui.comp.smartform"
+	xmlns:smartfield="sap.ui.comp.smartfield"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core">
+	<Page id="page"  showHeader="false">
+		<content>
+			<smartform:SmartForm id="smartform" editTogglable="false" editToggled="onEdit">
+				<smartform:customToolbar>
+					<OverflowToolbar design="Transparent" id="idOflw">
+						<ToolbarSpacer id="idTlbar"/>
+						<Button press="onlogClick" icon="sap-icon://history" visible="false" id="idHis"></Button>
+					</OverflowToolbar>
+				</smartform:customToolbar>
+				<smartform:Group title="{i18n>basDet}" id="idBasic">
+					<smartform:layoutData>
+						<l:GridData span="L6 M6 S12" id="idgrid"/>
+					</smartform:layoutData>
+					<smartform:GroupElement label="{i18n>locId}"  id="idLocL" >
+						<smartfield:SmartField value="{locId}" enabled="false" width="50%" id="idLoc"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>zPlaType}"  id="idZPtL" >
+						<smartfield:SmartField  value="{zplantType}" width="50%" enabled="false" id="idZPt"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>country}" id="idCntryL">
+						<smartfield:SmartField  value="{country}" width="50%" enabled="false" id="idCntry"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>countryCode}" id="idCntryCodeL">
+						<smartfield:SmartField  value="{countryCode}" width="50%" enabled="false" id="idCntryCode"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>locType}" id="idLocTyL">
+						<Text text="{path:'locType',formatter:'.formatter.locTypeFormatter'}" id="idLocTy"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement id="idPlantType" label="{i18n>plaType}" >
+						<Text text="{path:'plantType',formatter:'.formatter.plantTypeFormatter'}" id="idPltTy"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>kunnr}" id="idkunnrL"  >
+						<smartfield:SmartField value="{KUNNR}" width="50%" enabled="false" id="idkunnr"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>kukla}" id="idkulkaL">
+						<smartfield:SmartField value="{KUKLA}" width="50%" enabled="false" id="idkulka"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>facCal}" id="idfacCalL">
+						<smartfield:SmartField value="{FABKL}" width="50%" enabled="false" id="idfacCal"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>werks}" id="idwerksL">
+						<smartfield:SmartField value="{WERKS}" width="50%" enabled="false" id="idwerks"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>dummyTSLoc}" id="idDummyL">
+						<smartfield:SmartField value="{DUMMY_TS_LOC}" width="50%" enabled="false" id="idDummy"/>
+					</smartform:GroupElement>
+				</smartform:Group>
+				<smartform:Group title="  " id="idTtl">
+					<smartform:layoutData>
+						<l:GridData span="L6 M6 S12" id="idGridL"/>
+					</smartform:layoutData>
+					<smartform:GroupElement label="{i18n>locDescr}" id="idLocDscL">
+						<smartfield:SmartField  value="{locDescr}" width="50%" enabled="false" id="idLocDsc"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>VendrGrp}"  id="idVenL" >
+						<smartfield:SmartField value="{vendorGroup}" width="50%" id="idVen" change="changevendgrp"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>kepFlg}"   id="idKepflgL">
+					<smartfield:SmartField value="{Keeperflag}" width="50%"  id="idChk" enabled="false">
+						<smartfield:configuration>
+							<smartfield:Configuration controlType="checkBox"
+								displayBehaviour="OnOff" id="idConfi"/>
+						</smartfield:configuration>
+						</smartfield:SmartField>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>bussUnit}" id="idBussL"  >
+						<smartfield:SmartField value="{BUSINESS_UNIT}" width="50%" enabled="false" id="idBuss"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>lifnr}" id="idlifnrL"  >
+						<smartfield:SmartField value="{LIFNR}" width="50%" enabled="false" id="idlifnr"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>dabnode}" id="iddabnodeL">
+						<smartfield:SmartField value="{Dabnode_Flag}" width="50%" enabled="false" id="iddabnode"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>actveFlg}" id="idActflgL">
+						<smartfield:SmartField value="{ACTIVE_FLAG}" width="50%" enabled="false" id="idActflg"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>plifz}" id="idLocEm5L">
+						<smartfield:SmartField  value="{PLIFZ}" width="50%" enabled="false" id="idLocEm5"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>etaETD}" id="idEtaL">
+						<smartfield:SmartField value="{ETA_ETD}" width="50%" enabled="false" id="idEta"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>paName}" id="idpaNameL">
+						<smartfield:SmartField value="{PA_Name}" width="50%" enabled="false" id="idpaName"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>consolidate}" id="idconsoli" visible="false">
+						<smartfield:SmartField value="{mainPlant}" width="50%" id="idconsold"/>
+					</smartform:GroupElement>
+				</smartform:Group>
+				<smartform:Group title="{i18n>addDet}" id="idAddDt">
+					<smartform:layoutData>
+						<l:GridData span="L7 M7 S12" id="idGridLy"/>
+					</smartform:layoutData>
+					<smartform:GroupElement label="{i18n>locRegion}" id="idLocRegL">
+						<smartfield:SmartField  value="{locRegion}" enabled="false" id="idLocReg"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>locAd1}" id="idLocAd1L">
+						<smartfield:SmartField  value="{locationAddress1}" enabled="false" id="idLocAd1"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>locAd2}" id="idLocAd2L">
+						<smartfield:SmartField  value="{locationAddress2}" enabled="false" id="idLocAd2"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>city}" id="idCityL">
+						<smartfield:SmartField  value="{city}" enabled="false" id="idCity"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>state}" id="idStateL">
+						<smartfield:SmartField  value="{state}" enabled="false" id="idState"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>strtHno}" id="idStrtL">
+						<smartfield:SmartField  value="{STRAS}" enabled="false" id="idStrt"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>zipcode}" id="idZipL">
+						<smartfield:SmartField  value="{zipcode}" enabled="false" id="idZip"/>
+					</smartform:GroupElement>
+						<smartform:GroupElement label="{i18n>pstLz}" id="idPstL">
+						<smartfield:SmartField  value="{PSTLZ}" enabled="false" id="idPst"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>pstl2}" id="idPst2L">
+						<smartfield:SmartField  value="{PSTL2}" enabled="false" id="idPst2"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>locCNa1}" id="idLocCnt1L">
+						<smartfield:SmartField  value="{locationContact1Name}" enabled="false" id="idLocCnt1"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>locEm1}" id="idLocEm1L">
+						<smartfield:SmartField  value="{locationEmail1}"  enabled="false" id="idLocEm1"/>
+					</smartform:GroupElement>
+				</smartform:Group>
+				<smartform:Group title="   " id="idTitle">
+					<smartform:layoutData>
+						<l:GridData span="L5 M5 S12" id="idGridLay"/>
+					</smartform:layoutData>
+					<smartform:GroupElement label="{i18n>locCNa2}" id="idLocCnt2L">
+						<smartfield:SmartField  value="{locationContact2Name}" enabled="false" id="idLocCnt2"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>locEm2}" id="idLocEm2L">
+						<smartfield:SmartField  value="{locationEmail2}" width="50%" enabled="false" id="idLocEm2"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>locCNa3}" id="idLocCnt3L">
+						<smartfield:SmartField  value="{locationContact3Name}" enabled="false" id="idLocCnt3"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>locCNa4}" id="idLocCnt4L">
+						<smartfield:SmartField  value="{locationContact4Name}" enabled="false" id="idLocCnt4"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>telf}" id="idLocCnt5L">
+						<smartfield:SmartField  value="{TELF1}" enabled="false" id="idLocCnt5"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>TZone}" id="idTmZneL">
+						<smartfield:SmartField  value="{TIME_ZONE}" enabled="false" id="idTmZne"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>longitude}" id="idlongL">
+						<smartfield:SmartField  value="{longitude}" enabled="false" id="idlong"/>
+					</smartform:GroupElement>
+					<smartform:GroupElement label="{i18n>latitude}" id="idlatL">
+						<smartfield:SmartField  value="{latitude}" enabled="false" id="idlat"/>
+					</smartform:GroupElement>
+				</smartform:Group>
+			</smartform:SmartForm>
+		</content>
+		<footer >
+			<OverflowToolbar id="idtoolbar">
+				<ToolbarSpacer id="idtoolsp"/>
+				<Button  id="idsave" text="{i18n>save}" press="onSave"/>
+				<Button  id="idcancel" text="{i18n>cancel}" press="onCancel"/>
+			</OverflowToolbar>
+		</footer>
+	</Page>
+</mvc:View>
+
+
+
+app/pspumorilocui/webapp/controller/BaseController.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Location Mapping 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Manage Location Mapping
+//-----------------------------------------------------------------------------------*
+//Descriptions: Contains all the re-usable functions
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/core/UIComponent",
+    "sap/m/MessageBox"
+], function (Controller, UIComponent, MessageBox) {
+    "use strict";
+
+    return Controller.extend("pumorips.pumorilocation.pspumorilocui.controller.BaseController", {
+		/**
+		 * Convenience method for accessing the router.
+		 * @public
+		 * @returns {sap.ui.core.routing.Router} the router for this component
+		 */
+
+        getRouter: function () {
+            return UIComponent.getRouterFor(this);
+        },
+
+		/**
+		 * Convenience method for getting the view model by name.
+		 * @public
+		 * @param {string} [sName] the model name
+		 * @returns {sap.ui.model.Model} the model instance
+		 */
+        getModel: function (sName) {
+            return this.getView().getModel(sName);
+        },
+
+		/**
+		 * Convenience method for setting the view model.
+		 * @public
+		 * @param {sap.ui.model.Model} oModel the model instance
+		 * @param {string} sName the model name
+		 * @returns {sap.ui.mvc.View} the view instance
+		 */
+        setModel: function (oModel, sName) {
+            return this.getView().setModel(oModel, sName);
+        },
+
+		/**
+		 * Getter for the resource bundle.
+		 * @public
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundle: function () {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
+        },
+        /**
+		 * Getter for the resource bundle text.
+		 * @public
+         * @param 
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundleText: function (sTextProperty) {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle().getText(sTextProperty);
+        },
+		/**
+		 * Convenience method for displaying error messages
+		 * @public
+		 */
+    
+        //method to show the error message 
+        showMsgBoxError: function (message) {
+            var title = this.getResourceBundle().getText("ErrorDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.ERROR,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+
+        },
+        //method to show the success message
+        showMsgBoxSuccess: function (message) {
+            var title = this.getResourceBundle().getText("SuccessDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.SUCCESS,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show the warning message
+        showMsgBoxWarning: function (message) {
+            var title = this.getResourceBundle().getText("WarningDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.WARNING,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        //method to show the information message
+        showMsgBoxInformation: function (message) {
+            var title = this.getResourceBundle().getText("InformationDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.INFORMATION,
+                title: 'Information',
+                actions: [MessageBox.Action.OK]
+            });
+        }
+
+    });
+
+});
+
+
+
+app/pspumorilocui/webapp/controller/PumLocList.controller.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Location Mapping 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Manage Location Mapping
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for display filter and table in the app
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/export/Spreadsheet",
+    "sap/m/MessageBox"
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (BaseController, Filter, FilterOperator, JSONModel, Spreadsheeter,MessageBox) {
+        var zoomLevel;
+        var pixelRatioPercentage;
+        "use strict";
+
+        return BaseController.extend("pumorips.pumorilocation.pspumorilocui.controller.PumLocList", {
+            /* =========================================================== */
+            /* lifecycle methods                                           */
+            /* =========================================================== */
+            /**
+            * This method will trigger once during app initialization
+            * **/
+            onInit: function () {
+                this.getOwnerComponent().getRouter().getRoute("PumLocList").attachPatternMatched(this._onObjectMatched, this);
+                this.PumLocSrv = this.getOwnerComponent().getService('PumLoc');
+                this.PumLocState = this.getOwnerComponent().getState('PumLoc');
+            },
+
+
+            _fetchAuthorizationScopes: function () {
+                var that = this;
+                this.getView().setBusy(true);
+                this.PumLocSrv.fetchSecurityAuthScopes().then(
+                    function (oResponse) {
+                        var oSecurityScope = (oResponse.data.value) ? JSON.parse(oResponse.data.value) : JSON.parse(oResponse.data.SecurityAction);
+                        if (oSecurityScope.Edit) {
+                            that.getView().byId("idconsolidate").setVisible(true);                          
+                        }
+                        else if (oSecurityScope.Display) {
+                            that.getView().byId("idconsolidate").setVisible(false);                          
+                        }
+                        that.getView().setBusy(false);
+                    },
+                    function (error) {
+                        that.showMsgBoxError(JSON.parse(error.responseText).error.message.value);
+                        that.getView().setBusy(false);
+                    });
+
+            },
+
+
+
+            getZoomLevel: function () {
+
+
+                let currentWidth = window.innerWidth;   // Width of the current window
+                let currentHeight = window.innerHeight; // Height of the current window
+                
+
+                let totalWidth = screen.width;   // Total screen width
+                let totalHeight = screen.height; // Total screen height
+
+                screen1=(currentWidth*currentHeight);
+                Ascreen2=(totalWidth*totalHeight);
+                
+                
+                // Calculate the resolution percentage
+                let resolutionPercentage = ((currentWidth * currentHeight) / (totalWidth * totalHeight)) * 100;
+
+                resolutionPercentage=resolutionPercentage/4.1;
+
+                return resolutionPercentage;
+
+              },
+
+            /* =========================================================== */
+            /* internal methods                                            */
+            /* =========================================================== */
+            /**
+            * App view routing pattern change event handler
+            * this method will trigger each time user navigate between views
+            * This method used here to load, initialize home screen 
+            * **/
+            _onObjectMatched: function () {
+                let row = this.getView().byId("idRowM");
+                row.setMinRowCount(parseInt(this.getZoomLevel()));
+                row.setMaxRowCount(parseInt(this.getZoomLevel()));
+                this._fetchAuthorizationScopes();
+                var oSmartTable = this.getView().byId("pumLocTable");
+                var oSmartFilterBar = this.getView().byId(oSmartTable.getSmartFilterId());
+                if (oSmartTable && oSmartFilterBar.isInitialised()) {
+                    oSmartTable.rebindTable(true);
+                }
+
+            },
+
+            /**
+            * Getter for the user details through userinfo service.
+            * @public
+            */
+            _getUserInfoService: function () {
+                return new Promise(resolve => sap.ui.require([
+                    "sap/ushell/library"
+                ], oSapUshellLib => {
+                    const oContainer = oSapUshellLib.Container;
+                    const pService = (oContainer) ? oContainer.getServiceAsync("UserInfo") : ""; // .getService is deprecated!
+                    resolve(pService);
+                }));
+            },
+
+            onItemSelect: function (oEvent) {
+                var indices = this.getView().byId("oTable").getSelectedIndices();
+                
+                if(indices.length>0){
+
+                    this.getView().byId("idconsolidate").setEnabled(true);
+                    // this.getView().byId("idsavesss").setEnabled(true);
+                    // this.getView().byId("idcancelbtn").setEnabled(true);
+                    
+                }
+                else {
+
+                    this.getView().byId("idconsolidate").setEnabled(false);
+                   
+                    // this.getView().byId("idsavesss").setEnabled(false);
+                    // this.getView().byId("idcancelbtn").setEnabled(false);
+                }
+            },
+
+
+
+            /* =========================================================== */
+            /* event handlers                                              */
+            /* =========================================================== */
+
+            /**
+             * triggers once user clicks on line item in the table
+             */
+            onRowPress: function (oEve) {
+                var oSelObj = oEve.getSource().getBindingContext().getObject();
+                var oPayload = {};
+                oPayload.locId = encodeURIComponent(oSelObj.locId);
+                oPayload.locType = encodeURIComponent(oSelObj.locType);
+                oPayload.Keeperflag = encodeURIComponent(oSelObj.Keeperflag);
+                this.getOwnerComponent().getRouter().navTo("PumLocDetail", { obj: JSON.stringify(oPayload) });
+            },
+            /**
+             * triggers on before smart table rebind, adds selected filter to the table
+             */
+            onBeforeRebindTable: function (oEvent) {
+                let row = this.getView().byId("idRowM");
+                row.setMinRowCount(parseInt(this.getZoomLevel()));
+                row.setMaxRowCount(parseInt(this.getZoomLevel()));
+                var smartTable = oEvent.getSource()
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (smartTable) {
+                    var aFilters = [];
+                    var aORFilters = [];
+                    aORFilters.push(new Filter("markedforDeletion", FilterOperator.EQ, null));
+                    aORFilters.push(new Filter("markedforDeletion", FilterOperator.NE, "X"));
+                    aFilters.push(new sap.ui.model.Filter(aORFilters, false));
+                    var sLoctype = this.getView().byId("smartFilterBar").getControlByKey("locType").getSelectedKey();
+                    if (sLoctype != "") {
+                        aFilters.push(new Filter("locType", FilterOperator.EQ, sLoctype));
+                    }
+                    var sPlanttype = this.getView().byId("smartFilterBar").getControlByKey("plantType").getSelectedKey();
+                    if (sPlanttype != "") {
+                        aFilters.push(new Filter("plantType", FilterOperator.EQ, sPlanttype));
+                    }
+                    var sZPlanttype = this.getView().byId("smartFilterBar").getControlByKey("zplantType").getSelectedKey();
+                    if (sZPlanttype != "") {
+                        aFilters.push(new Filter("zplantType", FilterOperator.EQ, sZPlanttype));
+                    }
+                    if (aFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aFilters, true));
+                    }
+                }
+            },
+
+            /**
+             * triggers when user click on Clear button
+             * 
+             * clears selected filter value
+             * 
+             */
+            onClearPress: function (oEvent) {
+                this.getView().byId("idloccombo").setSelectedKey();
+                this.getView().byId("idplacombo").setSelectedKey();
+                this.getView().byId("idzplacombo").setSelectedKey();
+            },
+
+            // Consolodated Location ID codes
+            
+            onPrsConsolidateLID: function () {
+                var oModel = this.getOwnerComponent().getModel("oBasicDataModel");
+                var aSelData = this.getView().byId("oTable").getSelectedIndices();
+                var obj = { mainPlant: ""};
+                oModel.setData(obj);
+                if(aSelData.length>1)
+                {
+                    if (!this.fragmentOpen) {
+                        this.fragmentOpen = sap.ui.xmlfragment("pumorips.pumorilocation.pspumorilocui.fragments.consolidated", this);
+                    }
+                    this.getView().addDependent(this.fragmentOpen);
+                    this.fragmentOpen.setModel(oModel);
+                    this.fragmentOpen.open();
+                }
+                else{
+                    this.showMsgBoxError(this.getResourceBundleText("Please select more than 1 record"));
+                    return;
+                }
+            },
+
+
+            onPressCancel: function () {
+                this.fragmentOpen.close();
+            },
+
+
+
+            onPressSave: function (oEvent) {
+                var that=this;
+                var ConsoID = this.fragmentOpen.getModel().oData.mainPlant;
+                var ocheckval = [];
+                var aSelIndx = this.getView().byId("oTable").getSelectedIndices();
+                if(ConsoID!=0){
+                    for (var i = 0; i < aSelIndx.length; i++) {
+                        var oData = {};
+                        let index = aSelIndx[i];
+                        var selectedObject = this.getView().byId("oTable").getContextByIndex(index).getObject();
+                        oData.mainPlant = selectedObject.mainPlant;
+                        if(oData.mainPlant!="" && oData.mainPlant!=0 && oData.mainPlant!= undefined && oData.mainPlant!=''){
+                            ocheckval.push(oData);
+                        }
+                    }
+                    if(ocheckval.length>0){
+                         MessageBox.confirm(this.getResourceBundleText("Do You Want To Update The Selected Record ?"), {
+                            icon: "QUESTION",
+                            title: "Confirm",
+                            actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.CANCEL],
+                            onClose: function (oAction) {
+                            if (oAction === "YES") {
+                                that._savedata();
+                            }else{
+                                that.fragmentOpen.close();
+                            }}})
+
+                    }
+                    else{
+                        that._savedata();
+                    }
+                }
+                else{
+                    this.showMsgBoxError(this.getResourceBundleText("Please enter the Consolidated Location ID"));
+                    return;
+                }
+
+            },
+
+            _savedata: async function () {
+                var sConid = this.fragmentOpen.getModel().oData.mainPlant;
+                var oPayload = [];
+                    var aSelData = this.getView().byId("oTable").getSelectedIndices();
+                        for (var i = 0; i < aSelData.length; i++) {
+                            var oSaveData = {};
+                            let index = aSelData[i];
+                            var selectedObject = this.getView().byId("oTable").getContextByIndex(index).getObject();
+                            oSaveData.locId = selectedObject.locId;
+                            oSaveData.mainPlant = sConid;
+                            oPayload.push(oSaveData);
+                        }
+
+                    if ((oPayload!=0)) {
+                        
+                        var oView = this.getView();
+                        var oUserInfo = await this._getUserInfoService();
+                        var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                        var oSaveData = { UserEmail: sModifiedBy, PostingData: oPayload };
+                        oView.setBusy(true);
+
+                        return this.PumLocSrv.updateconsolidatedID(oSaveData).then(
+                        function (data) {
+                            this.iMsgCountr++;
+                            oView.setBusy(false);
+                            this.showMsgBoxSuccess("Save Success !!!");
+                            this.fragmentOpen.close();
+                            this.getView().byId("pumLocTable").rebindTable(true);
+                            this.getView().byId("idconsolidate").setEnabled(false);
+                        }.bind(this),
+
+                        function (error) {
+                            this.showMsgBoxError(this.getResourceBundleText("Error"));
+                            oView.setBusy(false);
+                        }.bind(this));
+                    }
+                    
+                    else{
+                        this.showMsgBoxError(this.getResourceBundleText("Please select more than 1 record"));
+                        this.getView().byId("idconsolidate").setEnabled(false);
+                        this.fragmentOpen.close();
+                        return;
+                    }
+
+
+            }
+        });
+    });
+
+
+
+    app/pspumorilocui/webapp/controller/PumLocDetail.controller.js
+
+
+
+    //-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Location Mapping 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Manage Location Mapping
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for display of detail page of the app
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./BaseController",
+    "../utils/formatter",
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (BaseController, formatter) {
+        "use strict";
+
+        return BaseController.extend("pumorips.pumorilocation.pspumorilocui.controller.PumLocDetail", {
+            formatter: formatter,
+            /* =========================================================== */
+            /* lifecycle methods                                           */
+            /* =========================================================== */
+            /**
+            * This method will trigger once during app initialization
+            * **/
+            onInit: function () {
+                this.getOwnerComponent().getRouter().getRoute("PumLocDetail").attachPatternMatched(this._onObjectMatched, this);
+                this.PumLocSrv = this.getOwnerComponent().getService('PumLoc');
+                this.PumLocState = this.getOwnerComponent().getState('PumLoc');
+            },
+            /* =========================================================== */
+            /* internal methods                                            */
+            /* =========================================================== */
+            /**
+            * App view routing pattern change event handler
+            * this method will trigger each time user navigate between views
+            * This method used here to load, initialize home screen 
+            * **/
+            _onObjectMatched: function (oEvent) {
+                this.oSeldata = JSON.parse(oEvent.getParameters().arguments.obj);
+                this.getView().byId("smartform").getModel().resetChanges();
+                this.getView().byId("smartform").bindElement("/PumoriLocations(locId='" + this.oSeldata.locId + "',locType='" + this.oSeldata.locType + "')");
+                this.getView().byId("smartform").setEditable(false);
+                this.getView().byId("idsave").setVisible(false);
+                this.getView().byId("idconsoli").setVisible(false);
+                this.getView().byId("idcancel").setVisible(false);
+                this.getView().byId("idChk").setEnabled(false);
+                
+                this._fetchAuthorizationScopes();
+                this. _getconsolidatedata();
+                
+            },
+
+
+
+            _fetchAuthorizationScopes: function () {
+                var that = this;
+                this.getView().setBusy(true);
+                this.PumLocSrv.fetchSecurityAuthScopes().then(
+                    function (oResponse) {
+                        var oSecurityScope = (oResponse.data.value) ? JSON.parse(oResponse.data.value) : JSON.parse(oResponse.data.SecurityAction);
+                        if (oSecurityScope.Edit) {
+                            that.getView().byId("smartform").setEditTogglable(true);                           
+                        }
+                        else if (oSecurityScope.Display) {
+                            that.getView().byId("smartform").setEditTogglable(false);                           
+                        }
+                        that.getView().setBusy(false);
+                    },
+                    function (error) {
+                        that.showMsgBoxError(JSON.parse(error.responseText).error.message.value);
+                        that.getView().setBusy(false);
+                    });
+
+            },
+
+            _getconsolidatedata: function(){
+                var colsoldata= this.getView().byId("idconsold").getValue();
+                if(colsoldata!=0 && colsoldata!="" && colsoldata!=undefined && colsoldata!=''){
+                    this.getView().byId("idconsoli").setVisible(true);
+
+                }
+
+            },
+
+
+            /**            * 
+           * internal method to fetch the logged in user details             *  
+           **/
+            _getUserInfoService: function () {
+                return new Promise(resolve => sap.ui.require([
+                    "sap/ushell/library"
+                ], oSapUshellLib => {
+                    const oContainer = oSapUshellLib.Container;
+                    const pService = (oContainer) ? oContainer.getServiceAsync("UserInfo") : ""; // .getService is deprecated!
+                    resolve(pService);
+                }));
+            },
+            /**
+            * 
+            * triggers when user click on edit 
+            *  
+            * **/
+            onEdit: function (oEvent) {
+                this.getView().byId("smartform").getModel().resetChanges();
+                var iSave = this.getView().byId("idsave");
+                var iCancel = this.getView().byId("idcancel");
+                if (oEvent.getParameters().editable) {
+                    iSave.setVisible(true);
+                    iCancel.setVisible(true);
+                } else {
+                    iSave.setVisible(false);
+                    iCancel.setVisible(false);
+                }
+                var oModel = this.getModel("oJSONModel");
+                oModel.setProperty("/LocData", []);
+
+                if (this.getView().byId("smartform").getBindingContext() != undefined) {
+                    this.getView().byId("smartform").getBindingContext().getObject();
+                    oModel.oData.LocData.push(this.getView().byId("smartform").getBindingContext().getObject());
+                }
+            },
+            /**
+            * 
+            * triggers when user click on save button 
+            *  
+            * **/
+            onSave: async function () {
+                var aErr = this.getView().byId("smartform").check(true);
+                if (aErr.length > 0) {
+                    this.showMsgBoxError(this.getResourceBundleText("Errmsg"));
+                    return;
+                }
+                var oSaveData = {};
+                var oUserInput = this.getView().byId("smartform").getBindingContext().getObject();
+                oSaveData.oldVendorGrp = oUserInput.vendorGroup;
+                oUserInput.vendorGroup = this.getView().byId("idVen").getValue();
+                oSaveData.newVendorGrp = this.getView().byId("idVen").getValue();
+                oSaveData.locId = oUserInput.locId;
+                oSaveData.locType = oUserInput.locType;
+                oSaveData.Keeperflag = this.getView().byId("idChk").getValue() ? 'X': '';
+                var oUserInfo = await this._getUserInfoService();
+                oSaveData.modifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+
+                var oModel = this.getModel("oJSONModel");
+                var aUpdatedLoc = [];
+
+                for (var i = 0; i < oModel.oData.LocData.length; i++) {
+                    if (JSON.stringify(oUserInput) !== JSON.stringify(oModel.oData.LocData[i])) {
+                        aUpdatedLoc.push(oUserInput);
+                    }
+                }
+
+                if (aUpdatedLoc.length === 0) {
+                    this.showMsgBoxInformation(this.getResourceBundleText("noChangeMsg"));
+                    return;
+                }
+                
+
+                var oView = this.getView();
+                oView.setBusy(true);
+                return this.PumLocSrv.updateLocData({ LocData: JSON.stringify(oSaveData) }).then(
+                    function () {
+                        oView.setBusy(false);
+                        this.showMsgBoxSuccess(this.getResourceBundleText("Success"));
+                        this.getView().byId("smartform").setEditable(false);
+                        this.getView().byId("idChk").setEnabled(false);
+                        this.getView().byId("smartform").getModel().refresh();
+                    }.bind(this),
+                    function (error) {
+                        oView.setBusy(false);
+                    }.bind(this));
+
+            },
+            /**
+             * 
+             * triggers when user click on cancel button 
+             *  
+             * **/
+            onCancel: function () {
+                this.getView().byId("smartform").getBindingContext().getModel().resetChanges();
+                this.getView().byId("smartform").setEditable(false);
+                this.getView().byId("idChk").setEnabled(false);
+            },
+            changevendgrp: function () {
+                var oSaveData = {};
+                var oUserInput = this.getView().byId("smartform").getBindingContext().getObject();
+                oSaveData.oldVendorGrp = oUserInput.vendorGroup;
+                var VendGrpVal= oSaveData.oldVendorGrp;
+                oSaveData.newVendorGrp= this.getView().byId("idVen").getValue();
+                var VendGrpChngVal=oSaveData.newVendorGrp;
+                if(VendGrpVal != VendGrpChngVal){
+                    this.getView().byId("idChk").setEnabled(true);
+                }
+                else{
+                    this.getView().byId("idChk").setEnabled(false);
+                }
+       
+            }
+        });
+    });
+
+
+
+    app/pspumorilocui/webapp/fragments/consolidated.fragment.xml
+
+
+
+    <core:FragmentDefinition  xmlns="sap.m" xmlns:core="sap.ui.core"  xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form">
+   <Dialog  id="IDdialogfrag" title="{i18n>addItem}" class="sapUiSizeCompact"  titleAlignment="Center"  >
+        <content>
+            <f:SimpleForm id="ediSimpleForm" editable="true"
+            layout="ResponsiveGridLayout"
+            labelSpanXL="3"
+            labelSpanL="1"
+            labelSpanM="1"
+            labelSpanS="6"
+            emptySpanXL="4"
+            emptySpanL="1"
+            emptySpanM="1"
+            emptySpanS="0"
+            columnsXL="1"
+            columnsL="1"
+            columnsM="1" >
+               <Label id="idconsol" text="{i18n>consolidate}" required="true">
+               </Label>
+               <Input id="idconsolidt" value="{/mainPlant}"  maxLength="20">
+               </Input>
+            </f:SimpleForm>
+        </content>
+        <beginButton>
+           <Button type="Emphasized" id="btnsave" text="{i18n>saveButton}" press="onPressSave"/>
+        </beginButton>
+        <endButton>
+           <Button type="Emphasized" id="btncancel" text="{i18n>cancelButton}" press="onPressCancel"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
+
+
+
+
+app/pspumorilocui/webapp/service/CoreService.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Location Mapping 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Manage Location Mapping 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Core service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object"
+], function (Object) {
+	"use strict";
+
+	return Object.extend("pumorips.pumorilocation.pspumorilocui.service.CoreService", {
+		constructor: function (model) {
+			Object.call(this);
+			if (model) {
+				this.setModel(model);
+			}
+		},
+		setModel: function (model) {
+			this.model = model;
+		},
+		odata: function (url) {
+			var me = this;
+			var core = {
+				ajax: function (type, url, data, parameters) {
+					var promise = new Promise(function (resolve, reject) {
+						var args = [];
+						var params = {};
+						args.push(url);
+						if (data) {
+							args.push(data);
+						}
+						if (parameters) {
+							params = parameters;
+						}
+						params.success = function (result, response) {
+							resolve({
+								data: result,
+								response: response
+							});
+						};
+						params.error = function (error) {
+							reject(error);
+						};
+						args.push(params);
+						me.model[type].apply(me.model, args);
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (params) {
+					return core.ajax('read', url, false, params);
+				},
+				'post': function (data, params) {
+					return core.ajax('create', url, data, params);
+				},
+				'put': function (data, params) {
+					return core.ajax('update', url, data, params);
+				},
+				'delete': function (params) {
+					return core.ajax('remove', url, false, params);
+				}
+			};
+		},
+		http: function (url) {
+			var core = {
+				ajax: function (method, url, headers, args) {
+					var promise = new Promise(function (resolve, reject) {
+						var client = new XMLHttpRequest();
+						var uri = url;
+						if (args && method === 'GET') {
+							uri += '?';
+							var argcount = 0;
+							for (var key in args) {
+								if (args.hasOwnProperty(key)) {
+									if (argcount++) {
+										uri += '&';
+									}
+									uri += encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+								}
+							}
+						}
+						if (args && (method === 'POST' || method === 'PUT')) {
+							var data = {};
+							for (var keyp in args) {
+								if (args.hasOwnProperty(keyp)) {
+									data[keyp] = args[keyp];
+								}
+							}
+						}
+						client.open(method, uri);
+						
+						if (method === 'POST' || method === 'PUT') {
+							client.setRequestHeader("accept", "application/json");
+							client.setRequestHeader("content-type", "application/json");
+						}
+						for (var keyh in headers) {
+							if (headers.hasOwnProperty(keyh)) {
+								client.setRequestHeader(keyh, headers[keyh]);
+							}
+						}
+						if (data) {
+							client.send(JSON.stringify(data));
+						} else {
+							client.send();
+						}
+						client.onload = function () {
+							if (this.status == 200) {
+								resolve(this.response);
+							} else {
+								reject(this.statusText);
+							}
+						};
+						client.onerror = function () {
+							reject(this.statusText);
+						};
+					});
+					return promise;
+				}
+			};
+
+			return {
+				'get': function (headers, args) {
+					return core.ajax('GET', url, headers, args);
+				},
+				'post': function (headers, args) {
+					return core.ajax('POST', url, headers, args);
+				},
+				'put': function (headers, args) {
+					return core.ajax('PUT', url, headers, args);
+				},
+				'delete': function (headers, args) {
+					return core.ajax('DELETE', url, headers, args);
+				}
+			};
+		}
+	});
+});
+
+
+
+app/pspumorilocui/webapp/service/PumLocService.js
+
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Location Mapping 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Manage Location Mapping 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Application service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./CoreService",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    
+], function (CoreService,Filter,FilterOperator) {
+    "use strict";
+
+    var PLMService = CoreService.extend("pumorips.pumorilocation.pspumorilocui.service.PumLocService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        },
+
+        /**
+        * Odata service for Update operation
+        * **/
+        updateLocData: function (oSaveData) {
+            return this.odata("/UpdatePumoriLocation").post(oSaveData);
+        },
+
+        fetchSecurityAuthScopes: function () {
+            return this.odata("/SecurityAction").get({});
+        },
+        updateconsolidatedID: function (oSaveData) {
+            return this.odata("/ConsolidatedID").post(oSaveData);
+        },
+    
+
+    });
+    return PLMService;
+});
+
+
+
+app/pspumorilocui/webapp/state/BaseState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Location Mapping
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Manage Location Mapping 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Base State file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+	"sap/ui/base/Object",
+	"sap/ui/model/json/JSONModel"
+], function(Object, JSONModel) {
+	"use strict";
+	return Object.extend("pumori.pumorilocation.pumorilocui.state.BaseState", {
+       //method to get model
+		getModel: function() {
+			if (!this.model) {
+				this.model = new JSONModel(this.data, true);
+			}
+			return this.model;
+		},
+        //method to update model
+		updateModel: function(bHardRefresh) {
+			if (this.model) {
+				this.model.refresh(bHardRefresh ? true : false);
+			}
+		}
+	});
+});
+
+
+
+
+app/pspumorilocui/webapp/state/PumLocState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Location Mapping 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Manage Location Mapping 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Application state file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "../state/BaseState",
+], function (BaseState) {
+    "use strict";
+    var PumLocState = BaseState.extend("pumori.pumorilocation.pumorilocui.state.PumLocState", {
+        constructor: function (oService) {
+            this.data = {
+                display: true,
+                busy: true                
+            };
+            this.PumlocService = oService;
+            BaseState.call(this);
+        }
+       
+
+    });
+    return PumLocState;
+});
+
+
+
+app/pspumorilocui/webapp/Component.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Location Mapping 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Manage Location Mapping 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for model instantiation
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+        "sap/ui/core/UIComponent",
+        "sap/ui/Device",
+        "pumorips/pumorilocation/pspumorilocui/model/models",
+        "./service/PumLocService",
+        "./state/PumLocState"
+    ],
+    function (UIComponent, Device, models, PumLocService, PumLocState) {
+        "use strict";
+
+        return UIComponent.extend("pumorips.pumorilocation.pspumorilocui.Component", {
+            metadata: {
+                manifest: "json"
+            },
+
+            /**
+             * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
+             * @public
+             * @override
+             */
+            init: function () {
+                // call the base component's init function
+                UIComponent.prototype.init.apply(this, arguments);
+
+                //Initialize service with the component
+                this._oPumLocService = new PumLocService(this.getModel());
+                //Initialize state with the component
+                this._oPumLocState = new PumLocState(this._oPumLocService);
+
+                // enable routing
+                this.getRouter().initialize();
+
+                // set the device model
+                this.setModel(models.createDeviceModel(), "device");
+                this.setModel(this._oPumLocState.getModel(), "oJSONModel");
+            },
+            // Return the service name as per parameter
+            getService: function (sService) {
+                return this["_o" + sService + "Service"];
+            },
+            // Return the state name as per parameter
+            getState: function (sState) {
+                return this["_o" + sState + "State"];
+            }
+        });
+    }
+);
+
+
+
+app/pspumorilocui/webapp/manifest.json
+
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.pumorilocation.pspumorilocui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.12.4",
+      "toolsId": "c29fccb2-69f8-4835-aaea-920d4d80553b"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/pumori-location/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "pspumoriloc-display": {
+          "semanticObject": "pspumoriloc",
+          "action": "display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.120.8",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.pumorilocation.pspumorilocui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      
+      "oBasicDataModel":{
+        "type": "sap.ui.model.json.JSONModel"
+    }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.pumorilocation.pspumorilocui.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "PumLocList",
+          "pattern": "",
+          "target": [
+            "TargetPumLocist"
+          ]
+        },
+        {
+          "name": "PumLocDetail",
+          "pattern": "PumLocDetail/{obj}",
+          "target": [
+            "TargetPumLocDetail"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetPumLocist": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "PumLocList",
+          "viewName": "PumLocList"
+        },
+        "TargetPumLocDetail": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "PumLocDetail",
+          "viewName": "PumLocDetail"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "pumorips.pumorilocation.pspumorilocui.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSPUMORILOC"
+  }
+}
+
+
+
+app/pspumorilocui/xs-app.json
+
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumoripslocation-srv-api",
+      "csrfProtection": false,
+      "scope": ["$XSAPPNAME.Display","$XSAPPNAME.Edit"]
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa",
+      "scope": ["$XSAPPNAME.Display","$XSAPPNAME.Edit"]
+    }
+  ]
+}

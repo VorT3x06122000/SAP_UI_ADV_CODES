@@ -1,0 +1,55 @@
+{
+    "name": "pumporips_location",
+    "version": "1.0.0",
+    "description": "CAP Project for Manage Location Mapping.",
+    "repository": "https://github.azc.ext.hp.com/HP-Supply-Chain-Planning/BTP-pumori_ps_manage_pumorilocationmaster.git",
+    "license": "UNLICENSED",
+    "private": true,
+    "dependencies": {
+      "@cap-js-community/odata-v2-adapter": "^1.12.3",
+      "@sap/cds": "^6",
+      "@sap/cds-odata-v2-adapter-proxy": "^1.9.4",
+      "@sap/hana-client": "^2.19.21",
+      "@sap/hdbext": "^7.6.5",
+      "@sap/textbundle": "^4.1.0",
+      "@sap/xsenv": "4.2.0",
+      "@sap/xssec": "3.6.1",
+      "express": "^4",
+      "hdb": "^0.19.8",
+      "passport": "^0.7.0",
+      "sap-hdbext-promisfied": "^2.202208.1",
+      "@sap/cds-dk": "^7",
+      "xlsx": "^0.18.5"
+    },
+    "devDependencies": {
+      "@sap/hdi-deploy": "4.9.2",
+      "@sap/cds-dk": "^7",
+      "@sap/ux-specification": "^1.120.4",
+      "rimraf": "^3.0.2"
+    },
+    "scripts": {
+      "start": "cds-serve",
+      "watch-pspumorilocui": "cds watch --open pspumorilocui/webapp/index.html?sap-ui-xx-viewCache=false",
+      "undeploy": "cf undeploy pumporips_location --delete-services --delete-service-keys --delete-service-brokers",
+      "build": "rimraf resources mta_archives && mbt build --mtar archive",
+      "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
+    },
+    "cds": {
+      "requires": {
+        "db": {
+          "kind": "hana"
+        },
+        "uaa": {
+          "kind": "xsuaa"
+        }
+      },
+      "auth": {
+        "passport": {
+          "strategy": "JWT"
+        }
+      },
+      "hana": {
+        "deploy-format": "hdbtable"
+      }
+    }
+  }
