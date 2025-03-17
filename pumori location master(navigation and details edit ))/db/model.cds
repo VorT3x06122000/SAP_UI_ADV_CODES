@@ -62,7 +62,7 @@ entity PumoriLocations : managed {
         custAttr9            : Decimal(5, 2);
         custAttr10           : String(40);
         mainPlant            : String(30);
-
+        opsiId               : String(10);
 }
 
 /*Tlane Transformation Table*/
@@ -142,17 +142,31 @@ entity FaclocTransformation : managed {
         markedforDeletion    : String(1);
 }
 
+entity OpsiIdResponse {
+        matchScore: String(3);
+        name: String(100);
+    key opsiId: String(10);
+        country: String(100);
+        countryCode:String(100);
+        city: String(35);
+        postalCode: String(10);
+        street1: String(200);
+        state: String(35);
+    key locId: String(20);
+        dunsNumber: String(100);
+}
+
 /*PumoriLocations View */
 view PumoriLocationsView as
     select
-        createdAt,
-        createdBy,
-        modifiedAt,
-        modifiedBy,
-    key locId,
-        locDescr,
-    key locType,
-        case PumoriLocations.locType
+        a.createdAt,
+        a.createdBy,
+        a.modifiedAt,
+        a.modifiedBy,
+    key a.locId,
+        a.locDescr,
+    key a.locType,
+        case a.locType
             when
                 'P'
             then
@@ -164,7 +178,7 @@ view PumoriLocationsView as
         end as locTypeText   : String(20),
         Keeperflag           : String(1),
         plantType,
-        case PumoriLocations.plantType
+        case a.plantType
             when
                 'PL'
             then
@@ -174,20 +188,20 @@ view PumoriLocationsView as
             then
                 'DC(Distribution Center)'
         end as plantTypeText : String(20),
-        zplantType,
-        locRegion,
-        locationAddress1,
-        locationAddress2,
-        city,
-        state,
-        country,
-        countryCode,
-        zipcode,
-        locationContact1Name,
-        locationEmail1,
-        locationContact2Name,
-        locationEmail2,
-        locationContact3Name,
+        a.zplantType,
+        a.locRegion,
+        a.locationAddress1,
+        a.locationAddress2,
+        a.city,
+        a.state,
+        a.country,
+        a.countryCode,
+        a.zipcode,
+        a.locationContact1Name,
+        a.locationEmail1,
+        a.locationContact2Name,
+        a.locationEmail2,
+        a.locationContact3Name,
         locationContact4Name,
         STRAS,
         TIME_ZONE,
@@ -220,8 +234,17 @@ view PumoriLocationsView as
         custAttr8,
         custAttr9,
         custAttr10,
-        mainPlant
-        from PumoriLocations;
+        mainPlant,
+        a.opsiId,
+        b.dunsNumber,
+        case when a.opsiId = '' OR a.opsiId is null
+            then false
+            else true
+            end as marked: Boolean
+        from PumoriLocations as a
+        left outer join OpsiIdResponse as b
+        on b.locId = a.locId 
+        and b.opsiId = a.opsiId;
 
 
 /*LocIdValueHelp view */
@@ -264,4 +287,3 @@ view DummyforIntegrationValueHelp as select distinct key DUMMY_TS_LOC from Pumor
 view ETAETDValueHelp as select distinct key ETA_ETD from PumoriLocationsView where ETA_ETD!='' and ETA_ETD is not null;
 view PlantValueHelp as select distinct key WERKS from PumoriLocationsView where WERKS!='' and WERKS is not null;
 view PlanningAreaValueHelp as select distinct key PA_Name from PumoriLocationsView where PA_Name!='' and PA_Name is not null;
-

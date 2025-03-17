@@ -6,8 +6,8 @@ service PumoriLocationService @(requires: 'authenticated-user'){
     entity PumoriLocationsView @(restrict: [{
         grant: ['*'],
         to   : [
-            'Display',
-            'Edit'
+            'WithView',
+            'WithEdit'
         ]
     }])                           as projection on PumoriLoc.PumoriLocationsView;
     
@@ -44,6 +44,7 @@ service PumoriLocationService @(requires: 'authenticated-user'){
     entity ETAETDValueHelp as projection on PumoriLoc.ETAETDValueHelp;
     entity PlantValueHelp as projection on PumoriLoc.PlantValueHelp;
     entity PlanningAreaValueHelp as projection on PumoriLoc.PlanningAreaValueHelp;
+    entity OpsiIdResponse as projection on PumoriLoc.OpsiIdResponse;
 
     type Success      : {
         created : String;
@@ -61,8 +62,16 @@ service PumoriLocationService @(requires: 'authenticated-user'){
         success : Success;
     }
 
+
+    type OpsiResponse :{
+        locId       : String(20);
+        opsiId   : String(30);
+    }
+
     action PumoriLocUpload(Days : Integer, FactoryNumber : String) returns String;
     action UpdatePumoriLocation(LocData : LargeString)             returns String;
     action ConsolidatedID(UserEmail : String, PostingData : array of ConsolidatedidInput)                    returns String;
     function SecurityAction()                                      returns String;
+    function MulesoftAPIJobSchedular() returns String;
+    function opsiIDItem(locId : String,) returns array of OpsiResponse;
 }

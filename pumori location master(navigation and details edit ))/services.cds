@@ -43,6 +43,8 @@ annotate PumoriLocationService.PumoriLocationsView with {
     PA_Name                         @(title : '{i18n>paName}');
     Keeperflag                      @(title : '{i18n>kepFlg}');
     mainPlant                       @(title : '{i18n>consolidID}');
+    opsiId                          @(title : '{i18n>opsiid}');
+    marked                          @(title : '{i18n>marked}');
     @UI.HiddenFilter markedforDeletion;
     @UI.HiddenFilter custAttr1;
     @UI.HiddenFilter custAttr2;
@@ -54,6 +56,7 @@ annotate PumoriLocationService.PumoriLocationsView with {
     @UI.HiddenFilter custAttr8;
     @UI.HiddenFilter custAttr9;
     @UI.HiddenFilter custAttr10;
+    @UI.HiddenFilter marked;
     @UI.HiddenFilter locTypeText    @(title : '{i18n>locType}');
     @UI.HiddenFilter plantTypeText  @(title : '{i18n>plantType}');
     @UI.Hidden markedforDeletion;
