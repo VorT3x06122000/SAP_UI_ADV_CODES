@@ -1,0 +1,604 @@
+app/pstransfaclocui/webapp/view/FacLocList.view.xml
+
+
+<!--
+*Confidential and Proprietary
+*Copyright  2024, HP
+*All Rights Reserved
+****************************************************************
+ Application Name         :   Display Pumori Location 
+ RICEFW No                : 
+ Release                  :   M1 Release  
+ Author                   :   Chowdhary,Mamtha
+ Date                     :   18.04.2024
+ Description              :   Display Pumori Location
+ *Descriptions: Displays master data list filter bar and table  
+ ****************************************************************
+Change Log:
+ //    Date      |   Author      |   Defect/Incident     |   Change Description
+****************************************************************-->
+<mvc:View controllerName="pumorips.factorylocation.pstransfaclocui.controller.FacLocList"
+    xmlns:mvc="sap.ui.core.mvc" 
+	displayBlock="true"
+    xmlns="sap.m" 
+	xmlns:core="sap.ui.core"
+	xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+	xmlns:smartTable="sap.ui.comp.smarttable">
+    <Page id="page" title="{i18n>title}" showHeader="false">
+        <content>
+        <VBox fitContainer="true" id="tranVBoxId">
+			    <smartFilterBar:SmartFilterBar persistencyKey="SmartFilterPKey"
+		id="smartFilterBar" showMessages="true" showClearOnFB="true" clear="onClearPress"
+		entitySet="LocationTransformationView">
+					<smartFilterBar:controlConfiguration>
+						<smartFilterBar:ControlConfiguration id="idLocTypFltr" key="locType" label="{i18n>locType}" visibleInAdvancedArea="true" index="3">
+							<smartFilterBar:customControl>
+                                <ComboBox id="idLocCombo" items="{path: '/LocationTypeValues'}"> 
+                                    <core:ListItem key="{locType}" text="{locTypeText}" id="idLocTypeVl"/> 
+                                </ComboBox>
+							</smartFilterBar:customControl>
+						</smartFilterBar:ControlConfiguration>
+					</smartFilterBar:controlConfiguration>
+				</smartFilterBar:SmartFilterBar>
+				<smartTable:SmartTable id="idTrFLSmrtTable"  smartFilterId="smartFilterBar" demandPopin="true" tableType="ResponsiveTable" editable="false" entitySet="LocationTransformationView" useVariantManagement="true" showVariantManagement="true" 
+                header="{i18n>res}" showRowCount="true" enableExport="true"  ignoredFields="markedforDeletion,locType" requestAtLeastFields="locType" ignoreFromPersonalisation="Keeperflag"
+                enableAutoBinding="false" placeToolbarInTable="true" beforeRebindTable="onBeforeRebindTable"   persistencyKey="SmartTablePersistencyKey" >
+					<Table id="idFlmtable" mode="None"  sticky="ColumnHeaders,HeaderToolbar" growing="true" growingScrollToLoad="true" growingThreshold="20" >
+					</Table>
+				</smartTable:SmartTable>
+			</VBox>
+        </content>
+    </Page>
+</mvc:View>
+
+
+
+app/pstransfaclocui/webapp/controller/BaseController.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Pumori Location 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Display Pumori Location
+//-----------------------------------------------------------------------------------*
+//Descriptions: Contains all the re-usable functions
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/core/UIComponent",
+    "sap/m/MessageBox"
+], function (Controller, UIComponent, MessageBox) {
+    "use strict";
+
+    return Controller.extend("pumorips.factorylocation.pstransfaclocui.controller.BaseController", {
+		/**
+		 * Convenience method for accessing the router.
+		 * @public
+		 * @returns {sap.ui.core.routing.Router} the router for this component
+		 */
+
+        getRouter: function () {
+            return UIComponent.getRouterFor(this);
+        },
+
+		/**
+		 * Convenience method for getting the view model by name.
+		 * @public
+		 * @param {string} [sName] the model name
+		 * @returns {sap.ui.model.Model} the model instance
+		 */
+        getModel: function (sName) {
+            return this.getView().getModel(sName);
+        },
+
+		/**
+		 * Convenience method for setting the view model.
+		 * @public
+		 * @param {sap.ui.model.Model} oModel the model instance
+		 * @param {string} sName the model name
+		 * @returns {sap.ui.mvc.View} the view instance
+		 */
+        setModel: function (oModel, sName) {
+            return this.getView().setModel(oModel, sName);
+        },
+
+		/**
+		 * Getter for the resource bundle.
+		 * @public
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundle: function () {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle();
+        },
+        /**
+		 * Getter for the resource bundle text.
+		 * @public
+         * @param 
+		 * @returns {sap.ui.model.resource.ResourceModel} the resourceModel of the component
+		 */
+        getResourceBundleText: function (sTextProperty) {
+            return this.getOwnerComponent().getModel("i18n").getResourceBundle().getText(sTextProperty);
+        },
+		/**
+		 * Convenience method for displaying error messages
+		 * @public
+		 */
+        showMsgBoxError: function (message) {
+            var title = this.getResourceBundle().getText("ErrorDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.ERROR,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+
+        },
+        
+        // method to show the success message
+        showMsgBoxSuccess: function (message) {
+            var title = this.getResourceBundle().getText("SuccessDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.SUCCESS,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        
+        // method to show the warning message
+        showMsgBoxWarning: function (message) {
+            var title = this.getResourceBundle().getText("WarningDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.WARNING,
+                title: title,
+                actions: [MessageBox.Action.OK]
+            });
+        },
+        
+        // method to show the information message
+        showMsgBoxInformation: function (message) {
+            var title = this.getResourceBundle().getText("InformationDialogTitle");
+            MessageBox.show(message, {
+                icon: MessageBox.Icon.INFORMATION,
+                title: 'Information',
+                actions: [MessageBox.Action.OK]
+            });
+        }
+
+    });
+
+});
+
+
+
+app/pstransfaclocui/webapp/controller/FacLocList.controller.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Pumori Location 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Display Pumori Location
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for display filter and table in the app
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "./BaseController",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
+],
+    /**
+     * @param {typeof sap.ui.core.mvc.Controller} Controller
+     */
+    function (Controller, BaseController, Filter, FilterOperator) {
+        "use strict";
+
+        return BaseController.extend("pumorips.factorylocation.pstransfaclocui.controller.FacLocList", {
+            /* =========================================================== */
+            /* lifecycle methods                                           */
+            /* =========================================================== */
+            /**
+            * This method will trigger once during app initialization
+            * **/
+            onInit: function () {
+                this.getRouter().getRoute("FacLocList").attachPatternMatched(this._onObjectMatched, this);
+            },
+
+            /* =========================================================== */
+            /* internal methods                                            */
+            /* =========================================================== */
+            /**
+            * App view routing pattern change event handler
+            * this method will trigger each time user navigate between views
+            * This method used here to load, initialize home screen 
+            * **/
+            _onObjectMatched: function () {
+                var oSmartTable = this.getView().byId("idTrFLSmrtTable");
+                var oSmartFilterBar = this.getView().byId(oSmartTable.getSmartFilterId());
+                if (oSmartTable && oSmartFilterBar.isInitialised()) {
+                    oSmartTable.rebindTable(true);
+                }
+
+            },
+
+            /* =========================================================== */
+            /* event handlers                                              */
+            /* =========================================================== */
+
+            /**
+             * triggers on before smart table rebind, adds selected filter to the table
+             */
+            onBeforeRebindTable: function (oEvent) {
+                var smartTable = oEvent.getSource()
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (smartTable) {
+                    var aFilters = [];
+                    var aORFilters = [];
+                    aORFilters.push(new Filter("markedforDeletion", FilterOperator.EQ, null));
+                    aORFilters.push(new Filter("markedforDeletion", FilterOperator.NE, "X"));
+                    aFilters.push(new sap.ui.model.Filter(aORFilters, false));
+                    var sLoctype = this.getView().byId("smartFilterBar").getControlByKey("locType").getSelectedKey();
+                    if (sLoctype != "") {
+                        aFilters.push(new Filter("locType", FilterOperator.EQ, sLoctype));
+                    }
+                    if (aFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aFilters, true));
+                    }
+                }
+            },
+            /**
+             * triggers on click of clear button in smart filter bar header, cleares all selected filter
+            */
+            onClearPress: function (oEvent) {
+                this.getView().byId("idLocCombo").setSelectedKey();
+            }
+        });
+    });
+
+
+
+    app/pstransfaclocui/webapp/service/TransFacLocService.js
+
+
+
+    //-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Pumori Location 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Display Pumori Location 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Application service file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "./CoreService",
+], function (CoreService) {
+    "use strict";
+
+    var FLMService = CoreService.extend("pumorips.factorylocation.pstransfaclocui.service.TransFacLocService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        }
+    });
+    return FLMService;
+});
+
+
+
+app/pstransfaclocui/webapp/state/TransFacLocState.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Pumori Location 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Display Pumori Location 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Application state file
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+    "../state/BaseState",
+], function (BaseState) {
+    "use strict";
+    var TransFacLocState = BaseState.extend("pumorips.factorylocation.pstransfaclocui.state.TransFacLocState", {
+        constructor: function (oService) {
+            this.data = {
+                display: true,
+                busy: true                
+            };
+            this.TransFacLocService = oService;
+            BaseState.call(this);
+        }
+       
+
+    });
+    return TransFacLocState;
+});
+
+
+
+app/pstransfaclocui/webapp/Component.js
+
+
+
+//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2024, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Display Pumori Location 
+// WRICEF No        :    
+// Release          :    M1 Release
+// Author           :    Chowdhary,Mamtha
+// Date             :    18.04.2024
+// Description      :    Display Pumori Location 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds the logic for model instantiation
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+sap.ui.define([
+        "sap/ui/core/UIComponent",
+        "sap/ui/Device",
+        "pumorips/factorylocation/pstransfaclocui/model/models",
+        "./service/TransFacLocService",
+        "./state/TransFacLocState"
+    ],
+    function (UIComponent, Device, models, TransFacLocService, TransFacLocState) {
+        "use strict";
+
+        return UIComponent.extend("pumorips.factorylocation.pstransfaclocui.Component", {
+            metadata: {
+                manifest: "json"
+            },
+
+            /**
+             * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
+             * @public
+             * @override
+             */
+            init: function () {
+                // call the base component's init function
+                UIComponent.prototype.init.apply(this, arguments);
+
+                // initialize receive service with the component
+                this._oTransFacLocService = new TransFacLocService(this.getModel());
+                // initialize receive state with the component
+                this._oTransFacLocState = new TransFacLocState(this._oTransFacLocService);
+
+                // enable routing
+                this.getRouter().initialize();
+
+                // set the device model
+                this.setModel(models.createDeviceModel(), "device");
+            },
+            //method to get service reference
+            getService: function (sService) {
+                return this["_o" + sService + "Service"];
+            },
+            //method to get state reference
+            getState: function (sState) {
+                return this["_o" + sState + "State"];
+            }
+        });
+    }
+);
+
+
+
+app/pstransfaclocui/webapp/manifest.json
+
+
+
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "pumorips.factorylocation.pstransfaclocui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.13.0",
+      "toolsId": "a26e7611-e5b0-4273-8526-a24a360d756e"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "srv-api/v2/factory-location/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "pstransfacloc-display": {
+          "semanticObject": "pstransfacloc",
+          "action": "display",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.121.2",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pumorips.factorylocation.pstransfaclocui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "pumorips.factorylocation.pstransfaclocui.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "FacLocList",
+          "pattern": "",
+          "target": [
+            "TargetFacLocList"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetFacLocList": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "FacLocList",
+          "viewName": "FacLocList"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "pumorips.factorylocation.pstransfaclocui.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "PSFACLOC"
+  }
+}
+
+
+
+
+app/pstransfaclocui/xs-app.json
+
+
+
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
+      "authenticationType": "xsuaa",
+      "destination": "pumoripsfacloc-srv-api",
+      "csrfProtection": false
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa"
+    }
+  ]
+}
+
+
+

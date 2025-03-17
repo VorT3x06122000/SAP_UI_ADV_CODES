@@ -1,0 +1,68 @@
+{
+  "xsappname": "pumorips_facloc",
+  "tenant-mode": "dedicated",
+  "description": "Security profile of called application",
+  "scopes": [
+    {
+      "name": "uaa.user",
+      "description": "UAA"
+    },
+    {
+      "name": "$XSAPPNAME.scopeformyapp",
+      "description": "Users of Factory Location Transformation app need this special role",
+      "grant-as-authority-to-apps": [
+          "$XSSERVICENAME(pumori_job-scheduling-service)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.Display",
+      "description": "Display Authorization"
+    },
+    {
+      "name": "$XSAPPNAME.Edit",
+      "description": "Edit Authorization"
+    }
+  ],
+  "role-templates": [
+    {
+      "name": "Token_Exchange",
+      "description": "UAA",
+      "scope-references": [
+        "uaa.user"
+      ]
+    },
+    {
+      "name": "RoleTemplateForPumoriPSLocation",
+      "description": "Users of Factory Location Transformation app need this special role",
+      "default-role-name": "PumoriPS Location Role",
+      "scope-references": [
+          "$XSAPPNAME.scopeformyapp"
+      ]
+    },
+    {
+      "name": "Pumori_PS_Display",
+      "description": "Display Role",
+      "scope-references": [
+        "uaa.user",
+        "$XSAPPNAME.Display"
+      ]
+    },
+    {
+      "name": "Pumori_PS_Edit",
+      "description": "Edit Role",
+      "scope-references": [
+        "uaa.user",
+        "$XSAPPNAME.Edit"
+      ]
+    }
+  ],
+  "role-collections": [
+    {
+        "name": "app_job_schedular_ps__factory_location_master_app",
+        "description": "job schedular",
+        "role-template-references": [
+            "$XSAPPNAME.scopeformyapp"
+        ]
+    }
+  ]
+}

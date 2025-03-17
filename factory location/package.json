@@ -1,0 +1,63 @@
+{
+    "name": "pumorips_facloc",
+    "version": "1.0.0",
+    "description": "CAP Project for Display Factory Location Master.",
+    "repository": "https://github.azc.ext.hp.com/HP-Supply-Chain-Planning/BTP-pumori_ps_display_factorylocationmaster.git",
+    "license": "UNLICENSED",
+    "private": true,
+    "dependencies": {
+      "@babel/code-frame": "^7.24.7",
+      "@cap-js-community/odata-v2-adapter": "^1.12.3",
+      "@sap/cds": "^6",
+      "@sap/cds-odata-v2-adapter-proxy": "^1.9.4",
+      "@sap/hana-client": "^2.19.21",
+      "@sap/hdbext": "^7.6.6",
+      "@sap/textbundle": "^3.1.0",
+      "@sap/xsenv": "4.2.0",
+      "@sap/xssec": "3.6.1",
+      "express": "^4",
+      "hdb": "^0.19.7",
+      "passport": "^0.7.0",
+      "sap-hdbext-promisfied": "^2.202208.1",
+      "@sap/cds-dk": "^7"
+    },
+    "devDependencies": {
+      "@eslint/js": "^9.5.0",
+      "@sap/cds-dk": "^7",
+      "@sap/hdi-deploy": "4.9.2",
+      "@sap/ux-specification": "^1.120.6",
+      "eslint": "^9.5.0",
+      "globals": "^15.6.0",
+      "rimraf": "^3.0.2"
+    },
+    "scripts": {
+      "start": "cds-serve",
+      "watch-psfaclocui": "cds watch --open psfaclocui/webapp/index.html?sap-ui-xx-viewCache=false",
+      "undeploy": "cf undeploy pumorips_facloc --delete-services --delete-service-keys --delete-service-brokers",
+      "build": "rimraf resources mta_archives && mbt build --mtar archive",
+      "deploy": "cf deploy mta_archives/archive.mtar --retries 1",
+      "watch-pstransfaclocui": "cds watch --open pstransfaclocui/webapp/index.html?sap-ui-xx-viewCache=false"
+    },
+    "cds": {
+      "requires": {
+        "db": {
+          "kind": "hana"
+        },
+        "uaa": {
+          "kind": "xsuaa"
+        }
+      },
+      "auth": {
+        "passport": {
+          "strategy": "JWT"
+        }
+      },
+      "hana": {
+        "deploy-format": "hdbtable"
+      }
+    },
+    "sapux": [
+      "app/psfaclocui",
+      "app/pstransfaclocui"
+    ]
+  }
