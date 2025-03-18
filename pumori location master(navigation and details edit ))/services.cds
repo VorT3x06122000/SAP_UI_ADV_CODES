@@ -199,8 +199,15 @@ annotate PumoriLocationService.PumoriLocationsView with @(UI : {
         {
             Value : mainPlant,
             Label : '{i18n>consolidID}'   
-        }
-        
+        },
+        {
+            Value : opsiId,
+            Label : '{i18n>opsiid}'   
+        },
+        {
+            Value : marked,
+            Label : '{i18n>marked}'   
+        }   
     ]
 });
 

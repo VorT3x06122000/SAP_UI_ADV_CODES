@@ -65,7 +65,8 @@ service PumoriLocationService @(requires: 'authenticated-user'){
 
     type OpsiResponse :{
         locId       : String(20);
-        opsiId   : String(30);
+        opsiId      : String(30);
+        name        : String(100);
     }
 
     action PumoriLocUpload(Days : Integer, FactoryNumber : String) returns String;
