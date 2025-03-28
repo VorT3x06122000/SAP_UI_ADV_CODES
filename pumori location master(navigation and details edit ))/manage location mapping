@@ -1052,9 +1052,13 @@ sap.ui.define(["sap/ui/core/MessageType",], function () {
         },
         formatStatusColor: function (status) {
            
-            if (status === false) {
+            if (status === 'No') {
                 return "Error"; // Red
-            } else {
+            }
+            else if (status === 'N/A') {
+                return "Information"; // Blue
+            } 
+            else {
                 return "None"; // Default color
             }
         }

@@ -1,0 +1,662 @@
+/*//-----------------------------------------------------------------------------------*
+//Confidential and Proprietary
+//Copyright 2021, HP
+//All Rights Reserved
+//-----------------------------------------------------------------------------------*
+// Application Name :    Manage Pumori Location Master
+// WRICEF No        : 
+// Release          :    M2 Release
+// Author           :    MatheRos
+// Date             :    09.09.2022
+// Description      :    Manage Pumori Location Master 
+//-----------------------------------------------------------------------------------*
+//Descriptions: Holds logic for services
+//-----------------------------------------------------------------------------------*
+//Change Log:
+//    Date      |   Author      |   Defect/Incident     |   Change Description
+//-----------------------------------------------------------------------------------*/
+
+PROCEDURE "pumoriloc" ( IN delta_input table(factoryNumber NVARCHAR(20)),
+                        IN daysCount NVARCHAR(10),
+                        out updated_rows INT,OUT inserted_rows INT, out deleted_rows INT)
+
+LANGUAGE SQLSCRIPT 
+SQL SECURITY INVOKER
+  --READS SQL DATA
+AS 
+BEGIN  SEQUENTIAL EXECUTION
+
+DECLARE total_updated_rows int; --Includes record with delflag
+DECLARE MINUSDAYSTIMESTAMP TIMESTAMP;
+DECLARE delta_input_check INT;
+
+-- get the timestamp to perform delta load on modifiedAt if daysCount has value
+IF (daysCount IS NOT NULL AND daysCount != '')
+    THEN MINUSDAYSTIMESTAMP= ADD_SECONDS (CURRENT_TIMESTAMP, - daysCount * 24*60*60);
+END IF;
+
+-- check if factorynumber(S) filter present or not
+select count(*) into delta_input_check from :delta_input;
+
+-- Get data with delta load
+--1st Condition when in input we got values for both days count and delta_input
+IF (daysCount IS NOT NULL AND daysCount != '') AND  ( delta_input_check !=0 ) 
+    THEN 
+        it_INfactloc_filter = 
+            SELECT DISTINCT
+                synfact.* 
+            FROM "PUMORI_PUMORILOCATION_SYN_FACTORYLOCATIONS" as synfact
+            INNER JOIN  :delta_input as delta
+            ON delta.factoryNumber = synfact.factoryNumber
+            WHERE (MODIFIEDAT BETWEEN :MINUSDAYSTIMESTAMP AND CURRENT_TIMESTAMP);
+    
+--2st Condition when in input we got values for days count only
+ELSEIF (daysCount IS NOT NULL AND daysCount != '')
+    THEN
+        it_INfactloc_filter = 
+            SELECT 
+                * 
+            FROM "PUMORI_PUMORILOCATION_SYN_FACTORYLOCATIONS"
+            WHERE MODIFIEDAT BETWEEN :MINUSDAYSTIMESTAMP AND CURRENT_TIMESTAMP;
+
+--3rd Condition when in input we got values for delta_input only
+ELSEIF ( delta_input_check > 0) --OR( delta_input_check IS NOT NULL AND  delta_input_check != '' ) 
+    THEN 
+        it_INfactloc_filter = 
+            SELECT DISTINCT
+                synfact.* 
+            FROM "PUMORI_PUMORILOCATION_SYN_FACTORYLOCATIONS" as synfact
+            INNER JOIN  :delta_input as delta
+            ON delta.factoryNumber = synfact.factoryNumber; 
+
+--if do not get values for both days count and delta_input, whole factory data
+ELSE 
+	it_INfactloc_filter = 
+	    SELECT * FROM "PUMORI_PUMORILOCATION_SYN_FACTORYLOCATIONS";
+   
+END IF; --delta load check end
+
+
+-- Factory Location data cleanse
+it_INfactloc =
+    SELECT
+        "CREATEDAT",
+        "CREATEDBY",
+        "MODIFIEDBY",
+        "MODIFIEDAT",
+        "FACTORYNUMBER" AS ZORIGFACTORYNO,
+        CASE
+			WHEN LOCTYPE = 'V' 
+			THEN SUBSTRING((FACTORYNUMBER||'_'||LOCID),0,20)
+		ELSE LOCID
+		END AS LOCID,
+		"LOCDESCR",
+        "LOCTYPE",
+		NULL AS ZLOCPRIORITY,
+        "PLANTTYPE",
+        "ZPLANTTYPE",
+        -- CASE
+        --     WHEN LOCTYPE = 'V' 
+        --     THEN 'Pending' 
+        --     ELSE NULL
+        -- END AS ZSUPPLIERNAME,		
+        -- NULL AS "ZMANUNAME",
+        -- NULL AS "ZMANUNAMEOF",
+		CASE 
+			WHEN LOCTYPE = 'V' 
+			THEN LOCID 
+			ELSE ''
+		END AS ZORIGSUPPLIERID,
+        "LOCREGION",
+        "LOCATIONADDRESS1",
+        "LOCATIONADDRESS2",
+        "CITY",
+        "STATE",
+        "ZCOUNTRY",
+        "ZIPCODE",
+        "LOCATIONCONTACT1NAME",
+        "LOCATIONEMAIL1",
+        "LOCATIONCONTACT2NAME",
+        "LOCATIONEMAIL2",
+        "LOCATIONCONTACT3NAME",
+        "LOCATIONEMAIL3",
+        "LOCATIONCONTACT4NAME",
+        "LOCATIONEMAIL4",
+        "LOCATIONCONTACT5NAME",
+        "LOCATIONEMAIL5",
+        "LOCATIONCONTACT6NAME",
+        "LOCATIONEMAIL6",
+        "TIMEZONE",
+        "DELFLAG",
+		'W8' AS FACTORYCALENDER,
+		'' AS ZMARKET,
+		'' AS ZGOC,
+		'' AS ZREGION,
+        "LOCDESCROF",
+        "LOCATIONADDRESS1OF",
+        "CUSTATTR1",
+        "CUSTATTR2",
+        "CUSTATTR3",
+        "CUSTATTR4",
+        "CUSTATTR5",
+        "CUSTATTR6",
+        "CUSTATTR7",
+        "CUSTATTR8",
+        "CUSTATTR9",
+        "CUSTATTR10",
+		NULL AS LONGITUDE,
+		NULL AS LATITUDE
+	-- FROM "PUMORI_PUMORILOCATION_SYN_FACTORYLOCATIONS";
+    FROM :it_INfactloc_filter;
+
+
+-- Get HP Locations data
+it_INhploc =
+    SELECT
+        NULL AS "CREATEDAT",
+        NULL AS    "CREATEDBY",
+        NULL AS    "MODIFIEDBY",
+        NULL AS    "MODIFIEDAT",
+        NULL AS ZORIGFACTORYNO,                                                                                                             
+        NULL AS ZLOCPRIORITY,                            
+       "LOCID",
+       "LOCDESCR",
+       "LOCTYPE",
+       "PLANTTYPE",
+       "ZPLANTTYPE",
+    --    CASE
+    --         WHEN LOCTYPE = 'V' 
+    --         THEN 'Pending' 
+    --         ELSE NULL
+    --     END AS ZSUPPLIERNAME,
+       CASE 
+            WHEN LOCTYPE = 'V' 
+            THEN LOCID 
+            ELSE ''
+        END AS ZORIGSUPPLIERID,
+        -- NULL AS "ZMANUNAME",
+        -- NULL AS "ZMANUNAMEOF",
+       "LOCREGION",
+       "LOCATIONADDRESS1",
+        NULL AS "LOCATIONADDRESS2",                                             
+       "CITY",
+       "STATE",
+       "COUNTRY" AS ZCOUNTRY,
+       "ZIPCODE",
+        NULL AS "LOCATIONCONTACT1NAME",
+        NULL AS "LOCATIONEMAIL1",
+        NULL AS "LOCATIONCONTACT2NAME",
+        NULL AS "LOCATIONEMAIL2",
+        NULL AS "LOCATIONCONTACT3NAME",
+        NULL AS "LOCATIONEMAIL3",
+        NULL AS "LOCATIONCONTACT4NAME",
+        NULL AS "LOCATIONEMAIL4",
+        NULL AS "LOCATIONCONTACT5NAME",
+        NULL AS "LOCATIONEMAIL5",
+        NULL AS "LOCATIONCONTACT6NAME",
+        NULL AS "LOCATIONEMAIL6",
+		"TIMEZONE",
+       "MARKEDFORDELETION" AS DELFLAG,
+       'W8' AS FACTORYCALENDER,
+       '' AS ZMARKET,
+       NULL AS "ZGOC",
+       '' AS ZREGION,
+	   NULL AS "LOCDESCROF",
+        NULL AS "LOCATIONADDRESS1OF",
+        NULL AS "CUSTATTR1",
+        NULL AS "CUSTATTR2",
+        NULL AS "CUSTATTR3",
+        NULL AS "CUSTATTR4",
+        NULL AS "CUSTATTR5",
+        NULL AS "CUSTATTR6",
+        NULL AS "CUSTATTR7",
+        NULL AS "CUSTATTR8",
+        NULL AS "CUSTATTR9",
+        NULL AS "CUSTATTR10",                       
+        LONGITUDE,
+        LATITUDE
+    FROM "PUMORI_PUMORILOCATION_SYN_HPLOCATIONS";
+
+
+-- Combined both factory and HP location data in single temp table to insert/update
+it_joined = 
+    SELECT
+        a.CREATEDAT,
+        a.CREATEDBY,      
+        a.MODIFIEDAT,
+        a.MODIFIEDBY,
+        a.LOCDESCR                     ,
+		a.LOCDESCROF                   ,
+		a.LOCID                        ,
+		a.LOCTYPE                      ,
+		a.ZLOCPRIORITY                 ,
+		a.PLANTTYPE                    ,
+		a.ZPLANTTYPE                   ,
+	    -- a.ZSUPPLIERNAME                ,
+        -- a.ZMANUNAME,
+        -- a.ZMANUNAMEOF,
+		a.ZORIGSUPPLIERID              ,
+		a.ZORIGFACTORYNO               ,
+		a.LOCREGION                    ,
+		a.LOCATIONADDRESS1             ,
+		a.LOCATIONADDRESS2             ,
+		a.LOCATIONADDRESS1OF           ,
+		a.CITY                         ,
+		a."STATE"                      ,
+		a.ZCOUNTRY                     ,
+		a.ZIPCODE                      ,
+		a.LOCATIONCONTACT1NAME         ,
+		a.LOCATIONEMAIL1               ,
+		a.LOCATIONCONTACT2NAME         ,
+		a.LOCATIONEMAIL2               ,
+		a.LOCATIONCONTACT3NAME         ,
+		a.LOCATIONEMAIL3               ,
+		a.LOCATIONCONTACT4NAME         ,
+		a.LOCATIONEMAIL4               ,
+		a.LOCATIONCONTACT5NAME         ,
+		a.LOCATIONEMAIL5               ,
+		a.LOCATIONCONTACT6NAME         ,
+		a.LOCATIONEMAIL6               ,
+		a.TIMEZONE                     ,
+		a.DELFLAG                      ,
+		a.FACTORYCALENDER              ,
+		a.ZMARKET                      ,
+		a.ZGOC                         ,
+		a.ZREGION                      ,
+		a.CUSTATTR1                    ,
+		a.CUSTATTR2                    ,
+		a.CUSTATTR3                    ,
+		a.CUSTATTR4                    ,
+		a.CUSTATTR5                    ,
+		a.CUSTATTR6                    ,
+		a.CUSTATTR7                    ,
+		a.CUSTATTR8                    ,
+		a.CUSTATTR9                    ,
+		a.CUSTATTR10                   ,
+		a.LONGITUDE                    ,
+		a.LATITUDE
+    FROM :it_INfactloc as a
+    UNION 
+    SELECT
+        "CREATEDAT",
+        "CREATEDBY",
+        "MODIFIEDBY",
+        "MODIFIEDAT",
+        b.LOCDESCR                     ,
+        b.LOCDESCROF                   ,
+        b.LOCID                        ,
+        b.LOCTYPE                      ,
+        b.ZLOCPRIORITY                 ,
+        b.PLANTTYPE                    ,
+        b.ZPLANTTYPE                   ,
+        -- b.ZSUPPLIERNAME                ,
+        -- b.ZMANUNAME,
+        -- b.ZMANUNAMEOF,
+        b.ZORIGSUPPLIERID              ,
+        b.ZORIGFACTORYNO               ,
+        b.LOCREGION                    ,
+        b.LOCATIONADDRESS1             ,
+        b.LOCATIONADDRESS2             ,
+        b.LOCATIONADDRESS1OF           ,
+        b.CITY                         ,
+        b."STATE"                      ,
+        b.ZCOUNTRY                     ,
+        b.ZIPCODE                      ,
+        b.LOCATIONCONTACT1NAME         ,
+        b.LOCATIONEMAIL1               ,
+        b.LOCATIONCONTACT2NAME         ,
+        b.LOCATIONEMAIL2               ,
+        b.LOCATIONCONTACT3NAME         ,
+        b.LOCATIONEMAIL3               ,
+        b.LOCATIONCONTACT4NAME         ,
+        b.LOCATIONEMAIL4               ,
+        b.LOCATIONCONTACT5NAME         ,
+        b.LOCATIONEMAIL5               ,
+        b.LOCATIONCONTACT6NAME         ,
+        b.LOCATIONEMAIL6               ,
+        b.TIMEZONE                     ,
+        b.DELFLAG                      ,
+        b.FACTORYCALENDER              ,
+        b.ZMARKET                      ,
+        b.ZGOC                         ,
+        b.ZREGION                      ,
+        b.CUSTATTR1                    ,
+        b.CUSTATTR2                    ,
+        b.CUSTATTR3                    ,
+        b.CUSTATTR4                    ,
+        b.CUSTATTR5                    ,
+        b.CUSTATTR6                    ,
+        b.CUSTATTR7                    ,
+        b.CUSTATTR8                    ,
+        b.CUSTATTR9                    ,
+        b.CUSTATTR10                   ,
+        b.LONGITUDE                    ,
+        b.LATITUDE
+    FROM :it_INhploc AS b;
+
+
+-- Adding row number to recognize uniq record in next cleanse
+it_cleanse_unique=
+    SELECT          
+        CREATEDAT,
+        CREATEDBY,      
+        MODIFIEDAT,
+        MODIFIEDBY,
+        LOCDESCR                     ,
+        LOCDESCROF                   ,
+        LOCID                        ,
+        LOCTYPE                      ,
+        ZLOCPRIORITY                 ,
+        PLANTTYPE                    ,
+        ZPLANTTYPE                   ,
+        -- ZSUPPLIERNAME                ,
+        -- ZMANUNAME,
+        -- ZMANUNAMEOF,
+        ZORIGSUPPLIERID              ,
+        ZORIGFACTORYNO               ,
+        LOCREGION                    ,
+        LOCATIONADDRESS1             ,
+        LOCATIONADDRESS2             ,
+        LOCATIONADDRESS1OF           ,
+        CITY                         ,
+        "STATE"                      ,
+        ZCOUNTRY                     ,
+        ZIPCODE                      ,
+        LOCATIONCONTACT1NAME         ,
+        LOCATIONEMAIL1               ,
+        LOCATIONCONTACT2NAME         ,
+        LOCATIONEMAIL2               ,
+        LOCATIONCONTACT3NAME         ,
+        LOCATIONEMAIL3               ,
+        LOCATIONCONTACT4NAME         ,
+        LOCATIONEMAIL4               ,
+        LOCATIONCONTACT5NAME         ,
+        LOCATIONEMAIL5               ,
+        LOCATIONCONTACT6NAME         ,
+        LOCATIONEMAIL6               ,
+        TIMEZONE                     ,
+        DELFLAG                      ,
+        FACTORYCALENDER              ,
+        ZMARKET                      ,
+        ZGOC                         ,
+        ZREGION                      ,
+        CUSTATTR1                    ,
+        CUSTATTR2                    ,
+        CUSTATTR3                    ,
+        CUSTATTR4                    ,
+        CUSTATTR5                    ,
+        CUSTATTR6                    ,
+        CUSTATTR7                    ,
+        CUSTATTR8                    ,
+        CUSTATTR9                    ,
+        CUSTATTR10                   ,
+        LONGITUDE                    ,
+        LATITUDE,
+        ROW_NUMBER() OVER (PARTITION BY LOCID, LOCTYPE ORDER BY LOCID,LOCTYPE DESC) as R_N
+    FROM :it_joined;
+
+
+-- Get unique records to insert/update in pumorilocation
+it_cleanse_main =
+    SELECT 
+        CREATEDAT,
+        CREATEDBY,      
+        MODIFIEDAT,
+        MODIFIEDBY,
+        LOCDESCR                     ,
+        LOCDESCROF                   ,
+        LOCID                        ,
+        LOCTYPE                      ,
+        ZLOCPRIORITY                 ,
+        PLANTTYPE                    ,
+        ZPLANTTYPE                   ,
+        NULL as  ZSUPPLIERNAME                ,
+        NULL as  ZMANUNAME,
+        NULL as  ZMANUNAMEOF,
+        ZORIGSUPPLIERID              ,
+        ZORIGFACTORYNO               ,
+        LOCREGION                    ,
+        LOCATIONADDRESS1             ,
+        LOCATIONADDRESS2             ,
+        LOCATIONADDRESS1OF           ,
+        CITY                         ,
+        "STATE"                      ,
+        ZCOUNTRY                     ,
+        ZIPCODE                      ,
+        LOCATIONCONTACT1NAME         ,
+        LOCATIONEMAIL1               ,
+        LOCATIONCONTACT2NAME         ,
+        LOCATIONEMAIL2               ,
+        LOCATIONCONTACT3NAME         ,
+        LOCATIONEMAIL3               ,
+        LOCATIONCONTACT4NAME         ,
+        LOCATIONEMAIL4               ,
+        LOCATIONCONTACT5NAME         ,
+        LOCATIONEMAIL5               ,
+        LOCATIONCONTACT6NAME         ,
+        LOCATIONEMAIL6               ,
+        TIMEZONE                     ,
+        DELFLAG                      ,
+        FACTORYCALENDER              ,
+        ZMARKET                      ,
+        ZGOC                         ,
+        ZREGION                      ,
+        CUSTATTR1                    ,
+        CUSTATTR2                    ,
+        CUSTATTR3                    ,
+        CUSTATTR4                    ,
+        CUSTATTR5                    ,
+        CUSTATTR6                    ,
+        CUSTATTR7                    ,
+        CUSTATTR8                    ,
+        CUSTATTR9                    ,
+        CUSTATTR10                   ,
+        LONGITUDE                    ,
+        LATITUDE
+    -- factoryNumber
+    FROM :it_cleanse_unique
+    WHERE R_N=1;
+
+
+-- get data to update in pumorilocation
+it_update_data=        
+    select DISTINCT     
+        c2."CREATEDAT",
+        c2."CREATEDBY",
+        c2."MODIFIEDAT" ,
+        c2."MODIFIEDBY",
+        c2.LOCDESCR                     ,
+        c2.LOCDESCROF                   ,
+        c2.LOCID                        ,
+        c2.LOCTYPE                      ,
+        c2.ZLOCPRIORITY                 ,
+        c2.PLANTTYPE                    ,
+        c2.ZPLANTTYPE                   ,
+        c2.ZSUPPLIERNAME                ,
+        c2.ZMANUNAME,
+        c2.ZMANUNAMEOF,
+        c2.ZORIGSUPPLIERID              ,
+        c2.ZORIGFACTORYNO               ,
+        c2.LOCREGION                    ,
+        c2.LOCATIONADDRESS1             ,
+        c2.LOCATIONADDRESS2             ,
+        c2.LOCATIONADDRESS1OF           ,
+        c2.CITY                         ,
+        c2."STATE"                      ,
+        c2.ZCOUNTRY                     ,
+        c2.ZIPCODE                      ,
+        c2.LOCATIONCONTACT1NAME         ,
+        c2.LOCATIONEMAIL1               ,
+        c2.LOCATIONCONTACT2NAME         ,
+        c2.LOCATIONEMAIL2               ,
+        c2.LOCATIONCONTACT3NAME         ,
+        c2.LOCATIONEMAIL3               ,
+        c2.LOCATIONCONTACT4NAME         ,
+        c2.LOCATIONEMAIL4               ,
+        c2.LOCATIONCONTACT5NAME         ,
+        c2.LOCATIONEMAIL5               ,
+        c2.LOCATIONCONTACT6NAME         ,
+        c2.LOCATIONEMAIL6               ,
+        c2.TIMEZONE                     ,
+        c2.DELFLAG                      ,
+        c2.FACTORYCALENDER              ,
+        c2.ZMARKET                      ,
+        c2.ZGOC                         ,
+        c2.ZREGION                      ,
+        c2.CUSTATTR1                    ,
+        c2.CUSTATTR2                    ,
+        c2.CUSTATTR3                    ,
+        c2.CUSTATTR4                    ,
+        c2.CUSTATTR5                    ,
+        c2.CUSTATTR6                    ,
+        c2.CUSTATTR7                    ,
+        c2.CUSTATTR8                    ,
+        c2.CUSTATTR9                    ,
+        c2.CUSTATTR10                   ,
+        c2.LONGITUDE                    ,
+        c2.LATITUDE
+    FROM :it_cleanse_main AS c2
+    INNER JOIN "PUMORI_PUMORILOCATION_PUMORILOCATIONS" AS pumloc
+    ON c2.LOCID = pumloc.LOCID 
+    AND c2.LOCTYPE = pumloc.LOCTYPE;
+            
+-- Update(non editable in UI) data in pumori location  if its existing in DB, including delflag records        
+MERGE INTO "PUMORI_PUMORILOCATION_PUMORILOCATIONS" AS pumloc USING :it_update_data AS updateloc
+    ON pumloc.LOCID = updateloc.LOCID
+    AND pumloc.LOCTYPE = updateloc.LOCTYPE
+    WHEN MATCHED THEN
+UPDATE 
+SET
+    pumloc."MODIFIEDAT" = now(),
+    pumloc."MODIFIEDBY" = current_user,
+    pumloc.LOCDESCR = updateloc.LOCDESCR,
+    pumloc.LOCDESCROF = updateloc.LOCDESCROF,
+    pumloc.LOCID = updateloc.LOCID,
+    pumloc.LOCTYPE = updateloc.LOCTYPE,
+    -- pumloc.ZLOCPRIORITY = updateloc.ZLOCPRIORITY, --editable in ui
+    pumloc.PLANTTYPE = updateloc.PLANTTYPE,
+    pumloc.ZPLANTTYPE = updateloc.ZPLANTTYPE,
+    -- pumloc.ZSUPPLIERNAME = updateloc.ZSUPPLIERNAME,--editable in ui
+    pumloc.ZORIGSUPPLIERID = updateloc.ZORIGSUPPLIERID,
+    pumloc.ZORIGFACTORYNO = updateloc.ZORIGFACTORYNO,
+    pumloc.LOCREGION = updateloc.LOCREGION,
+    pumloc.LOCATIONADDRESS1 = updateloc.LOCATIONADDRESS1,
+    pumloc.LOCATIONADDRESS2 = updateloc.LOCATIONADDRESS2,
+    pumloc.LOCATIONADDRESS1OF = updateloc.LOCATIONADDRESS1OF,
+    pumloc.CITY = updateloc.CITY,
+    pumloc."STATE" = updateloc."STATE",
+    pumloc.ZCOUNTRY = updateloc.ZCOUNTRY,
+    pumloc.ZIPCODE = updateloc.ZIPCODE,
+    pumloc.LOCATIONCONTACT1NAME = updateloc.LOCATIONCONTACT1NAME,
+    pumloc.LOCATIONEMAIL1 = updateloc.LOCATIONEMAIL1,
+    pumloc.LOCATIONCONTACT2NAME = updateloc.LOCATIONCONTACT2NAME,
+    pumloc.LOCATIONEMAIL2 = updateloc.LOCATIONEMAIL2,
+    pumloc.LOCATIONCONTACT3NAME = updateloc.LOCATIONCONTACT3NAME,
+    pumloc.LOCATIONEMAIL3 = updateloc.LOCATIONEMAIL3,
+    pumloc.LOCATIONCONTACT4NAME = updateloc.LOCATIONCONTACT4NAME,
+    pumloc.LOCATIONEMAIL4 = updateloc.LOCATIONEMAIL4,
+    pumloc.LOCATIONCONTACT5NAME = updateloc.LOCATIONCONTACT5NAME,
+    pumloc.LOCATIONEMAIL5 = updateloc.LOCATIONEMAIL5,
+    pumloc.LOCATIONCONTACT6NAME = updateloc.LOCATIONCONTACT6NAME,
+    pumloc.LOCATIONEMAIL6 = updateloc.LOCATIONEMAIL6,
+    pumloc.TIMEZONE = updateloc.TIMEZONE,
+    pumloc.DELFLAG = updateloc.DELFLAG,
+    -- pumloc.FACTORYCALENDER = updateloc.FACTORYCALENDER,--editable in ui
+    -- pumloc.ZMARKET = updateloc.ZMARKET,--editable in ui
+    -- pumloc.ZGOC = updateloc.ZGOC,--editable in ui
+    -- pumloc.ZREGION = updateloc.ZREGION,--editable in ui
+    pumloc.CUSTATTR1 = updateloc.CUSTATTR1,
+    pumloc.CUSTATTR2 = updateloc.CUSTATTR2,
+    pumloc.CUSTATTR3 = updateloc.CUSTATTR3,
+    pumloc.CUSTATTR4 = updateloc.CUSTATTR4,
+    pumloc.CUSTATTR5 = updateloc.CUSTATTR5,
+    pumloc.CUSTATTR6 = updateloc.CUSTATTR6,
+    pumloc.CUSTATTR7 = updateloc.CUSTATTR7,
+    pumloc.CUSTATTR8 = updateloc.CUSTATTR8,
+    pumloc.CUSTATTR9 = updateloc.CUSTATTR9,
+    pumloc.CUSTATTR10 = updateloc.CUSTATTR10,
+    pumloc.LONGITUDE = updateloc.LONGITUDE,
+    pumloc.LATITUDE = updateloc.LATITUDE;
+    total_updated_rows= ::ROWCOUNT;
+
+
+-- get data to insert, new entries
+it_insert_data=
+    SELECT * 
+    FROM :it_cleanse_main     
+    MINUS 
+    SELECT *
+    FROM :it_update_data;
+
+-- Insert data to pumori location if it is new entry
+INSERT INTO "PUMORI_PUMORILOCATION_PUMORILOCATIONS" 
+SELECT 
+    now() as "CREATEDAT" ,
+    current_user as "CREATEDBY" ,
+    now() as "MODIFIEDAT" ,
+    current_user as "MODIFIEDBY" ,   
+    LOCDESCR                     ,
+    LOCDESCROF                   ,
+    LOCID                        ,
+    LOCTYPE                      ,
+    ZLOCPRIORITY                 ,
+    PLANTTYPE                    ,
+    ZPLANTTYPE                   ,
+    ZSUPPLIERNAME                ,
+    ZMANUNAME,
+    ZMANUNAMEOF,
+    ZORIGSUPPLIERID              ,
+    ZORIGFACTORYNO               ,
+    LOCREGION                    ,
+    LOCATIONADDRESS1             ,
+    LOCATIONADDRESS2             ,
+    LOCATIONADDRESS1OF           ,
+    CITY                         ,
+    "STATE"                      ,
+    ZCOUNTRY                     ,
+    ZIPCODE                      ,
+    LOCATIONCONTACT1NAME         ,
+    LOCATIONEMAIL1               ,
+    LOCATIONCONTACT2NAME         ,
+    LOCATIONEMAIL2               ,
+    LOCATIONCONTACT3NAME         ,
+    LOCATIONEMAIL3               ,
+    LOCATIONCONTACT4NAME         ,
+    LOCATIONEMAIL4               ,
+    LOCATIONCONTACT5NAME         ,
+    LOCATIONEMAIL5               ,
+    LOCATIONCONTACT6NAME         ,
+    LOCATIONEMAIL6               ,
+    TIMEZONE                     ,
+    DELFLAG                      ,
+    FACTORYCALENDER              ,
+    ZMARKET                      ,
+    ZGOC                         ,
+    ZREGION                      ,
+    CUSTATTR1                    ,
+    CUSTATTR2                    ,
+    CUSTATTR3                    ,
+    CUSTATTR4                    ,
+    CUSTATTR5                    ,
+    CUSTATTR6                    ,
+    CUSTATTR7                    ,
+    CUSTATTR8                    ,
+    CUSTATTR9                    ,
+    CUSTATTR10                   ,
+    LONGITUDE                    ,
+    LATITUDE                     ,
+    null AS opsiId               ,
+    null AS dunsNumber           ,
+    null AS opsiflag
+FROM :it_insert_data WHERE (DELFLAG != 'Y' AND DELFLAG != 'y') OR (DELFLAG IS NULL OR DELFLAG='');
+inserted_rows= ::ROWCOUNT; --inserted row count
+
+-- delete records with flag
+DELETE FROM "PUMORI_PUMORILOCATION_PUMORILOCATIONS" WHERE delFlag='Y' OR delFlag='y';
+deleted_rows= ::ROWCOUNT; --deleted row count
+
+-- get updated records count
+updated_rows = total_updated_rows - deleted_rows;
+
+
+END;
