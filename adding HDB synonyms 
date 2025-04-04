@@ -1,0 +1,150 @@
+
+
+
+
+
+***************1st Project(to use the table from this project in another project)*****************
+
+
+step 1 making roles in src folder in db to export entity(path:- db/src/roles)
+
+
+db/src/roles/facprod_access_g#.hdbrole
+
+
+
+{
+    "role": {
+        "name": "facprod_access_g#",
+        "object_privileges": [
+            {
+                "name": "PUMORIPS_FACTORYPRODUCT_FACTORYPRODUCTS",
+                "type": "TABLE",
+                "privileges_with_grant_option": [
+                    "SELECT",
+                    "INSERT",
+                    "UPDATE",
+                    "DELETE"
+                ]
+            },           
+        ]
+    }
+}
+
+
+
+db/src/roles/facprod_access.hdbrole
+
+
+
+{
+    "role": {
+        "name": "facprod_access",
+        "object_privileges": [
+            {
+                "name": "PUMORIPS_FACTORYPRODUCT_FACTORYPRODUCTS",
+                "type": "TABLE",
+                "privileges": [
+                    "SELECT",
+                    "INSERT",
+                    "UPDATE",
+                    "DELETE"
+                ]
+            },
+        ]
+    }
+}
+
+
+
+Step 2 Deploy the 1st project with the roles and go the the 2nd project 
+
+
+
+***************2nd Project(To use the table from 1st project in this project)******************
+
+
+
+Step 3 Add the database connection to the 1st projects HDI Container from SAP Hana Projects section
+
+step 4 after the connection addition it will add another dependency in db deployer section of mta.yaml file with name="cross-container-service" and key="Service-1"
+
+step 5 change the "cross-container-service" name to the container of the first project in whole mta.yaml file (for example "cross-container-service" we will change this to "facprod")
+
+step 6 we will also change the key="service-1" to "logical-facprod-grantor" (here this "logical-facprod-grantor" key name is nomenclature set by SAP where "facprod is the container name of the 1st project")
+
+step 7 bind the database connections from SAP Hana Projects section 
+
+step 8 create the .hdbgrants grants file in /db/cfg folder with 1st projects container name (for example "facprod.hdbgrants")
+
+
+
+db/cfg/facprod.hdbgrants
+
+
+
+{
+    "logical-facprod-grantor": {
+        "object_owner": {
+            "container_roles": [
+                "facprod_access_g#"
+            ]
+        },
+        "application_user": {
+            "container_roles": [
+                "facprod_access"
+            ]
+        }   
+    }    
+} 
+
+
+
+step 9 create the synonym config file in /db/cfg folder with 1st projects container name(for expample "facprod.hdbsynonymconfig")
+
+
+
+db/cfg/facprod.hdbsynonymconfig
+
+
+
+{
+    "PUMORIPS_PUMORIPRODUCT_SYN_FACTORYPRODUCTS": {                             //in this line "PUMORIPS_PUMORIPRODUCT" this the name space of the 2nd project and "SYN_FACTORYPRODUCTS" this the entity name which you will use to create entity in model.cds.when we will deploy the "SYN_FACTORYPRODUCTS" entity it will create table in db explorer by thi name "PUMORIPS_PUMORIPRODUCT_SYN_FACTORYPRODUCTS"
+        "target": {
+            "object": "PUMORIPS_FACTORYPRODUCT_FACTORYPRODUCTS",                // in this object specifies from where you are calling the entity, here "PUMORIPS_FACTORYPRODUCT" is the name space of the 1sr project and "FACTORYPRODUCTS" is the entity name specified in 1st project which we are fetching here."PUMORIPS_FACTORYPRODUCT_FACTORYPRODUCTS" this is the deployed name of FACTORYPRODUCTS entity in 1st table.
+            "schema.configure": "logical-facprod-grantor/schema"                // in this line "logical-facprod-grantor" this is the key which we changed to this name in mta.yaml file and "/schema" part is again nomenclature set by SAP
+        }   
+    },
+}
+
+
+
+step 10 create the folder inside src folder in db by name synonym (path to understand:- db/src/synonym)
+
+step 11 inside synonym folder we will create .hdbsynonym file with same name of .hdbsynonymconfig file 
+
+
+
+db/src/synonym/facprod.hdbsynonym
+
+
+{
+    "PUMORIPS_PUMORIPRODUCT_SYN_FACTORYPRODUCTS": {                             // this is the same line from .hdbsynonymconfig file where we specify the target for.
+
+    },
+    
+}
+
+step 12 Do cds build and deploy the project structure of the second project 
+
+
+step 13 after the deployment of the structure will go to the model.cds file of 2nd project to create the entity of synonym and to consume the data of first project table 
+
+
+@cds.persistence.exists                                                                         //in this line this "@cds.persistence.exists" specifies that the below synonym exists in the database if we remove this line and deploy the model.cds file it will create new entity with name "syn_FactoryProducts"
+entity syn_FactoryProducts : managed {
+    key factoryNumber     : String(20);
+    key prodId            : String(50);
+        prodDesc          : String(200);
+        //columns from Factory products entity of 1st table ....
+}
