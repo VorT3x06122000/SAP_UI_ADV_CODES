@@ -1,0 +1,648 @@
+To add roles authentication and authorization in any app we need to add in xs-security.json file.This file defines the security roles and permissions required for the application to function properly.
+to get this xs-security file you should run command "cds add xsuaa" while creating the basic setup of your project
+
+Step1- Add role name and description inside "scope" section and role template in "role-template" section in xs-security file 
+
+
+{
+    "xsappname": "pumporips_location",
+    "tenant-mode": "dedicated",
+    "description": "Security profile of called application",
+    "scopes": [
+        {
+            "name": "uaa.user",
+            "description": "UAA"
+        },
+        {
+            "name": "$XSAPPNAME.scopeformyapp",
+            "description": "Users of Pumori Location app need this special role",
+            "grant-as-authority-to-apps": [
+                "$XSSERVICENAME(pumori_job-scheduling-service)"
+            ]
+        },
+        {
+            "name": "$XSAPPNAME.Display",                                   //role name
+            "description": "Display Authorization"                          //role description
+        },
+        {
+            "name": "$XSAPPNAME.Edit",
+            "description": "Edit Authorization"
+        }
+    ],
+    "role-templates": [
+        {
+            "name": "Token_Exchange",
+            "description": "UAA",
+            "scope-references": [
+                "uaa.user"
+            ]
+        },
+        {
+            "name": "RoleTemplateForPumoriPSLocation",
+            "description": "Users of Pumori Location app need this special role",
+            "default-role-name": "PumoriPS Location Role",
+            "scope-references": [
+                "$XSAPPNAME.scopeformyapp"
+            ]
+        },
+        {                                                                           //role template start
+            "name": "Pumori_PS_Display",
+            "description": "Display Role",
+            "scope-references": [
+                "uaa.user",
+                "$XSAPPNAME.Display"
+            ]
+        },                                                                          //role template end
+        {
+            "name": "Pumori_PS_Edit",
+            "description": "Edit Role",
+            "scope-references": [
+                "uaa.user",
+                "$XSAPPNAME.Edit"
+            ]
+        }
+    ],
+    "role-collections": [                                                                       //this is not a default value we need to add it for specific requirement
+        {
+            "name": "app_job_schedular_ps_pumori_location_master_app",
+            "description": "job schedular",
+            "role-template-references": [
+                "$XSAPPNAME.scopeformyapp"
+            ]
+        }
+    ]
+}
+
+
+
+Step2- after addition of roles in xs-security.json file we will add service in "service.js" file in srv folder to fetch the roles which will allow us to manage user permissions and access control in the application.(path:- srv/pumoripspumorilocation-service.js)
+
+
+module.exports=cds.service.impl(async function(){
+
+    let securityScope = {
+        "Display": false,
+        "Edit": false
+    };
+
+
+    this.on("SecurityAction", async (req) => {
+        var requestAuthInfo = req.req.authInfo;
+        
+        securityScope.Display = requestAuthInfo.checkLocalScope('Display');                 //this lines fetch the true and false value for specific roles from cockpit if this perticular role is assigned to the user and that user logged in to the app then "securityScope.Display" will get true value same will be for the "securityScope.Edit".
+        securityScope.Edit = requestAuthInfo.checkLocalScope('Edit');
+
+
+        return JSON.stringify(securityScope);
+    });
+}
+
+
+step3- Now we will add restrict and function in "service.cds" file in srv folder(path:- srv/pumoripspumorilocation-service.cds)
+
+
+using pumorips.pumorilocation as PumoriLoc from '../db/pumoripspumorilocation-model';
+
+service PumoriLocationService   {
+
+entity PumoriLocationsView @(restrict: [{
+    grant: ['*'],
+        to   : [
+            'Display',
+            'Edit'
+        ]
+}])                           as projection on PumoriLoc.PumoriLocationsView;
+
+
+
+function SecurityAction()                                      returns String;                      //this line will return the name of the role which got true value in service.js file in srv folder (described in step 2)
+}
+
+
+
+
+step4- now to consume the node service in controller we will add the service call in service.js file in service folder(this is not a default folder we need to create it) in webapp folder in app (path:-app/pspumorilocui/webapp/service/PumLocService.js)
+note:-please refer note 2 for service folder information
+
+
+sap.ui.define([
+    "./CoreService",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    
+], function (CoreService,Filter,FilterOperator) {
+    "use strict";
+
+    var PLMService = CoreService.extend("pumorips.pumorilocation.pspumorilocui.service.PumLocService", {
+        constructor: function (model) {
+            CoreService.call(this, model);
+        },
+
+        fetchSecurityAuthScopes: function () {
+            return this.odata("/SecurityAction").get({});
+        }
+    
+
+    });
+    return PLMService;
+});
+
+
+step5- add scope in xs-app.json(path:- app/pspumorilocui/xs-app.json)
+
+{
+    "welcomeFile": "/index.html",
+    "authenticationMethod": "route",
+    "routes": [
+      {
+        "source": "^/srv-api/(.*)$",
+        "target": "$1",
+        "authenticationType": "xsuaa",
+        "destination": "pumoripslocation-srv-api",
+        "csrfProtection": false,
+        "scope": ["$XSAPPNAME.Display","$XSAPPNAME.Edit"]               //this line, And "$XSAPPNAME.Edit" this scope name comes from scopes in xs-security.json file
+      },
+      {
+        "source": "^(.*)$",
+        "target": "$1",
+        "service": "html5-apps-repo-rt",
+        "authenticationType": "xsuaa",
+        "scope": ["$XSAPPNAME.Display","$XSAPPNAME.Edit"]               //this line
+      }
+    ]
+  }
+
+
+  step6- now to use roles in app we need to configure controller.js file(path:- app/pspumorilocui/webapp/controller/PumLocList.controller.js)
+
+
+    onInit: function () {
+        this.getOwnerComponent().getRouter().getRoute("PumLocList").attachPatternMatched(this._onObjectMatched, this);
+        this.PumLocSrv = this.getOwnerComponent().getService('PumLoc');                                                                     //this line used to consume the service file in controller which will add the service in ui 
+        this.PumLocState = this.getOwnerComponent().getState('PumLoc');
+    },
+
+
+    _fetchAuthorizationScopes: function () {
+        var that = this;
+        this.getView().setBusy(true);
+        this.PumLocSrv.fetchSecurityAuthScopes().then(                                                                                      // this line will point to the function in service.js file in service folder in webapp folder(check step no 4)
+            function (oResponse) {                                                                                                          // in "oResponse" we will get the value from service.cds file in srv folder(refer step 3)
+                var oSecurityScope = (oResponse.data.value) ? JSON.parse(oResponse.data.value) : JSON.parse(oResponse.data.SecurityAction);
+                if (oSecurityScope.Edit) {
+                    that.getView().byId("idconsolidate").setVisible(true);  
+                    //add the visibility/enables property set method for buttons                         
+                }
+                else if (oSecurityScope.Display) {
+                    that.getView().byId("idconsolidate").setVisible(false);                          
+                }
+                that.getView().setBusy(false);
+            },
+            function (error) {
+                that.showMsgBoxError(JSON.parse(error.responseText).error.message.value);
+                that.getView().setBusy(false);
+            });
+
+    },
+
+
+    _onObjectMatched: function () {
+
+        this._fetchAuthorizationScopes();                   //to call the security scopes in initial load of the app we will add "_fetchAuthorizationScopes" in "_onObjectMatched"
+
+    },
+
+
+
+
+
+    ************************* Testing of Roles *************************
+
+
+    To test the roles locally we need to remove and edit some of the code 
+
+
+    step1- we will remove the restriction of the entity from service.cds file in srv folder 
+
+    ----------This is the original code we added for roles----------
+    entity PumoriLocationsView @(restrict: [{
+        grant: ['*'],
+            to   : [
+                'Display',
+                'Edit'
+            ]
+    }])                           as projection on PumoriLoc.PumoriLocationsView;
+
+
+    -----------We will remove restrict from entity after removal it will look like this ------------
+
+    entity PumoriLocationsView      as projection on PumoriLoc.PumoriLocationsView;
+
+
+
+    step2- we need to edit the service in service.js in srv folder 
+
+
+    ----------This is the original code we added for roles----------
+
+
+    this.on("SecurityAction", async (req) => {
+        var requestAuthInfo = req.req.authInfo;
+        
+        securityScope.Display = requestAuthInfo.checkLocalScope('Display');   //description for these lines is defined in step 2
+        securityScope.Edit = requestAuthInfo.checkLocalScope('Edit');
+
+
+        return JSON.stringify(securityScope);
+    });
+
+
+    -----------code after edit it will look like this ------------
+    
+    this.on("SecurityAction", async (req) => {
+        var requestAuthInfo = req.req.authInfo;
+        
+        securityScope.Display = true;                                       //we will feed the values according to testing 
+        securityScope.Edit = false;
+
+
+        return JSON.stringify(securityScope);
+    });
+
+
+
+    step3(OPTIONAL)- if this didn't work then we will need to remove the scopes in xs-app.json file 
+
+
+    ----------This is the original code we added for roles----------
+
+
+    {
+        "welcomeFile": "/index.html",
+        "authenticationMethod": "route",
+        "routes": [
+          {
+            "source": "^/srv-api/(.*)$",
+            "target": "$1",
+            "authenticationType": "xsuaa",
+            "destination": "pumoripslocation-srv-api",
+            "csrfProtection": false,
+            "scope": ["$XSAPPNAME.Display","$XSAPPNAME.Edit"]               //this line, we need to remove
+          {
+            "source": "^(.*)$",
+            "target": "$1",
+            "service": "html5-apps-repo-rt",
+            "authenticationType": "xsuaa",
+            "scope": ["$XSAPPNAME.Display","$XSAPPNAME.Edit"]               //this line, we need to remove
+          }
+        ]
+      }
+
+
+    
+      -----------code after removal of scopes it will look like this ------------
+
+
+      {
+        "welcomeFile": "/index.html",
+        "authenticationMethod": "route",
+        "routes": [
+          {
+            "source": "^/srv-api/(.*)$",
+            "target": "$1",
+            "authenticationType": "xsuaa",
+            "destination": "pumoripslocation-srv-api",
+            "csrfProtection": false             
+          },
+          {
+            "source": "^(.*)$",
+            "target": "$1",
+            "service": "html5-apps-repo-rt",
+            "authenticationType": "xsuaa"               
+          }
+        ]
+      }
+
+
+
+      ############-----------NOTE1-----------############
+
+
+      1:PLEASE REVERT ALL THE CHANGES WE DID FOR TESTING THE ROLES LOCALLY AND THE DEPLOY THE CODE 
+      2:ONLY ONE ROLE SHOULD ASSIGNED TO USER FROM COCKPIT
+
+
+
+
+
+
+
+
+
+      ############-----------NOTE2-----------############
+
+
+      1: Service and State folders are not default folder we need to create it
+      2: there are two files each in service and state folder out of that "CoreService.js" file in "service" folder and "BaseState.js" file in "state" folder's code is given by SAP so we just need to copy paste the code 
+      3: other two files which we create will need some changes accroding to project name,service names and requirements.
+      4: these 4 files we need to initialize in component.js file 
+      5: Sample code for all the 4 files is given below we should change it accordingly 
+
+
+
+
+############################"service files"###############################
+      app/pspumorilocui/webapp/service/CoreService.js
+
+
+
+      sap.ui.define([
+        "sap/ui/base/Object"
+    ], function (Object) {
+        "use strict";
+    
+        return Object.extend("pumorips.pumorilocation.pspumorilocui.service.CoreService", {
+            constructor: function (model) {
+                Object.call(this);
+                if (model) {
+                    this.setModel(model);
+                }
+            },
+            setModel: function (model) {
+                this.model = model;
+            },
+            odata: function (url) {
+                var me = this;
+                var core = {
+                    ajax: function (type, url, data, parameters) {
+                        var promise = new Promise(function (resolve, reject) {
+                            var args = [];
+                            var params = {};
+                            args.push(url);
+                            if (data) {
+                                args.push(data);
+                            }
+                            if (parameters) {
+                                params = parameters;
+                            }
+                            params.success = function (result, response) {
+                                resolve({
+                                    data: result,
+                                    response: response
+                                });
+                            };
+                            params.error = function (error) {
+                                reject(error);
+                            };
+                            args.push(params);
+                            me.model[type].apply(me.model, args);
+                        });
+                        return promise;
+                    }
+                };
+    
+                return {
+                    'get': function (params) {
+                        return core.ajax('read', url, false, params);
+                    },
+                    'post': function (data, params) {
+                        return core.ajax('create', url, data, params);
+                    },
+                    'put': function (data, params) {
+                        return core.ajax('update', url, data, params);
+                    },
+                    'delete': function (params) {
+                        return core.ajax('remove', url, false, params);
+                    }
+                };
+            },
+            http: function (url) {
+                var core = {
+                    ajax: function (method, url, headers, args) {
+                        var promise = new Promise(function (resolve, reject) {
+                            var client = new XMLHttpRequest();
+                            var uri = url;
+                            if (args && method === 'GET') {
+                                uri += '?';
+                                var argcount = 0;
+                                for (var key in args) {
+                                    if (args.hasOwnProperty(key)) {
+                                        if (argcount++) {
+                                            uri += '&';
+                                        }
+                                        uri += encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+                                    }
+                                }
+                            }
+                            if (args && (method === 'POST' || method === 'PUT')) {
+                                var data = {};
+                                for (var keyp in args) {
+                                    if (args.hasOwnProperty(keyp)) {
+                                        data[keyp] = args[keyp];
+                                    }
+                                }
+                            }
+                            client.open(method, uri);
+                            
+                            if (method === 'POST' || method === 'PUT') {
+                                client.setRequestHeader("accept", "application/json");
+                                client.setRequestHeader("content-type", "application/json");
+                            }
+                            for (var keyh in headers) {
+                                if (headers.hasOwnProperty(keyh)) {
+                                    client.setRequestHeader(keyh, headers[keyh]);
+                                }
+                            }
+                            if (data) {
+                                client.send(JSON.stringify(data));
+                            } else {
+                                client.send();
+                            }
+                            client.onload = function () {
+                                if (this.status == 200) {
+                                    resolve(this.response);
+                                } else {
+                                    reject(this.statusText);
+                                }
+                            };
+                            client.onerror = function () {
+                                reject(this.statusText);
+                            };
+                        });
+                        return promise;
+                    }
+                };
+    
+                return {
+                    'get': function (headers, args) {
+                        return core.ajax('GET', url, headers, args);
+                    },
+                    'post': function (headers, args) {
+                        return core.ajax('POST', url, headers, args);
+                    },
+                    'put': function (headers, args) {
+                        return core.ajax('PUT', url, headers, args);
+                    },
+                    'delete': function (headers, args) {
+                        return core.ajax('DELETE', url, headers, args);
+                    }
+                };
+            }
+        });
+    });
+
+
+#########################"state files"#############################
+
+
+    app/pspumorilocui/webapp/service/PumLocService.js
+
+
+    sap.ui.define([
+        "./CoreService",
+        "sap/ui/model/Filter",
+        "sap/ui/model/FilterOperator",
+        
+    ], function (CoreService,Filter,FilterOperator) {
+        "use strict";
+    
+        var PLMService = CoreService.extend("pumorips.pumorilocation.pspumorilocui.service.PumLocService", {
+            constructor: function (model) {
+                CoreService.call(this, model);
+            },
+    
+            /**
+            * Odata service for Update operation
+            * **/
+            updateLocData: function (oSaveData) {
+                return this.odata("/UpdatePumoriLocation").post(oSaveData);
+            },
+    
+            fetchSecurityAuthScopes: function () {
+                return this.odata("/SecurityAction").get({});
+            },
+            updateconsolidatedID: function (oSaveData) {
+                return this.odata("/ConsolidatedID").post(oSaveData);
+            },
+        
+    
+        });
+        return PLMService;
+    });
+
+
+
+    app/pspumorilocui/webapp/state/BaseState.js
+
+
+
+    sap.ui.define([
+        "sap/ui/base/Object",
+        "sap/ui/model/json/JSONModel"
+    ], function(Object, JSONModel) {
+        "use strict";
+        return Object.extend("pumori.pumorilocation.pumorilocui.state.BaseState", {
+           //method to get model
+            getModel: function() {
+                if (!this.model) {
+                    this.model = new JSONModel(this.data, true);
+                }
+                return this.model;
+            },
+            //method to update model
+            updateModel: function(bHardRefresh) {
+                if (this.model) {
+                    this.model.refresh(bHardRefresh ? true : false);
+                }
+            }
+        });
+    });
+
+
+
+    app/pspumorilocui/webapp/state/PumLocState.js
+
+
+
+    sap.ui.define([
+        "../state/BaseState",
+    ], function (BaseState) {
+        "use strict";
+        var PumLocState = BaseState.extend("pumori.pumorilocation.pumorilocui.state.PumLocState", {
+            constructor: function (oService) {
+                this.data = {
+                    display: true,
+                    busy: true                
+                };
+                this.PumlocService = oService;
+                BaseState.call(this);
+            }
+           
+    
+        });
+        return PumLocState;
+    });
+
+
+
+    ################"component.js"###################
+
+
+    app/pspumorilocui/webapp/Component.js
+
+
+
+    sap.ui.define([
+        "sap/ui/core/UIComponent",
+        "sap/ui/Device",
+        "pumorips/pumorilocation/pspumorilocui/model/models",
+        "./service/PumLocService",
+        "./state/PumLocState"
+    ],
+    function (UIComponent, Device, models, PumLocService, PumLocState) {
+        "use strict";
+
+        return UIComponent.extend("pumorips.pumorilocation.pspumorilocui.Component", {
+            metadata: {
+                manifest: "json"
+            },
+
+            /**
+             * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
+             * @public
+             * @override
+             */
+            init: function () {
+                // call the base component's init function
+                UIComponent.prototype.init.apply(this, arguments);
+
+                //Initialize service with the component
+                this._oPumLocService = new PumLocService(this.getModel());
+                //Initialize state with the component
+                this._oPumLocState = new PumLocState(this._oPumLocService);
+
+                // enable routing
+                this.getRouter().initialize();
+
+                // set the device model
+                this.setModel(models.createDeviceModel(), "device");
+                this.setModel(this._oPumLocState.getModel(), "oJSONModel");
+            },
+            // Return the service name as per parameter
+            getService: function (sService) {
+                return this["_o" + sService + "Service"];
+            },
+            // Return the state name as per parameter
+            getState: function (sState) {
+                return this["_o" + sState + "State"];
+            }
+        });
+    }
+);
+
+
+
+
+
+
+
