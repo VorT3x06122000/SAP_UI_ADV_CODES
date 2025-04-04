@@ -122,7 +122,7 @@ function SecurityAction()                                      returns String;  
 
 
 step4- now to consume the node service in controller we will add the service call in service.js file in service folder(this is not a default folder we need to create it) in webapp folder in app (path:-app/pspumorilocui/webapp/service/PumLocService.js)
-note:-please refer note 2 for service folder information
+note:-please refer NOTE2 for service folder information
 
 
 sap.ui.define([
@@ -342,7 +342,7 @@ step5- add scope in xs-app.json(path:- app/pspumorilocui/xs-app.json)
       ############-----------NOTE2-----------############
 
 
-      1: Service and State folders are not default folder we need to create it
+      1: Service and State folders are not default folderS we need to create it
       2: there are two files each in service and state folder out of that "CoreService.js" file in "service" folder and "BaseState.js" file in "state" folder's code is given by SAP so we just need to copy paste the code 
       3: other two files which we create will need some changes accroding to project name,service names and requirements.
       4: these 4 files we need to initialize in component.js file 
