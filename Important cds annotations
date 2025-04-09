@@ -1,0 +1,289 @@
+*******************************_______________dynamic dropdown fetching data directly from db_______________*******************************
+
+db/pumoripshpproductmaster-model.cds
+
+
+
+ key LOCID               as locID               : String(20),
+            LOCTYPE             as locType             : String(1),
+            case syn_LocationProducts.LOCTYPE
+                when
+                    'C'
+                then
+                    'c (Customer)'
+                when
+                    'P'
+                then
+                    'P (Plant or Distribution Center)'
+                when
+                    'V'
+                then
+                    'V (Supplier)'
+            end as LOCTYPETEXT : String(20),
+
+
+
+app/services.cds
+
+
+
+annotate HPProductService.LocationProducts with {
+    prodId              @(title: '{i18n>hppn}');
+    locID               @(title: '{i18n>locid}');
+    locType             @(title: '{i18n>locType}');                 //we have this field already for this field we wanted to create dynamic dropdown fetching data directly from db 
+    LOCTYPETEXT         @(title: '{i18n>locType}');                 // this is the field we created in our view in model.cds using case as you can see in step 1
+    grprocessingTime    @(title: '{i18n>webaz}');
+    planneddeliveryTime @(title: '{i18n>plandeltime}');
+    safetystockMd       @(title: '{i18n>safetystockMds}');
+    
+};
+
+
+
+SelectionFields: [
+        prodId,
+        locID,
+        PROCUREMENTTYPETEXT
+        PROCUREMENTTYPETEXT,
+        LOCTYPETEXT                                                // added that in selection fields
+    ],
+
+
+
+
+    LOCTYPETEXT @(Common: {                                         //this is the f4 to fetch the values for this drop down 
+        Text                    : {
+            $value                : LOCTYPETEXT,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        ValueList               : {
+            SearchSupported: true,
+            Label          : '{i18n>locType}',
+            CollectionPath : 'LoctypeTextValueHelp',
+            Parameters     : [{
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: LOCTYPETEXT,
+                ValueListProperty: 'LOCTYPETEXT'
+            }]
+        },
+        ValueListWithFixedValues: true                              //this line is imp to show filter as a drop down
+    });
+
+
+
+
+
+    *******************************_______________single value select annotation for filters in filterbar_______________*******************************
+
+
+    annotate BOMDisplayService.BOMHeaderViewLatest with @(Capabilities : {
+        FilterRestrictions : {
+            FilterExpressionRestrictions : [{
+                $Type              : 'Capabilities.FilterExpressionRestrictionType',
+                Property           : planningDiv,
+                AllowedExpressions : 'SingleValue'
+            }]
+        }
+    })
+
+
+
+
+        *******************************_______________Hard coded drop down _______________*******************************
+
+
+
+        View code----------------------------------------------------------------------------
+
+<!-- <smartFilterBar:controlConfiguration>
+                        <smartFilterBar:ControlConfiguration id="idstrategicFltr" key="strategicautoFlag" label="{i18n>Stratgicatoflg}" visibleInAdvancedArea="true" index="2">
+                            <smartFilterBar:customControl>
+                                <ComboBox id="idstratfltr">   
+                                    <core:Item key=" " text="{i18n>nonstrategic}" id="idnonstrategic"/>
+                                    <core:Item key="X" text="{i18n>strategic}" id="idstrategic" />
+                                </ComboBox>
+                            </smartFilterBar:customControl>
+                        </smartFilterBar:ControlConfiguration>
+                    </smartFilterBar:controlConfiguration> -->
+
+
+
+Controller code--------------------------------------
+
+
+onBeforeRebindTable: function (oEvent) {
+                var smartTable = oEvent.getSource()
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (smartTable) {
+                    var aFilters = [];
+                    var ORFilters=[];
+                    var sMattype = this.getView().byId("smartFilterBar").getControlByKey("materialType").getSelectedKey();
+                    if (sMattype != "") {
+                        aFilters.push(new Filter("materialType", FilterOperator.EQ, sMattype));
+                    }
+                    // var sstrat = this.getView().byId("smartFilterBar").getControlByKey("strategicautoFlag").getSelectedKey();
+                    // if (sstrat != "") {
+                    //     aFilters.push(new Filter("strategicautoFlag", FilterOperator.EQ, sstrat));
+                    // }
+                   
+                    if (aFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aFilters, true));
+                    }
+                }
+            },
+
+
+
+
+
+ *******************************_______________Hard coded multi select drop down_______________*******************************
+
+
+
+ View.xml code
+
+
+
+<smartFilterBar:controlConfiguration>
+                    <smartFilterBar:ControlConfiguration
+                        id="idmaterialtype" key="MATERIALTYPE" label="{i18n>matType}" visibleInAdvancedArea="true" index="3"
+                    >
+                        <smartFilterBar:customControl>
+                            <MultiComboBox id="idmattype">
+                                <core:Item key="FERT" text="{i18n>F}" id="idCval1"/>
+                                <core:Item key="HALB" text="{i18n>H}" id="idPval2"/>
+                                <core:Item key="ROH" text="{i18n>R}" id="idVval3"/>
+                            </MultiComboBox>
+                        </smartFilterBar:customControl>
+                    </smartFilterBar:ControlConfiguration>
+                </smartFilterBar:controlConfiguration>
+
+
+
+
+Controller.js code
+
+
+
+
+onBeforeRebindTable: function (oEvent) {
+                var smartTable = oEvent.getSource();
+                var oBindingParams = oEvent.getParameter("bindingParams");
+                oBindingParams.parameters = oBindingParams.parameters || {};
+                if (smartTable) {
+                    var aFilters = [];
+                    var smttypeId = this.getView().byId("smartFilterBar").getControlByKey("MATERIALTYPE").getSelectedKeys();
+                    if (smttypeId.length > 0) {
+                        var aMatType = smttypeId.map(function(matKey){
+                            return new Filter("MATERIALTYPE",FilterOperator.EQ, matKey);
+                        })
+                        aFilters.push(new Filter(aMatType, false));
+                    }
+                    if (aFilters.length > 0) {
+                        oBindingParams.filters.push(new Filter(aFilters, true));
+                    }
+                }
+            },
+
+
+*******************************_______________Hard coded date picker without services .cds _______________*******************************
+
+Controller code
+
+In init function: - 
+
+this.smartFilterBar = this.getView().byId("smartFilterBarIBPhyer");
+
+Note : - "smartFilterBarIBPhyer" this is smartfilter bar id  
+
+
+
+onBeforeRebindTable: function (oEvent) {
+              
+            var smartTable = oEvent.getSource()
+            var oBindingParams = oEvent.getParameter("bindingParams");
+            oBindingParams.parameters = oBindingParams.parameters || {};
+            if (smartTable) {
+                var aFilters = [];
+                var frmDt = this.smartFilterBar.getControlByKey("frmDt").getValue();
+                var toDt = this.smartFilterBar.getControlByKey("toDt").getValue();
+                var impFrmDt = this.smartFilterBar.getControlByKey("impDt").getFrom();
+                var impToDt = this.smartFilterBar.getControlByKey("impDt").getTo();
+                //var busTyp = this.smartFilterBar.getControlByKey("busTyp").getSelectedItem().getText();
+                var dateFormat = sap.ui.core.format.DateFormat.getDateInstance({ pattern: "YYYY-MM-dd",UTC:false });
+                var dateFormatID = sap.ui.core.format.DateFormat.getDateTimeInstance({ pattern: "YYYY-MM-dd HH:mm:ss" ,UTC:false});
+
+                if (frmDt != "") {
+                    var dateFormattedFrmDt = dateFormat.format(new Date(frmDt));
+                    aFilters.push(new Filter("bomValidFrom", FilterOperator.GE, dateFormattedFrmDt));
+                }
+                if (toDt != "") {
+                    var dateFormattedToDt = dateFormat.format(new Date(toDt));
+                    aFilters.push(new Filter("bomValidTo", FilterOperator.LE, dateFormattedToDt));
+                }
+                if (impFrmDt != null&&impToDt!== null) {
+                    var dateFormattedFrmDt = dateFormatID.format(new Date(impFrmDt));
+                    var dateFormattedToDt = dateFormatID.format(new Date(impToDt));
+                   aFilters.push(new Filter("bomImportDate", FilterOperator.GE, dateFormattedFrmDt));
+                    aFilters.push(new Filter("bomImportDate", FilterOperator.LE, dateFormattedToDt));
+                }
+               
+                
+                if (aFilters.length > 0) {
+                    oBindingParams.filters.push(new Filter(aFilters, true));
+                }
+            }
+            
+        }
+
+
+
+
+
+View.xml code
+
+	
+	<smartFilterBar:SmartFilterBar 
+	        id="smartFilterBarIBPhyer" showMessages="true" showClearOnFB="true" persistencyKey="SmartFilterPKey"
+	        entitySet="BOMHeaderPDSIdentifierView" clear="clearFilters">
+	                    <smartFilterBar:controlConfiguration>
+	                    
+	                    <smartFilterBar:ControlConfiguration key="frmDt" label="{i18n>BOM_VALID_FRM}" visibleInAdvancedArea="true">
+	                            <smartFilterBar:customControl>
+	                                <DatePicker id="fltrValidFrm"/>
+	                            </smartFilterBar:customControl>
+	                        
+	                    </smartFilterBar:ControlConfiguration>
+	                    
+	                        <smartFilterBar:ControlConfiguration key="toDt" label="{i18n>BOM_VALID_TO}" visibleInAdvancedArea="true">
+	                            <smartFilterBar:customControl>
+	                                <DatePicker id="fltrValidTo"/>
+	                            </smartFilterBar:customControl>
+	                        </smartFilterBar:ControlConfiguration>
+	     <smartFilterBar:ControlConfiguration key="impDt" label="{i18n>BOM_IMP_DATE}" visibleInAdvancedArea="true">
+	                            <smartFilterBar:customControl>
+	                                <DateRangeSelection id="fltrImpDtRng"/>
+	                            </smartFilterBar:customControl>
+	                        </smartFilterBar:ControlConfiguration>
+	               </smartFilterBar:controlConfiguration>
+	            </smartFilterBar:SmartFilterBar>
+	
+
+
+
+ *******************************_______________Date picker for Smart filter bar(Services.cds)_______________*******************************
+
+
+
+
+ 
+annotate PumoriConfigService.FactoryStatusDashboard with @(Capabilities : {
+    FilterRestrictions : {
+        FilterExpressionRestrictions : [{
+    $Type              : 'Capabilities.FilterExpressionRestrictionType',
+    Property           : date,                                                          //this is field in entity having datatype Date
+    AllowedExpressions : 'SingleRange'
+}]
+}
+});
