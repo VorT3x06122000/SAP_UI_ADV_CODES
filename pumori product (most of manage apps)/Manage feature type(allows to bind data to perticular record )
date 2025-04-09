@@ -25,6 +25,7 @@ app/mapftfvui/webapp/view/MapFtFvDetails.view.xml
                 <smartTable:customToolbar>
                         <OverflowToolbar id="overflowToolBar" design="Transparent">
                             <ToolbarSpacer id="toolbarSpaceId"/>
+                            <Button id="idmap" visible="true" text="{i18n>mpfthp}"  press="onPressmap"/>
                             <Button id="idAddHpFt" text="{i18n>AddHpFtFv}" tooltip="Add HP FT/FV" class="sapUiSmallMargin" press="onAddHpFtFv" visible="{=${sm4rtM0d3l>/editable} === false}"  /> 
                             <Button id="idSave" text="{i18n>save}" tooltip="Save Changes" class="sapUiSmallMargin" press=".onSave" visible="{=${sm4rtM0d3l>/editable} === true}"  />
                         </OverflowToolbar>
@@ -34,23 +35,6 @@ app/mapftfvui/webapp/view/MapFtFvDetails.view.xml
                     <rowmodes:Auto id="idRowM" xmlns:rowmodes="sap.ui.table.rowmodes" minRowCount="5" maxRowCount="5"/>
                     </table:rowMode>
                         <table:columns>
-                            <table:Column id="idHpvalue" hAlign="Begin" width="16rem" filterProperty="zhfvtypeHP" sortProperty="zhfvtypeHP">
-                                <table:customData>
-                                    <core:CustomData key="p13nData" value='\{"columnKey":"zhfvtypeHP","leadingProperty":"zhfvtypeHP", "columnIndex":"3"}'/>
-                                </table:customData>
-                                <Label id="idHpvalueLabel" text="HP FT" />
-                                <table:template>
-                                    <HBox id="hboxHpvalue" class="zCoreSelectColumns" alignItems="Center" justifyContent="Start">
-                                        <items>
-                                            <Text id="txtHpvalue" text="{path:'zhfvtypeHP'}" visible="{=${sm4rtM0d3l>/editable} === false}"></Text>
-                                            <ComboBox id="ComboHpvalue" items="{path:'/ms4FTFV'}" visible="{=${sm4rtM0d3l>/editable} === true}" selectedKey="{zhfvtypeHP}" change="handleChange">
-                                                <core:Item id="coreItemsHpvalue" key="{zhfvtypeHP}" text="{zhfvtypeHP}" />
-                                            </ComboBox>
-                                        </items>
-                                    </HBox>
-                                </table:template>   
-                            </table:Column>
-
                             <table:Column id="idHpvalueInput" hAlign="Begin" width="13rem" filterProperty="zhfvvalueHP" sortProperty="zhfvvalueHP">
                                 <table:customData>
                                     <core:CustomData key="p13nData" value='\{"columnKey":"zhfvvalueHP","leadingProperty":"zhfvvalueHP", "columnIndex":"4"}'/>
@@ -72,6 +56,137 @@ app/mapftfvui/webapp/view/MapFtFvDetails.view.xml
         </content>
     </Page>
 </mvc:View>
+
+
+app/mapftfvui/webapp/Fragments/mapHPFT.fragment.xml
+
+
+
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout"
+    xmlns:f="sap.ui.layout.form"
+>
+    <Dialog
+        id="IDdialogfrag"
+        title="{i18n>mpfthp}"
+        class="sapUiSizeCompact"
+        titleAlignment="Center"
+    >
+        <content>
+                    <f:SimpleForm id="ediSimpleForm" editable="true"
+                        layout="ResponsiveGridLayout"
+                        labelSpanL="4"
+                        emptySpanL="4"
+                        columnsL="4" >
+            <Label id="idfacnum" text="{i18n>facNum}" required="true">
+            </Label>
+            <Input id="idFacNum"  maxLength="20" showValueHelp="true" valueHelpRequest="onFacNumValueHelp">
+            </Input>
+            <Label id="idtduom" text="{i18n>facFT}" required="true"/>
+            <Input id="idFacFt"  maxLength="2" showValueHelp="true" valueHelpRequest="onFacFtValueHelp"/>
+            <Label id="idmduom" text="{i18n>hpFT}"  required="true"/>
+            <ComboBox
+                        id="ComboHpvalue1"
+                        items="{path:'/ms4FTFV'}"
+                        selectedKey="{zhfvtypeHP}"
+                    >
+                        <core:Item
+                            id="coreItemsHpvalue1"
+                            key="{zhfvtypeHP}"
+                            text="{zhfvtypeHP}"
+                        />
+                    </ComboBox>
+            </f:SimpleForm>
+            <HBox
+                id="hboxHpvalue"
+                class="zCoreSelectColumns"
+                alignItems="Center"
+                justifyContent="Start"
+            >
+                <items>
+                    <!-- <ComboBox
+                        id="ComboHpvalue"
+                        items="{path:'/ms4FTFV'}"
+                        selectedKey="{zhfvtypeHP}"
+                    >
+                        <core:Item
+                            id="coreItemsHpvalue"
+                            key="{zhfvtypeHP}"
+                            text="{zhfvtypeHP}"
+                        />
+                    </ComboBox> -->
+                </items>
+            </HBox>
+        </content>
+        <beginButton>
+            <Button
+                type="Emphasized"
+                id="btnsave"
+                text="{i18n>saveButton}"
+                press="onPressSave"
+            />
+        </beginButton>
+        <endButton>
+            <Button
+                type="Emphasized"
+                id="btncancel"
+                text="{i18n>cancelButton}"
+                press="onPressCancel"
+            />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
+
+
+
+
+app/mapftfvui/webapp/Fragments/FactFtValueHelp.fragment.xml
+
+
+
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+  <SelectDialog
+      id="factoryFTDialog"
+      title="{i18n>selfacFT}"
+      items="{
+          path: '/zhfvtypeFacMappingFtFvValueHelp'
+      }"
+      search="onFactoryFTSearch"
+      confirm="onFactoryFtConfirm"
+      cancel="onFactoryFTCancel">
+      
+    <StandardListItem id="stdListItemFT"
+        title="{zhfvtypeFac}"/>
+        
+  </SelectDialog>
+</core:FragmentDefinition>
+
+
+
+
+app/mapftfvui/webapp/Fragments/FacNmValueHelp.fragment.xml
+
+
+
+
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+  <SelectDialog
+      id="factoryNumberDialog"
+      title="{i18n>selfacnum}"
+      items="{
+          path: '/factoryNumbermappingFtFvValueHelp'
+      }"
+      search="onFactoryNumberSearch"
+      confirm="onFactoryNumberConfirm"
+      cancel="onFactoryNumberCancel">
+      
+    <StandardListItem id="stdListItem"
+        title="{factoryNumber}"/>
+        
+  </SelectDialog>
+</core:FragmentDefinition>
 
 
 
@@ -247,7 +362,6 @@ sap.ui.define([
 app/mapftfvui/webapp/controller/MapFtFvDetails.controller.js
 
 
-
 //-----------------------------------------------------------------------------------*
 //Confidential and Proprietary
 //Copyright 2024, HP
@@ -270,11 +384,12 @@ sap.ui.define([
     "sap/ui/core/Fragment",
     "sap/m/MessageToast",
     "sap/ui/core/library",
+    "sap/m/MessageBox"
 ],
     /**
      * @param {typeof sap.ui.core.mvc.Controller} Controller
      */
-    function (BaseController,Fragment,MessageToast,coreLibrary) {
+    function (BaseController,Fragment,MessageToast,coreLibrary,MessageBox) {
         "use strict";
         var ValueState = coreLibrary.ValueState;
         return BaseController.extend("pumorips.pumoriproduct.mapftfvui.controller.MapFtFvDetails", {
@@ -284,6 +399,7 @@ sap.ui.define([
                 let oDataModel = this.getOwnerComponent().getModel();
                 oDataModel.setSizeLimit(5000);
                 this.getRouter().getRoute("RouteMapFtFvDetails").attachPatternMatched(this._onObjectMatched, this);
+                this.rowArr =[];
             },
 
             getZoomLevel: function () {
@@ -431,22 +547,30 @@ sap.ui.define([
             /**
              * triggers once user provides an unkown values in combo box
              */
-            handleChange:function(oEvent){
-                var oValidatedComboBox = oEvent.getSource(),
-				sSelectedKey = oValidatedComboBox.getSelectedKey(),
-				sValue = oValidatedComboBox.getValue();
+            // handleChange:function(oEvent){
+            //     var oValidatedComboBox = oEvent.getSource();              
+			// 	var sSelectedKey = oValidatedComboBox.getSelectedKey(),
+			// 	sValue = oValidatedComboBox.getValue();
 
-                if (!sSelectedKey && sValue) {
-                    oValidatedComboBox.setValueState(ValueState.Error);
-                    oValidatedComboBox.setValueStateText(this.getResourceBundleText("checkDropDownValue"));
-                    oValidatedComboBox.setValue("");
-                    MessageToast.show(this.getResourceBundleText("checkDropDownValue"));
-                    this.getView().byId("idSave").setEnabled(false);
-                } else {
-                    oValidatedComboBox.setValueState(ValueState.None);
-                    this.getView().byId("idSave").setEnabled(true);
-                }
-            },
+            //     if (!sSelectedKey && sValue) {
+            //         oValidatedComboBox.setValueState(ValueState.Error);
+            //         oValidatedComboBox.setValueStateText(this.getResourceBundleText("checkDropDownValue"));
+            //         oValidatedComboBox.setValue("");
+            //         MessageToast.show(this.getResourceBundleText("checkDropDownValue"));
+            //         this.getView().byId("idSave").setEnabled(false);
+            //     } else {
+            //         oValidatedComboBox.setValueState(ValueState.None);
+            //         this.getView().byId("idSave").setEnabled(true);
+            //     }
+            // },
+            // resetCombo:function(){
+            //     var oTable = this.byId("idSmartTable").getTable();
+            //     var aRows = oTable.getRows();
+
+            //         aRows.forEach(function(oRow) {
+            //              oRow.getCells()[3].getItems()[1].setEnabled(true);
+            //         });
+            // },
             /**
              * triggers once user clicks on Save button
              */
@@ -460,12 +584,12 @@ sap.ui.define([
                         this.showMsgBoxSuccess(this.getResourceBundleText("saved"));
                         this.getView().byId("idSmartTable").rebindTable();
                         this.getView().byId("idSmartTable")._oEditButton.firePress();
-                        this.getView().byId("idSmartTable").getModel("sm4rtM0d3l").setProperty("/editable", false);
+                        this.getView().byId("idSmartTable").getModel("sm4rtM0d3l").setProperty("/editable", false);                       
                     }.bind(this),
                     error:function(oError){
                         this.getView().setBusy(false);
                         this.raiseBackendException(oError);
-                        this.sessionProgram=[];
+                        this.sessionProgram=[];         
                     }.bind(this)
                 },this);
             },
@@ -486,8 +610,153 @@ sap.ui.define([
                 }
                 this.showMsgBoxError(message);
             },
+            onPressmap:function(){
+ 
+                // var oModel = this.getOwnerComponent().getModel("oBasicDataModel");
+                // var obj = { factoryNumber: "", zhfvtypeFac: "", zhfvtypeHP: ""};
+                // oModel.setData(obj);
+                if (!this.fragmentOpen) {
+                    this.fragmentOpen = sap.ui.xmlfragment("pumorips.pumoriproduct.mapftfvui.Fragments.mapHPFT", this);
+                }
+                this.getView().addDependent(this.fragmentOpen);
+                // this.fragmentOpen.setModel(oModel);
+                this.fragmentOpen.open();
+            },
+            onFacNumValueHelp:function(oEvent){
+                if (!this._oFactoryDialog) {
+                    this._oFactoryDialog = sap.ui.xmlfragment("pumorips.pumoriproduct.mapftfvui.Fragments.FacNmValueHelp", this);
+                    this.getView().addDependent(this._oFactoryDialog);
+                }
+                this._oFactoryDialog.open();
+            },
+            onFactoryNumberConfirm: function(oEvent) {
+                var oSelectedItem = oEvent.getParameter("selectedItem");
+                if (oSelectedItem) {
+                    var sFactoryNumber = oSelectedItem.getTitle();
+                    sap.ui.getCore().byId("idFacNum").setValue(sFactoryNumber);
+                }
+            },
+            onFactoryNumberSearch: function(oEvent) {
+                var sValue = oEvent.getParameter("value");
+                var oFilter = new sap.ui.model.Filter("factoryNumber", sap.ui.model.FilterOperator.Contains, sValue);
+                oEvent.getSource().getBinding("items").filter([oFilter]);
+            },
+
+            onFactoryNumberCancel: function(oEvent) {
+                oEvent.getSource().getBinding("items").filter([]);  // Clear filters
+            },
+
+
+            onFacFtValueHelp:function(oEvent){
+                if (!this._oFactoryFtDialog) {
+                    this._oFactoryFtDialog = sap.ui.xmlfragment("pumorips.pumoriproduct.mapftfvui.Fragments.FactFtValueHelp", this);
+                    this.getView().addDependent(this._oFactoryFtDialog);
+                }
+                this._oFactoryFtDialog.open();
+            },
+
+            onFactoryFtConfirm: function(oEvent) {
+                var oSelectedItem = oEvent.getParameter("selectedItem");
+                if (oSelectedItem) {
+                    var sFactoryFt = oSelectedItem.getTitle();
+                    sap.ui.getCore().byId("idFacFt").setValue(sFactoryFt);
+                }
+            },
+
+            onFactoryFTSearch: function(oEvent) {
+                var sValue = oEvent.getParameter("value");
+                var oFilter = new sap.ui.model.Filter("zhfvtypeFac", sap.ui.model.FilterOperator.Contains, sValue);
+                oEvent.getSource().getBinding("items").filter([oFilter]);
+            },
+
+            onFactoryFTCancel: function(oEvent) {
+                oEvent.getSource().getBinding("items").filter([]);  // Clear filters
+            },
+
+
+
+            onPressSave:function(){
+                var that=this;
+                var factoryNumber = sap.ui.getCore().byId("idFacNum").getValue(),
+                zhfvtypeFac = sap.ui.getCore().byId("idFacFt").getValue(),
+                hpFT = sap.ui.getCore().byId("ComboHpvalue1").getValue();
+
+                if(factoryNumber && zhfvtypeFac && hpFT){
+                    MessageBox.confirm(this.getResourceBundleText("updtrecconf"), {
+                        icon: "QUESTION",
+                        title: "Confirm",
+                        actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.CANCEL],
+                        onClose: function (oAction) {
+                        if (oAction === "YES") {
+                            that._savedata();
+                        }else{
+                            sap.ui.getCore().byId("idFacNum").setValue("");
+                            sap.ui.getCore().byId("idFacFt").setValue("");
+                            sap.ui.getCore().byId("ComboHpvalue1").setValue("");
+                            that.fragmentOpen.close();
+                        }}})
+
+                }else{
+                    this.showMsgBoxError(this.getResourceBundleText("mandatefield"));
+                }
+            },
+
+
+            onPressCancel:function(){
+                if (this.fragmentOpen) {
+                    sap.ui.getCore().byId("idFacNum").setValue("");
+                    sap.ui.getCore().byId("idFacFt").setValue("");
+                    sap.ui.getCore().byId("ComboHpvalue1").setValue("");
+                    this.fragmentOpen.close();
+                 }
+            },
+
+
+            _savedata: async function () {
+                var oPayload = [];
+                var factoryNumber = sap.ui.getCore().byId("idFacNum").getValue(),
+                zhfvtypeFac = sap.ui.getCore().byId("idFacFt").getValue(),
+                hpFT = sap.ui.getCore().byId("ComboHpvalue1").getValue();
+               
+                var oSaveData = {};
+                oSaveData.factoryNumber = factoryNumber;
+                oSaveData.zhfvtypeFac = zhfvtypeFac;
+                oSaveData.zhfvtypeHP = hpFT;
+                oPayload.push(oSaveData);
+             
+
+                    
+                var oView = this.getView();
+                var oUserInfo = await this._getUserInfoService();
+                var sModifiedBy = (oUserInfo === "") ? "" : oUserInfo.getEmail();
+                var oSaveData = { UserEmail: sModifiedBy, PostingData: oPayload };
+                oView.setBusy(true);
+
+                    return this.MapFtFvSrv.UpdateHPFT(oSaveData).then(
+                    function (data) {
+                        oView.setBusy(false);
+                        this.showMsgBoxSuccess("saved");
+                        sap.ui.getCore().byId("idFacNum").setValue("");
+                        sap.ui.getCore().byId("idFacFt").setValue("");
+                        sap.ui.getCore().byId("ComboHpvalue1").setValue("");
+                        this.fragmentOpen.close();
+                        this.getView().byId("idSmartTable").rebindTable(true);
+                    }.bind(this),
+
+                    function (error) {
+                        this.showMsgBoxError(this.getResourceBundleText("saveError"));
+                        oView.setBusy(false);
+                    }.bind(this));
+         
+                
+            }
+
+
+
+
         });
     });
+
 
 
 
@@ -652,6 +921,9 @@ sap.ui.define([
         */
         fetchSecurityAuthScopes: function () {
             return this.odata("/SecurityAction").get({});
+        },
+        UpdateHPFT: function (oSaveData) {
+            return this.odata("/UpdateHpFtResponse").post(oSaveData);
         }
 
     });

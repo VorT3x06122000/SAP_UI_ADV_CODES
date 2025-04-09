@@ -42,13 +42,15 @@ module.exports = cds.service.impl(async function () {
 
     this.on('UPDATE', "mappingFtFv", async (req) => {
         try {
+
             const tx = cds.transaction(req);
             const authToken =  req.headers.authorization;
             const decoded = jwtDecode(authToken); 
-             if( req.data.zhfvtypeHP && req.data.zhfvtypeHP !== '' && req.data.zhfvvalueHP && req.data.zhfvvalueHP !== '') { 
+            // const decoded = "v.girish.pahurkar@acc.com"; 
+             
                await tx.run(UPDATE.entity(mappingFtFv).set(
                 {
-                    zhfvtypeHP: req.data.zhfvtypeHP,
+                    // zhfvtypeHP: req.data.zhfvtypeHP,
                     zhfvvalueHP: req.data.zhfvvalueHP,
                     modifiedBy: decoded.email
                 }
@@ -57,45 +59,8 @@ module.exports = cds.service.impl(async function () {
                 zhfvtypeFac: req.data.zhfvtypeFac,
                 zhfvvalueFac: req.data.zhfvvalueFac
             }));
-        }
-        else{
-            if(req.data.zhfvvalueHP && req.data.zhfvvalueHP !== ''){
-                await tx.run(UPDATE.entity(mappingFtFv).set(
-                    {
-                        zhfvvalueHP: req.data.zhfvvalueHP,
-                        modifiedBy: decoded.email
-                    }
-                ).where({
-                    factoryNumber: req.data.factoryNumber,
-                    zhfvtypeFac: req.data.zhfvtypeFac,
-                    zhfvvalueFac: req.data.zhfvvalueFac
-                }));
-            }
-            else{
-                await tx.run(UPDATE.entity(mappingFtFv).set(
-                    {
-                        zhfvtypeHP: req.data.zhfvtypeHP,
-                        modifiedBy: decoded.email
-                    }
-                ).where({
-                    factoryNumber: req.data.factoryNumber,
-                    zhfvtypeFac: req.data.zhfvtypeFac,
-                    zhfvvalueFac: req.data.zhfvvalueFac
-                }));
-            }
-        }
-            const mappingFtFvData = await tx.run(SELECT.from(mappingFtFv).where({ 
-                factoryNumber: req.data.factoryNumber,
-                zhfvtypeFac: req.data.zhfvtypeFac,
-                zhfvvalueFac: req.data.zhfvvalueFac
-            })); 
-            const manageFlagData = await tx.run(SELECT.from(manageflag).where({ zhfvType: mappingFtFvData[0].zhfvtypeHP })).catch((error) => req.error({ code: 400, message: error.message }));
-            await tx.run(UPDATE.entity(PumoriProducts).
-                data({
-                    strategicautoFlag: manageFlagData[0].Strategicautoflag,
-                    zhfvValue: mappingFtFvData[0].zhfvvalueHP,
-                    modifiedBy: decoded.email
-                }).where({ zhfvType: manageFlagData[0].zhfvType }));
+
+            
         } catch (error) {
             return req.error(error.message);
         }
@@ -556,7 +521,44 @@ module.exports = cds.service.impl(async function () {
             return req.error(error);
         }
     });
+
+
+    this.on("UpdateHpFtResponse", async(req)=>{
+        try{
+            const tx = cds.transaction(req);
+            const authToken =  req.headers.authorization;
+            const decoded = jwtDecode(authToken);
+            // const decoded = "v.girish.pahurkar@acc.com";
+            const result = await tx.run(UPDATE.entity(mappingFtFv).set(
+                {
+                    zhfvtypeHP: req.data.PostingData[0].zhfvtypeHP,
+                    modifiedBy: decoded
+                }
+            ).where({
+                factoryNumber: req.data.PostingData[0].factoryNumber,
+                zhfvtypeFac: req.data.PostingData[0].zhfvtypeFac
+            }));
+
+            const manageFlagData = await tx.run(SELECT.from(manageflag).where({ zhfvType: req.data.PostingData[0].zhfvtypeHP })).catch((error) => req.error({ code: 400, message: error.message }));
+            if(manageFlagData.length > 0 ) {
+                await tx.run(UPDATE.entity(PumoriProducts).
+                data({
+                    strategicautoFlag: manageFlagData[0].Strategicautoflag,
+                    zhfvType: req.data.PostingData[0].zhfvtypeHP,
+                    zhfvValue: req.data.PostingData[0].zhfvvalueHP,
+                    modifiedBy: decoded
+                }).where({ zhfvType: req.data.zhfvtypeFac }));
+            }
+
+            if (result && result.length > 0) {
+                return 'Successfully Updated';
+            } else {
+                return 'No record found with the specified Factory Number and Factory FT Value';
+            }
+        }
+        catch(error){
+            return req.error(error.message);
+        }
+    });
+ 
 });
-
-
-

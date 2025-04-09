@@ -214,8 +214,8 @@ entity PumoriUOM : managed {
 /**Feature Type,Feature value mapping **/
 entity mappingFtFv : managed {
     key factoryNumber : String(20)  @Core.Computed: true;
-    key zhfvtypeFac   : String(70) @Core.Computed: true;
-        zhfvtypeHP    : String(70) @Core.Computed: false;
+    key zhfvtypeFac   : String(70) @Core.Computed: true;         //make it false to make editable
+        zhfvtypeHP    : String(70) @Core.Computed: true;
     key zhfvvalueFac  : String(70) @Core.Computed: true;
         zhfvvalueHP   : String(70) @Core.Computed: false;
         default       : String(1)  @Core.Computed: false;

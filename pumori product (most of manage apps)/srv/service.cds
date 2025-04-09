@@ -74,7 +74,7 @@ service PumoriProductService @(requires : 'authenticated-user'){
             'WithCostview',
             'WithoutCostview'
         ]
-    }])                                       as projection on PumoriProd.mappingFtFv;
+    }])                                             as projection on PumoriProd.mappingFtFv;
     
 
 
@@ -318,6 +318,12 @@ service PumoriProductService @(requires : 'authenticated-user'){
         snapshotDate  : String;
     }
 
+    type HpFtResponseInput:{
+        factoryNumber : String(20);
+        zhfvtypeFac   : String(70);
+        zhfvtypeHP    : String(70);
+    }
+
     action   PumoriStrategic(UserEmail : String, PostingData : array of PumoriStrategicInput)                    returns String;
     action   UpdatePumoriProd(UserEmail : String, ProdData : LargeString)                                        returns String;
     action   PumoriProductsMasterUpload(Days : Integer, FactoryNumber : String)                                  returns array of ResponseType;
@@ -334,4 +340,5 @@ service PumoriProductService @(requires : 'authenticated-user'){
     action   PumoriProdResponse(PostingData: array of PumoriProdResponseInput,UserEmail : String)                returns String;
     function SecurityAction()                                                                                    returns String;
     function HistoryTableLoad()                                                                                  returns String;
+    action   UpdateHpFtResponse(PostingData: array of HpFtResponseInput, UserEmail:String)                       returns String;
 }
