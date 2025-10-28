@@ -1,0 +1,12 @@
+> open the project folder
+> Create terminal with project folder directory
+Note:- Replace CloneURL with actual repository link
+> run these commands : -
+- git init
+- git add .
+- git commit -m "Your message"
+- git branch
+- git branch dev
+- git checkout dev
+- git remote add origin <cloneURL>
+> After these command go to Git icon in the left bottom panel and publish the branch
