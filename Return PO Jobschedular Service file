@@ -1,0 +1,191 @@
+// Application Name : RETURN-PO Application
+// Object Id       : OSO_E_0007
+// Release         : 1
+// Date            : 19/02/2026
+// Description     : Job Schedular Service
+// --------------------------------------------------------------------------------------------------------------------*
+// Descriptions: Job Schedular service to create and get Job Description
+// --------------------------------------------------------------------------------------------------------------------*
+// Change Log:
+//     Date                |   Author          |   Change Id     |   Change Description
+// --------------------------------------------------------------------------------------------------------------------*
+'use strict';
+const cds = require('@sap/cds');
+const xsenv = require('@sap/xsenv');
+const axios = require('axios');
+const cfenv = require("cfenv");
+const {
+  POST,
+  DELETE_JOB_NAME,
+  DELETE_JOB_DESCRIPTION,
+} = require('../config/constants');
+
+const LOG = cds.log('zbosoe0007retpo-jobschedular');
+
+// Get Cloud Foundry application environment details
+const appEnv = cfenv.getAppEnv();
+// Determine the base URL of the running application, used as the callback URL for job actions
+let serviceURL = appEnv.url;
+
+/**
+* Retrieves the job scheduler service credentials from the environment (e.g., VCAP_SERVICES).
+* @name getJobSchedulerOptions
+* @returns {Object} Job scheduler service credentials including UAA details.
+* @private
+*/
+const getJobSchedulerOptions = () => {
+  try {
+    // Look for a service instance with the 'jobscheduler' tag
+    return xsenv.getServices({ jobscheduler: { tag: 'jobscheduler' } }).jobscheduler;
+  } catch (err) {
+    LOG.error("Job Scheduler Service not bound to this app.",err.message);
+    throw new Error(err.message);
+  }
+};
+
+
+/**
+* Schedules an immediate run for an existing job definition in the Job Scheduler.
+* It first ensures all necessary job definitions exist before attempting to schedule.
+* @name createSchedule
+* @param {String} jobName - The name of the job definition to schedule (e.g., REPROCESS_JOB_NAME).
+* @returns {Promise<Boolean>} Resolves to true upon successful schedule creation.
+* @public
+*/
+async function createSchedule(jobName) {
+  LOG.info("createSchedule triggered...");
+  // const jobName = 'zbosoe001_sourcelist';
+  try {
+    const jobService = getJobSchedulerOptions();
+    LOG.info("createSchedule jobService details >> " + JSON.stringify(jobService));
+    // Get access token for Job Scheduler API calls
+    const token = await getAccessToken();
+
+    // Ensures all job definitions (including recurring ones) are present
+    await ensureAllJobsExist(token, jobService);
+    return true;
+  } catch (error) {
+    LOG.error('create schedule err catch >>', error.message);
+    throw new Error(error.message);
+  }
+}
+
+/**
+* Ensures all required job definitions exist, creating them if they don't.
+* This is crucial for initializing recurring jobs (Auto Reprocess, Delete, Email) and ensuring the
+* job definition for manual triggers (Reprocess) is available.
+* @name ensureAllJobsExist
+* @param {String} token - Authentication token for the Job Scheduler API.
+* @param {Object} jobService - Job scheduler service configuration object.
+* @private
+*/
+async function ensureAllJobsExist(token, jobService) {
+  LOG.info("ensureAllJobsExist: Checking all jobs...");
+
+  // Define all required job definitions
+  const requiredJobs = [    
+    {
+      name: DELETE_JOB_NAME,
+      description: DELETE_JOB_DESCRIPTION,
+      action: 'odata/v4/returnpo/deleteOldRecords',
+      schedules: [{
+        pattern: "recurring",
+        repeatInterval: "1 days",
+        // startTime: GetNextCETTimeInUTC(21, 0), // 10pm CET
+        active: true        
+      }]
+    }
+  ];
+
+  // Iterate over all required jobs to check existence and create if missing
+  for (const job of requiredJobs) {
+    try {
+      // Check if job exists by name
+      await axios.get(`${jobService.url}/scheduler/jobs?name=${job.name}`, {
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      LOG.info(`ensureAllJobsExist: Job ${job.name} already exists`);
+    } catch (error) {
+      // Job does not exist, proceed to create it
+      LOG.info(`ensureAllJobsExist: Job ${job.name} not found, creating...`);
+
+      try {
+
+        const payload = {
+          "name": job.name,
+          "description": job.description,
+          "action": `${serviceURL}/${job.action}`,// Defines the callback URL for the job execution
+          "active": true,
+          "calmConfig": {
+            "enabled": true // Enables monitoring capabilities
+          },
+          "httpMethod": "GET", // The job will execute by sending a POST request to the action URL
+          "schedules": job.schedules // Includes recurring schedule configuration
+        };
+
+        LOG.info(JSON.stringify(payload));
+
+        // Post the job definition to the Job Scheduler API
+        await axios.post(`${jobService.url}/scheduler/jobs`, payload, {
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        LOG.info(`ensureAllJobsExist: Job ${job.name} created successfully`);
+      } catch (createError) {
+        LOG.error(`ensureAllJobsExist: Failed to create job ${job.name}:`, createError.detailedError);
+        // Continue to the next job in case of failure to create one
+      }
+    }
+  }
+
+  // LOG.info("ensureAllJobsExist: All jobs verified/created");
+}
+
+
+/**
+* Retrieves the OAuth access token (JWT) required for authenticating with the Job Scheduler API
+* using the client credentials flow.
+* @name getAccessToken
+* @returns {Promise<String>} The JWT access token.
+* @private
+*/
+async function getAccessToken() {
+  try {
+    const { uaa } = getJobSchedulerOptions();
+    // Base64 encode the client ID and secret for the Basic Auth header
+    const sUaaCredentials = uaa.clientid + ':' + uaa.clientsecret;
+    const getAUTHTOKENRequest = {
+      // UAA token endpoint URL
+      url: `${uaa.url}/oauth/token?grant_type=client_credentials`,
+      method: POST,
+      headers: {
+        'Authorization': 'Basic ' + Buffer.from(sUaaCredentials).toString('base64'),
+        'Content-type': 'application/x-www-form-urlencoded',
+      },
+    };
+
+    // Make the request to the UAA server
+    const AUTHTOKENResponse = await axios(getAUTHTOKENRequest).catch((error) => {
+      LOG.error('token response error >>', error.message);
+      throw new Error(error.message);
+    });
+
+    const jwtTokenFromMethod = AUTHTOKENResponse.data.access_token;
+    return jwtTokenFromMethod;
+  } catch (error) {
+    LOG.error(error.message);
+    throw error;
+  }
+}
+
+module.exports = {
+  createSchedule
+};
+ 
