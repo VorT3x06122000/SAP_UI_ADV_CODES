@@ -205,6 +205,41 @@ step5- add scope in xs-app.json(path:- app/pspumorilocui/xs-app.json)
 
     },
 
+    ===================================================================OR=====================================================================================
+
+
+    _fetchAuthorizationScopes: async function () {
+                try {
+                    let oThat = this;
+                    const oDataModel = this.getView().getModel();
+ 
+                    let sServiceUrl = oDataModel.getServiceUrl();
+                    jQuery.ajax({
+                        url: sServiceUrl + `/SecurityAction()`, // Target the stream URL with /$value
+                        type: "GET",
+                        success: function (oResp) {
+ 
+                            oResp = JSON.parse(oResp.value);
+ 
+                            let hasXS3Role = oResp?.Display;
+                            let hasXS2Role = oResp?.Maintain;
+ 
+                            const oPanel = oThat.byId("idFileUpl");
+                            if (oPanel && !hasXS2Role) {
+                                oPanel.setVisible(!hasXS3Role);
+                            }
+ 
+                        },
+                        error: function (oError) {
+                            sap.m.MessageToast.show("File upload failed");
+                        },
+                    });
+ 
+                } catch (error) {
+                    console.log(error.message);
+                }
+            },
+
 
     _onObjectMatched: function () {
 

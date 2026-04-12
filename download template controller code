@@ -1,0 +1,12 @@
+onTemplateDownload: function (oEvent) {
+                let fileName = "ReturnPO_UploadTemplate.xlsx";
+                var sFilePath = sap.ui.require.toUrl(`jnj/osoe0007/jnj/osoe0007retpo/assets/${fileName}`); // Resolve module path to asset
+ 
+                // Create a temporary hidden anchor to trigger download
+                var oDocElement = document.createElement("a");
+                oDocElement.href = sFilePath;
+                oDocElement.style.display = "none";
+                document.body.appendChild(oDocElement);
+                oDocElement.click();
+                document.body.removeChild(oDocElement);
+            },
