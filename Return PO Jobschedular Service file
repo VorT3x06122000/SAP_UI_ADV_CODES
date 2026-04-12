@@ -189,3 +189,46 @@ module.exports = {
   createSchedule
 };
  
+
+
+
+
+
+
+
+
+
+
+
+server.js Configuration
+
+
+SERVER.JS
+ 
+ 
+ 
+const cds = require('@sap/cds');
+
+const { createSchedule } = require("./job-scheduling/job-scheduler");
+ 
+ 
+// Register a handler for the 'listening' event
+
+cds.on('listening', ({ server, url }) => {
+
+  console.log(`Server is listening on ${url}`);
+
+  // console.log(process.env);
+
+  if (process.env.CF_INSTANCE_INDEX !== undefined) {
+
+     createSchedule("ZOSO_E_0007_RETPO_DELETE_JOB");
+
+  }
+
+  // You can access the underlying Node.js HTTP server instance if needed
+
+  // console.log('HTTP server instance:', server);
+
+});
+ 

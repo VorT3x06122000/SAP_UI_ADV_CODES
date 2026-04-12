@@ -1,0 +1,1674 @@
+const cds = require('@sap/cds');
+const { DELETE, SELECT, UPDATE, INSERT } = require('@sap/cds/lib/ql/cds-ql');
+const XLSX = require('xlsx');
+const { executeHttpRequest } = require('@sap-cloud-sdk/http-client');
+const { getDestination } = require('@sap-cloud-sdk/connectivity');
+const axios = require('axios');
+const querystring = require('querystring');
+const { BTPUIAPPURL, FILE_NAME_PRESENT, CREATE, DEELETE, VALIDATION_PROGRESS, WAIT_FOR_PROCESS, DOCTYP_NOT_VALID, STRGLOC_NOT_VALID, STCKTYP_NOT_VALID, FILE_NOT_FND_FR_UPLDID, NO_READABLE_CNTNT, VALIDATION_FAIL, EXCEL_MPTY, SUCCESS, ERROR, VALIDATION_FAIL_FEW_REC, VALIDATION_SUCC_SENT_FOR_APPROV, EXCEL_PROCESSED, ULPDID_NOT_PRSNT, ACTN_A_R, UPDT_APRVR_ACTN_REJ, L1_APPROVE, L1_APRVR_S4_TRIGG, ERR_S4, SUCC_S4, SMTNG_WNT_WRNG_S4_UPLD, DTA_UPLD_SUCC, EXCEL_COL_MISMATCH, MSNG_MAND_VAL, DT_FRMT_INVALID, ACTN_NOT_VALID, VALID_ERR, VALID_SUCC } = require("./config/constants");
+const PassThrough = require('stream');
+const fs = require("fs");
+const { Worker } = require("worker_threads");
+const path = require("path");
+const ExcelJS = require("exceljs");
+const { jobSchedule } = require("./job-scheduling/job-scheduler");
+const { log } = require('console');
+const { pipeline } = require("stream");
+const { promisify } = require("util");
+const pipe = promisify(pipeline);
+
+
+module.exports = cds.service.impl(async function () {
+
+    const { UploadFiles, RETPORecords } = this.entities;
+
+    /**
+     * SecurityAction handler that returns the authenticated user's information.
+     * This is typically used in CAP/RAP Node.js service handlers to expose user context.
+     *
+     * @param {Object} req - The CAP request object containing user details.
+     * @returns {Object} The authenticated CAP user object.
+     */
+    this.on("SecurityAction", async (req) => {
+        try {
+            if (req.user && req.user?.roles) {
+
+                return JSON.stringify(req.user.roles);
+            }
+            else { return null; }
+        }
+        catch (err) {
+            console.log("Error in Security Action: " + err);
+            return null;
+        }
+
+    });
+
+    /**
+     * Before READ handler for RETPORecords.
+     * Normalizes the `action` field from single-letter codes to readable labels.
+     *
+     * Hook: this.before('READ', RETPORecords, handler)
+     * @param {import('@sap/cds/apis/services').Request} req - CAP request context.
+     * @returns {Promise<void>} No return needed; modifies result rows in-place before READ.
+     */
+    this.before('READ', RETPORecords, async (req) => {
+        // Load the target records (read-side transformation prior to delivery)
+        const results = await SELECT.from(RETPORecords);
+
+        results.forEach((record) => {
+            if (record.action) {
+                // Map one-letter action codes to descriptive labels
+                switch (record.action.toUpperCase()) {
+                    case "C":
+                        record.action = CREATE;
+                        break;
+                    case "D":
+                        record.action = DEELETE;
+                        break;
+                    default:
+                        record.action = record.action; // leave as-is if unknown
+                }
+            }
+        });
+
+        // Note: no explicit return is required in a `before READ` hook;
+        // CAP will use the mutated `results` for the response pipeline.
+        // return results;
+    });
+
+
+    /**
+     * Before CREATE handler for UploadFiles.
+     * - Ensures a new upload gets default metadata (ID, status, comments, dateTime).
+     * - Checks for duplicate file names and rejects the request if found.
+     *
+     * @param {import('@sap/cds/apis/services').Request} req - CAP request context for the CREATE operation.
+     * @returns {Promise<void|string>} No return on success; returns a JSON string on early duplicate rejection.
+     */
+    this.before('CREATE', UploadFiles, async (req) => {
+        var res = [];
+        // Seed default fields for new uploads if not provided
+        if (!req.data.uploadID) {
+            req.data.uploadID = cds.utils.uuid();
+            req.data.status = VALIDATION_PROGRESS;
+            req.data.comments = WAIT_FOR_PROCESS;
+            req.data.dateTime = new Date();
+        }
+        // Duplicate file-name check
+        let sFileName = req.data.fileName;
+        let aFilePresent = await SELECT.from(UploadFiles).where({ fileName: sFileName });
+
+        if (aFilePresent.length > 0) {
+            // Reject with meaningful message if the file name already exists
+            req.reject(400, FILE_NAME_PRESENT);
+            res = ({ "STATUS_CODE": 400, "MESSAGE": FILE_NAME_PRESENT });
+            return JSON.stringify(res);
+        }
+    });
+
+
+    /**
+     * Handler for the custom 'userInfo' action.
+     * Returns key user context information such as id, tenant, roles, and attributes.
+     *
+     * @param {import('@sap/cds/apis/services').Request} req - CAP request object containing user context.
+     * @returns {Object} Sanitized user information object.
+     */
+    this.on("userInfo", (req) => {
+        // Construct a response with key user details
+        const user = {
+            id: req.user.id,
+            tenant: req.user.tenant,
+            _roles: req.user._roles,
+            attr: req.user.attr
+        };
+
+        return user;
+    });
+
+    /**
+     * UPDATE handler for UploadFiles media endpoint.
+     * Handles PUT to /UploadFiles(<ID>)/content:
+     *  - Accepts stream/buffer, persists to /tmp
+     *  - Parses Excel via ExcelJS stream reader in batches
+     *  - Upserts detail records and updates UploadFiles status
+     *  - Cleans up temp file
+     *
+     * Notes:
+     *  - Helpers expected: pipe, sleep, isBlankRow, updateExcelDetailsFromStream, sendReqSBPA
+     *  - Modules expected: fs, fs/promises (fsp), ExcelJS, cds
+     *
+     * @param {import('@sap/cds/apis/services').Request} req - CAP request context
+     * @param {Function} next - Next handler in pipeline
+     * @returns {Promise<any>}
+     */
+    this.on("UPDATE", UploadFiles, async (req, next) => {
+        // Guard: require uploadID; otherwise delegate
+        if (!req.data.uploadID) return next();
+
+        const url = req._.req.path;
+        // Guard: only handle media update on /content endpoint
+        if (!url.includes("content")) return next();
+
+        const sUploadID = req.data.uploadID;
+        const mediaObj = await SELECT.one.from(UploadFiles).where({ uploadID: sUploadID });
+
+        if (!mediaObj) {
+            req.reject(404, FILE_NOT_FND_FR_UPLDID);
+            return;
+        }
+
+        const oContent = req.data.content; // may be a Readable stream or a Buffer depending on CAP & client
+        //stream or a Buffer depending on CAP & client
+        const uploadPath = `/tmp/${Date.now()}-file.xlsx`;
+
+        cds.spawn({ user: req.user }, async () => {
+            try {
+                // 1) Persist the upload to disk safely
+                if (oContent && typeof oContent.pipe === "function") {
+                    // Readable stream (IncomingMessage or similar)
+                    await pipe(oContent, fs.createWriteStream(uploadPath));
+                } else if (Buffer.isBuffer(oContent)) {
+                    // Buffer already in memory
+                    await fsp.writeFile(uploadPath, oContent);
+                } else if (req?._?.req && typeof req._.req.pipe === "function") {
+                    // Fallback: pipe the raw HTTP request if content isn't provided as stream/buffer
+                    await pipe(req._.req, fs.createWriteStream(uploadPath));
+                } else {
+                    throw new Error(NO_READABLE_CNTNT);
+                }
+
+                // 2) Process with ExcelJS stream reader
+                const workbookReader = new ExcelJS.stream.xlsx.WorkbookReader(uploadPath);
+                let bFirst = true;
+                const iBatchSize = 1000;
+                let aReqEntries = [];
+                let headers = []; // ❗ you used `headers` without declaring it
+
+                for await (const worksheet of workbookReader) {
+                    if (!bFirst) break; // only first sheet
+                    bFirst = false;
+
+                    for await (const row of worksheet) {
+                        if (row.number === 1) {
+                            headers = row.values.map(v => (typeof v === "string" ? v.trim() : v));
+                            continue;
+                        } else if (row.number === 2) {
+                            continue;
+                        } else if (row.number === 3) {
+                            continue;
+                        }
+
+                        if (isBlankRow(row.values, headers)) continue;
+
+                        const record = {};
+                        headers.forEach((header, index) => {
+                            if (header) record[header] = row.values[index] ?? null;
+                        });
+
+                        aReqEntries.push(record);
+
+                        if (aReqEntries.length === iBatchSize) {
+                            // ❗ If this is async, await it to avoid races
+                            await updateExcelDetailsFromStream(aReqEntries, sUploadID, req?.user?.id);
+                            aReqEntries = [];
+                        }
+
+                        await sleep(20);
+                    }
+                }
+
+                if (aReqEntries.length) {
+                    await updateExcelDetailsFromStream(aReqEntries, sUploadID, req?.user?.id);
+                }
+                await sleep(20);
+
+                // 3) Housekeeping and status calc
+                await UPDATE(UploadFiles).where({ uploadID: sUploadID }).set({ content: null });
+
+                // Document Type Similar Check
+                let oUplRecds = await SELECT.from(RETPORecords).where({
+                    uploadID: sUploadID
+                });
+
+                let oGroupedByPO = Object.groupBy(oUplRecds, (item) => {
+                    return item.groupingPo;
+                });
+
+                Object.entries(oGroupedByPO).map(async (key, value) => {
+                    let aGrpLineItems = key[1];
+
+                    // Document Type Similar Check
+                    let bDTSame = true, sDocType = aGrpLineItems[0].documentType;
+                    for (let i = 1; i < aGrpLineItems.length; i++) {
+                        if (aGrpLineItems[i].documentType !== sDocType) {
+                            bDTSame = false;
+                            break;
+                        }
+                    }
+
+                    if (!bDTSame) {
+                        await UPDATE(RETPORecords)
+                            .where({
+                                groupingPo: key[
+                                    let aGrpLineItems = key[1];
+
+                                // Document Type Similar Check
+                                let bDTSame = true, sDocType = aGrpLineItems[0].documentType;
+                                for(let i = 1; i<aGrpLineItems.length; i++) {
+                            if (aGrpLineItems[i].documentType !== sDocType) {
+                                bDTSame = false;
+                                break;
+                            }
+                        }
+
+                        if (!bDTSame) {
+                            await UPDATE(RETPORecords)
+                                .where({ groupingPo: key[0], uploadID: sUploadID })
+                                .set({
+                                    errorMessage: `Document type mismatch for PO creation request`,
+                                    validationStatus: ERROR,
+                                });
+                            return;
+                        }
+                    });
+
+                const [{ count: totalCount }] = await SELECT.from(RETPORecords)
+                    .columns("count(*) as count")
+                    .where({ uploadID: sUploadID });
+
+                if (!totalCount) {
+                    await UPDATE(UploadFiles).where({ uploadID: sUploadID }).set({
+                        status: VALIDATION_FAIL,
+                        comments: EXCEL_MPTY,
+                        content: null,
+                        base64String: null
+                    });
+
+                    return { message: EXCEL_MPTY, uploadID: sUploadID };
+                }
+
+                const [{ count: errCount }] = await SELECT.from(RETPORecords)
+                    .columns("count(*) as count")
+                    .where({ uploadID: sUploadID, validationStatus: ERROR });
+
+                const [{ count: okCount }] = await SELECT.from(RETPORecords)
+                    .columns("count(*) as count")
+                    .where({ uploadID: sUploadID, validationStatus: SUCCESS });
+
+                let uploadStatus = VALIDATION_FAIL;
+                let sComments = VALIDATION_FAIL_FEW_REC;
+
+                if (!errCount && okCount) {
+                    uploadStatus = VALIDATION_SUCC_SENT_FOR_APPROV;
+                    sComments = `Validation success for ${okCount} lines and awaiting for approval.`;
+
+                    // Optionally await if this is async
+                    const sUser = req?.user?.id;
+                    const sUserName = `${req?.user?.attr.givenName || ""} ${req?.user?.attr.familyName || ""}`.trim();
+                    const oSBPARes = await sendReqSBPA(sUploadID, sUser, sUserName);
+                    console.log(oSBPARes);
+                }
+
+                const uploadEntry = {
+                    dateTime: new Date(),
+                    status: uploadStatus,
+                    noOfRecords: totalCount,
+                    comments: sComments,
+                    content: null,
+                    base64String: null
+                };
+
+                await UPDATE(UploadFiles).where({ uploadID: sUploadID }).set(uploadEntry);
+
+                return { message: EXCEL_PROCESSED, uploadID: sUploadID };
+            } catch (err) {
+                console.error(`Upload failed for Upload Id: ${sUploadID} with error - `, err);
+            } finally {
+                // 4) Cleanup
+                try { await fsp.unlink(uploadPath); } catch (e) { /* ignore */ }
+            }
+        });
+        // Continue with next handler in the pipeline
+        return next();
+    });
+
+    /**
+     * Custom action to test an external destination/connectivity.
+     * Delegates to `checkDestination` and returns its result.
+     *
+     * @param {import('@sap/cds/apis/services').Request} req - CAP request context.
+     * @returns {Promise<any>} Result of the destination check.
+     */
+    this.on("testDestination", (req) => {
+        // Delegate to helper which performs the actual destination check
+        return checkDestination(req);
+        // sendMailForUploadSuccess(); // optional hook for success notification
+    });
+
+    /**
+     * Custom action to delete old records.
+     * Delegates to `deleteRecords` which contains the cleanup logic.
+     *
+     * @param {import('@sap/cds/apis/services').Request} req - CAP request context.
+     * @returns {Promise<any>} Result of the deletion routine.
+     */
+    this.on("deleteOldRecords", (req) => {
+        // Delegate to helper which performs deletion of stale records
+        return deleteRecords(req);
+    });
+
+    /**
+     * Verifies outbound connectivity by calling the destination's OData metadata.
+     * Returns the raw $metadata XML to the client.
+     *
+     * @param {import('@sap/cds/apis/services').Request} req - CAP request context.
+     * @returns {Promise<string|void>} Sends XML via `req._.res` on success; returns error payload string on failure.
+     */
+    async function checkDestination(req) {
+
+        try {
+
+            const destinationName = 'MT_Transcend_BTP_RETPO';
+            const sMetaURL = "/odata/v4/returnpo/$metadata";
+            // Resolve destination configuration (URL, auth, proxy, etc.)
+            const destination = await getDestination({ destinationName });
+            console.log("Destination name: ", destination);
+            const url = `${destination.url}`;
+            console.log("Request URL: ", url);
+            // Call the metadata endpoint through the destination
+            let response = await executeHttpRequest(destination, {
+                method: 'GET',
+                url: sMetaURL,
+            });
+            console.log('Upload Id sent : ', response);
+            // Return the raw metadata (XML) to the client
+            req._.res.set('Content-Type', 'application/xml'); // Set custom header
+            req._.res.send(response.data); // Send raw data
+            // return response.data;
+
+
+        }
+        catch (error) {
+            console.log("Error occurred: ", error.message);
+            // Return the backend error payload (if available) or the message
+            return JSON.stringify(error.response?.data || error.message);
+        }
+
+    }
+
+    /**
+     * Handles SBPA approval callbacks for a given upload ID.
+     * - Validates input/action and ensures the upload exists.
+     * - On Reject (R): updates status and stores approver's comment.
+     * - On Approve (A) at L1: marks status and triggers background upload tasks to S/4.
+     *
+     * @param {import('@sap/cds/apis/services').Request} req - CAP request context (expects data: { action:'A'|'R', level:'L1'|..., uploadId:string, comments?:string, timestamp?:string })
+     * @returns {Promise<{message:string, uploadID:string}|void>} A short status payload or void when rejecting via `req.reject`.
+     */
+    this.on("SBPAapproval", async (req) => {
+        let sAction = req.data.action;
+        let sLevel = req.data.level;
+        let sUploadId = req.data.uploadId;
+        let sComments = req.data.comments;
+        let sTimestamp = req.data.timestamp;    // Currently unused, kept for audit/tracking if needed
+
+        // Ensure referenced UploadFiles entry exists
+        let aFilePresent = await SELECT.from(UploadFiles).where({ uploadID: sUploadId });
+        if (!aFilePresent.length) {
+            return req.reject(400, ULPDID_NOT_PRSNT);
+        }
+        // Validate action code
+        if (!["A", "R"].includes(sAction)) {
+            return req.reject(500, ACTN_A_R);
+        }
+
+        if (sAction === "R") {
+            // Rejection path: update status/comments and return
+            await UPDATE(UploadFiles)
+                .where({ uploadID: sUploadId })
+                .set({ status: `Rejected by ${sLevel} Approver`, comments: sComments });
+            return {
+                message: UPDT_APRVR_ACTN_REJ,
+                uploadID: sUploadId
+            };
+        }
+        else {
+            // Approval path
+            if (sLevel === "L1") {
+                // Mark as approved by L1; clear comments (as per current convention)
+                await UPDATE(UploadFiles).where({ uploadID: sUploadId }).set({ status: L1_APPROVE, comments: "" });
+                // Fetch all records for this upload
+                let oUplRecds = await SELECT.from(RETPORecords).where({ uploadID: sUploadId });
+
+                // Seggregating Create and Delete Records
+
+                let aCrtRecs = [];
+                oUplRecds.forEach(item => {
+                    if (item.action === "C") {
+                        aCrtRecs.push(item);
+                    }
+
+                });
+                // Spawn background transaction to perform the S/4 upload tasks
+                cds.spawn({ user: req.user }, async () => {
+                    // The code here runs in a new transaction
+                    await performUploadTasks(aCrtRecs, sUploadId);
+                });
+
+                return {
+                    message: L1_APRVR_S4_TRIGG,
+                    uploadID: sUploadId
+                };
+            }
+        }
+    });
+
+    /**
+     * Orchestrates post-approval upload tasks to S/4:
+     * 1) Triggers S/4 upload for "Create" records.
+     * 2) Triggers S/4 upload for "Delete" records.
+     * 3) Evaluates errors and updates UploadFiles status/comments.
+     * 4) Sends a success email on full success.
+     *
+     * @param {Array<Object>} aCrtRecs   - Records to create in S/4.
+     * @param {Array<Object>} aDelRecs   - Records to delete in S/4.
+     * @param {string}        sUploadId  - Upload ID to correlate status and detail records.
+     * @returns {Promise<void>}
+     */
+    async function performUploadTasks(aCrtRecs, sUploadId) {
+        // Trigger S/4 integration for create & delete flows
+        await triggerS4UploadProcessForCreate(aCrtRecs, sUploadId);
+        // Check if any detail records ended up with validation errors
+        let aErrItems = await SELECT(RETPORecords).where({ uploadID: sUploadId, validationStatus: ERROR });
+
+        if (aErrItems.length) // Not successful
+        {
+            await UPDATE(UploadFiles).where({ uploadID: sUploadId }).set({ status: ERR_S4, comments: SMTNG_WNT_WRNG_S4_UPLD });
+        }
+        else {
+            // Successfull
+            await UPDATE(UploadFiles).where({ uploadID: sUploadId }).set({ status: SUCC_S4, comments: DTA_UPLD_SUCC });
+            // Notify stakeholders on success
+            // sendMailForUploadSuccess("", sUploadId);
+        }
+    }
+
+    /**
+     * Triggers SBPA upload-success email flow.
+     * Forwards the incoming payload to the mail helper.
+     *
+     * @param {import('@sap/cds/apis/services').Request} req - CAP request context (expects data.payload).
+     * @returns {Promise<any>} Result returned by sendMailForUploadSuccess.
+     */this.on("SBPAEmailTrigger", async (req) => {
+        let oPayload = req.data?.payload;
+        // Delegate to the mail utility; pass along req for context and the payload
+        // return await sendMailForUploadSuccess(req, "", oPayload);
+    });
+
+    /**
+     * Validates and persists Excel-derived records into RETPORecords.
+     * - Maps incoming JSON columns to backend fields.
+     * - Validates mandatory fields and normalizes dates.
+     * - Flags each row as "Success" or "Error" with an aggregated error message.
+     * - Inserts rows and triggers duplicate checks.
+     * - Updates UploadFiles with a failure status if headers don't match.
+     *
+     * @param {Array<Object>} jsonData - Raw rows parsed from Excel (array of objects).
+     * @param {string}        sUploadID - Upload ID to link each record.
+     * @param {string}        sUser     - User ID used for spawning transactional updates.
+     * @returns {Promise<{message:string, uploadID:string}|void>} Returns a message on header mismatch; otherwise void.
+     */
+    async function updateExcelDetailsFromStream(jsonData, sUploadID, sUser) {
+        try {
+
+            // Convert incoming Excel column headers/values into canonical structure
+            oMappedJsonData = mapConvertExcelColumns(jsonData);
+            // If mapping produced no data, mark upload as failed due to header mismatch
+            if (!oMappedJsonData.data.length) {
+                cds.spawn({ user: sUser }, async () => {
+                    await UPDATE(UploadFiles).where({ uploadID: sUploadID }).set({
+                        status: VALIDATION_FAIL,
+                        comments: EXCEL_COL_MISMATCH,
+                    });
+                });
+
+                return {
+                    message: EXCEL_COL_MISMATCH,
+                    uploadID: sUploadID,
+                };
+            }
+
+            let aReqEnteries = [];
+            // Mandatory fields and check variables
+            var FIELD_LABELS;
+            var aMandFields;
+            // Validate & transform each record
+            for (let item of oMappedJsonData.data) {
+                var count = 0;
+                let errors = [];
+                if (!item.agreementNo || !item.agreementItem) {
+                    // Mandatory fields expected per row if agreement number and agreement item is not there
+                    FIELD_LABELS = { action: "Action", documentType: "Document Type", vendor: "Vendor", material: "Material", plant: "Plant", quantity: "Quantity", deliveryDate: "Delivery Date", storageLocation: "Storage Location", batch: "Batch", stockType: "Stock Type", reasonForOrdering: "Reason for Ordering", poheadertext: "PO Header Text", groupingPo: "Grouping PO", groupingPoItem: "Grouping PO Item" };
+                    aMandFields = ["action", "documentType", "vendor", "material", "plant", "quantity", "deliveryDate", "storageLocation", "batch", "stockType", "reasonForOrdering", "poheadertext", "groupingPo", "groupingPoItem"];
+                } else {
+                    // Mandatory fields expected per row if agreement number and agreement item is there
+                    FIELD_LABELS = { action: "Action", documentType: "Document Type", quantity: "Quantity", deliveryDate: "Delivery Date", storageLocation: "Storage Location", batch: "Batch", stockType: "Stock Type", reasonForOrdering: "Reason for Ordering", poheadertext: "PO Header Text", groupingPo: "Grouping PO", groupingPoItem: "Grouping PO Item" };
+                    aMandFields = ["action", "documentType", "quantity", "deliveryDate", "storageLocation", "batch", "stockType", "reasonForOrdering", "poheadertext", "groupingPo", "groupingPoItem"];
+                }
+                // Check for presence of all mandatory fields and non-empty string value
+                missingFields = [];
+                try {
+                    for (const field of aMandFields) {
+                        const val = item[field];
+
+                        // Empty means: null/undefined OR (string that trims to empty)
+                        const isEmpty =
+                            val === null ||
+                            val === undefined ||
+                            (typeof val === "string" && val.trim() === "");
+
+                        if (isEmpty) {
+                            missingFields.push(FIELD_LABELS[field] || field);
+                        }
+                    }
+
+                    if (missingFields.length > 0) {
+                        errors.push(MSNG_MAND_VAL + missingFields);
+                    }
+
+                    // Normalize date strings/numbers from Excel into backend-friendly format
+                    if (item.deliveryDate) {
+                        item.deliveryDate = normalizeExcelDate(item.deliveryDate);
+                        if (!item.deliveryDate) {
+                            errors.push(DT_FRMT_INVALID);
+                        }
+                    }
+                    // Force action to uppercase and validate allowed values
+                    if (item.action) {
+                        item.action = item.action.toUpperCase();
+                        if (!["C"].includes(item.action)) {
+                            errors.push(ACTN_NOT_VALID);
+                        }
+                    }
+                    if (item.stockType) {
+                        item.stockType = item.stockType.toUpperCase();
+                        if (!["U", "S", "X"].includes(item.stockType)) {
+                            errors.push(STCKTYP_NOT_VALID);
+                            count++;
+                        }
+                    }
+                    if (item.documentType) {
+                        item.documentType = item.documentType.toUpperCase();
+                        if (!["NB2", "ZIR"].includes(item.documentType)) {
+                            errors.push(DOCTYP_NOT_VALID);
+                            count++;
+                        }
+                    }
+                    if (item.storageLocation != null) {
+                        const s = String(item.storageLocation).trim();
+                        // Accept only exactly four digits: 0000 .. 9999
+                        if (!/^\d{4}$/.test(s)) {
+                            errors.push(STRGLOC_NOT_VALID);
+                        }
+                    }
+
+                } catch (oErr) {
+                    console.log("Date Normalization failed", oErr);
+                }
+                // Build final payload row with status & error details
+                let lineStatusMsg = errors.length ? VALID_ERR : VALID_SUCC;
+                if (count > 0) {
+                    aReqEnteries.push({
+                        ...item,
+                        uploadID: sUploadID,
+                        validationStatus: SUCCESS,
+                        errorMessage: errors.length ? errors.join("; ") : lineStatusMsg,
+                    });
+                } else {
+
+                    aReqEnteries.push({
+                        ...item,
+                        uploadID: sUploadID,
+                        validationStatus: errors.length ? ERROR : SUCCESS,
+                        errorMessage: errors.length ? errors.join("; ") : lineStatusMsg,
+                    });
+                }
+            }
+            // Insert records and perform duplicate detection/flagging in a spawned tx
+            cds.spawn({ user: sUser }, async () => {
+                // aReqEnteries = fncheckDataTypes(aReqEnteries);
+                await INSERT.into(RETPORecords).entries(aReqEnteries);
+                await addErrorForDuplicatesDB();
+            });
+        } catch (err) {
+            console.error(`Upload failed for Upload Id - ${sUploadID} with error - `, err);
+        }
+    }
+
+    /**
+     * Marks duplicate rows in STRPRRecords with an error message.
+     * Uses a single SQL UPDATE to set `errorMessage = 'Duplicate Record'`
+     * for records that share the same (MATERIAL, PLANT, UPLOADID) combination.
+     *
+     * @returns {Promise<any>} Number of affected rows (driver-dependent result).
+     */
+    async function addErrorForDuplicatesDB() {
+        // const tx = cds.transaction(req);
+        const db = cds.db;
+
+        const rawSqlQuery = `
+        UPDATE JNJ_OSOE0007_RETPORECORDS t
+        SET t.errorMessage = 'Duplicate Record' , t.validationStatus = 'Error'
+        WHERE (t.GROUPINGPO, t.GROUPINGPOITEM, t.DOCUMENTTYPE, t.UPLOADID) IN (
+        SELECT GROUPINGPO, GROUPINGPOITEM, DOCUMENTTYPE, UPLOADID
+        FROM JNJ_OSOE0007_RETPORECORDS
+        GROUP BY GROUPINGPO, GROUPINGPOITEM, DOCUMENTTYPE, UPLOADID
+        HAVING COUNT(*) > 1
+      )
+    `;
+        try {
+            let result = db.run(rawSqlQuery);
+            return result; // affected rows
+        } catch (err) {
+            console.log(err);
+        }
+        // const result = await tx.run(sql);
+    }
+
+    /**
+     * Deletes old UploadFiles and corresponding RETPORecords based on age & status.
+     * - For each "valid" status, removes records older than 7 days.
+     * - Additionally removes records with status "Error - S4 Upload Failed" older than 90 days.
+     * - Returns a summary string with counts of deleted header/detail rows.
+     *
+     * @param {import('@sap/cds/apis/services').Request} req - CAP request context (not used directly here).
+     * @returns {Promise<string>} Summary text or error string.
+     */
+    async function deleteRecords(req) {
+        const SwitchFrameworkSrv = await cds.connect.to('ZSB_SWITCH_FRAMEWORK');
+        const { SwitchTable } = SwitchFrameworkSrv.entities;
+
+        const aValidStatus = await SwitchFrameworkSrv.run(
+            SELECT.from(SwitchTable)
+                .columns(['Value', 'Tag'])
+                .where({
+                    RicefwId: 'ZOSO_E_0007',
+                    NameId: 'STATUS',
+                    Active: '',
+                    ConfigDeprecationCode: ''
+                })
+
+        );
+
+        const db = cds.db;
+
+        // Capture counts before deletion (for a simple delta summary
+        let iPrevUploadTblRecords = await SELECT.from(UploadFiles).columns("count(uploadID) as iUploadCount");
+        let iPrevDetailsTblRecords = await SELECT.from(RETPORecords).columns("count(ID) as iDetailsCount");
+
+        try {
+            // Raw SQL templates for deleting detail and header rows by createdAt + status
+            let sQueryRETPOTbl = "DELETE FROM JNJ_OSOE0007_RETPORECORDS WHERE UPLOADID IN ( SELECT UPLOADID FROM JNJ_OSOE0007_UPLOADFILES WHERE CREATEDAT < ? AND STATUS = ? )"
+            let sQueryUploadTbl = "DELETE FROM JNJ_OSOE0007_UPLOADFILES t WHERE t.UPLOADID IN ( SELECT UPLOADID FROM JNJ_OSOE0007_UPLOADFILES WHERE CREATEDAT < ? AND STATUS = ? )"
+
+            // 7‑day deletion for all eligible statuses
+            for (let each of aValidStatus) {
+                await db.run(sQueryRETPOTbl, [fnGetTimeStamp(each.Value), each.Tag]);     // delete details first
+                await db.run(sQueryUploadTbl, [fnGetTimeStamp(each.Value), each.Tag]);   // then headers
+            }
+
+            // Compute simple deltas for return message
+            let iLaterUploadTblRecords = await SELECT.from(UploadFiles).columns("count(uploadID) as iUploadCount");
+            let iLaterDetailsTblRecords = await SELECT.from(RETPORecords).columns("count(ID) as iDetailsCount");
+
+            let iDeletedUplRecs = iPrevUploadTblRecords[0]?.iUploadCount - iLaterUploadTblRecords[0]?.iUploadCount;
+            let iDeletedDetailsRecs = iPrevDetailsTblRecords[0]?.iDetailsCount - iLaterDetailsTblRecords[0]?.iDetailsCount;
+
+            return "Respected Records are deleted - " + iDeletedUplRecs + " , " + iDeletedDetailsRecs;
+        } catch (oError) {
+            // Return a plain string on failure to match existing behavior
+            return "Error occured while deletion - " + oError;
+        }
+    }
+
+    /**
+   * Method handles date string creation for past date
+   * @param String Number of Days
+   * @returns ISO Date String 
+   */
+    function fnGetTimeStamp(iDay) {
+        let dPastDate = new Date();
+        dPastDate.setDate(new Date().getDate() - Number(iDay));
+        dPastDate = dPastDate.toISOString();
+        return dPastDate;
+    }
+
+    /**
+     * Maps human-friendly Excel column headers to internal field names and
+     * returns a normalized data array with an `ok` flag and any unknown headers.
+     *
+     * - Accepts variations like "Document Type" and "DocumentType" (spaces collapsed).
+     * - Normalizes header strings by trimming, collapsing spaces, and lowercasing.
+     ** - Collects headers that don't match the known map into `unknownHeaders`.
+
+     *
+
+     * @param {Array<Object>} oExcelData - Rows parsed from Excel (array of objects keyed by header).
+
+     * @returns {{ ok: boolean, data: Array<Object>, unknownHeaders: string[] }}
+
+     *          An object with a success flag, converted rows, and a list of unmatched headers.
+
+     */
+
+    function mapConvertExcelColumns(oExcelData) {
+
+        // Static mapping from Excel display headers to internal keys
+
+        const rawMap = {
+
+            "Action": "action",
+
+            "Grouping PO": "groupingPo",
+
+            "Grouping PO Item": "groupingPoItem",
+
+            "Document Type": "documentType",
+
+            "Vendor": "vendor",
+
+            "Material": "material",
+
+            "Plant": "plant",
+
+            "Quantity": "quantity",
+
+            "Delivery Date": "deliveryDate",
+
+            "Storage Location": "storageLocation",
+
+            "Batch": "batch",
+
+            "Stock Type": "stockType",
+
+            "Reason For Ordering": "reasonForOrdering",
+
+            "Agreement No": "agreementNo",
+
+            "Agreement Item": "agreementItem",
+
+            "Reference PO": "purchaseDocument",
+
+            "Reference PO Line Item": "purchaseDocumentItem",
+
+            "PO Header Text": "poheadertext",
+
+            "Purchase Organization": "purchaseOrg",
+
+            "Purchase Group": "purchaseGroup",
+
+            "Company Code": "companyCode",
+
+            "PO Item Text": "poitemtext",
+
+        };
+
+        // Normalize function: trim, collapse spaces, remove spaces, lowercase for matching
+
+        const norm = (s) => String(s).trim().replace(/\s+/g, " ").toLowerCase();
+
+        const noSpaces = (s) => norm(s).replace(/\s/g, "");
+
+        // Build a lookup that accepts BOTH "Document Type" and "DocumentType"
+
+        const lookup = {};
+
+        for (const [human, internal] of Object.entries(rawMap)) {
+
+            lookup[norm(human)] = internal;       // "document type" -> "documentType"
+
+            lookup[noSpaces(human)] = internal;   // "documenttype" -> "documentType"
+
+        }
+
+        const out = [];
+
+        const unknownHeaders = new Set();
+
+        // Convert each row by remapping its keys using the lookup
+
+        for (const row of oExcelData) {
+
+            const converted = {};
+
+            for (const col of Object.keys(row)) {
+
+                const key1 = norm(col);
+
+                const key2 = noSpaces(col);
+
+                const internal = lookup[key1] || lookup[key2];
+
+                if (internal) {
+
+                    converted[internal] = row[col];
+
+                } else {
+
+                    // Track headers that don't exist in the map for reporting
+
+                    unknownHeaders.add(col);
+
+                }
+
+            }
+
+            out.push(converted);
+
+        }
+
+        if (unknownHeaders.size) {
+
+            // You can throw, return false, or include the info; here I include both.
+
+            return { ok: false, data: out, unknownHeaders: Array.from(unknownHeaders) };
+
+        }
+
+        return { ok: true, data: out, unknownHeaders: [] };
+
+    }
+
+    /**
+
+     * Triggers an SAP Build Process Automation (SBPA) workflow instance for the given upload.
+
+     * - Reads destination "sap-build-process-automation" to obtain base URL and API key.
+
+     * - Fetches runtime configuration (landscape, etc.) from ZSB_SWITCH_FRAMEWORK.
+
+     * - Builds context payload (including app URL and file name) and starts the workflow.
+
+     *
+
+     * @param {string} sUploadId  - The UploadFiles.uploadID identifier.
+
+     * @param {string} sUser      - Requesting user ID (used for context).
+
+     * @param {string} sUserName  - Requesting user full name (used for context).
+
+     * @returns {Promise<any>}    - The HTTP response from SBPA on success; stringified error payload on failure.
+
+     */
+
+    async function sendReqSBPA(sUploadId, sUser, sUserName) {
+
+        try {
+
+            // Resolve SBPA destination and API key
+
+            const destinationName = 'sap-build-process-automation';
+
+            const destination = await getDestination({ destinationName });
+
+            const apikey = destination.originalProperties.destinationConfiguration["irpa-api-key"];
+
+            // Compose workflow runtime URL (environment scoped)
+
+            let sDestUrl = `${destination.url}/workflow-instances?environmentId=massuploadsapprovalenv`;
+
+            console.log("Request URL: ", sDestUrl);
+
+            // Read runtime switches from custom service
+
+            const SwitchFrameworkSrv = await cds.connect.to('ZSB_SWITCH_FRAMEWORK');
+
+            const { SwitchTable } = SwitchFrameworkSrv.entities;
+
+            const runtimeData = await SwitchFrameworkSrv.run(
+
+                SELECT.from(SwitchTable)
+
+                    .columns('Value')
+
+                    .where({
+
+                        RicefwId: 'SO-E-0007',
+
+                        NameId: 'SYSLANDSCAPE',
+
+                        Active: 'X',
+
+                        ConfigDeprecationCode: ''
+
+                    })
+
+            );
+
+            // Build app URL deep link and fetch file name for context
+
+            let sComAppUrl = await generateAppURL(sUploadId);
+
+            let sFileName = await SELECT.from(UploadFiles).columns('fileName').where({ uploadID: sUploadId });
+
+            // Prepare SBPA workflow payload (definition ID + context)
+
+            let payload = {
+
+                "definitionId": "us10.dev-sfdc-rq24o0we.massuploadapprovalprocess4.massUploadApprovalFlow",
+
+                "context": {
+
+                    "uri": sComAppUrl,
+
+                    "ricefwid": runtimeData[0].RicefwId,
+
+                    "uploadid": sUploadId,
+
+                    // Fallbacks for anonymous/system-triggered flows
+
+                    "requestormailid": sUser ? sUser : "anonymous",
+
+                    "requestorfullname": sUserName ? sUserName : "anonymous",
+
+                    "submittedon": new Date().toISOString(),
+
+                    "filename": sFileName[0].fileName,
+
+                    "systemlandscape": runtimeData[0].Value
+
+                }
+
+            };
+
+            console.log(JSON.stringify(payload));
+
+            // Invoke SBPA workflow create endpoint via destination
+
+            let response = await executeHttpRequest(destination, {
+
+                method: 'POST',
+
+                url: sDestUrl,
+
+                data: JSON.stringify(payload),
+
+                headers: {
+
+                    'Content-Type': 'application/json',
+
+                    // API key from destination configuration
+
+                    'irpa-api-key': apikey
+
+                }
+
+            });
+
+            console.log('Upload Id sent : ', response);
+
+            return response;
+
+        }
+
+        catch (error) {
+
+            // Return backend error payload (if present) or message text
+
+            console.log("Error occurred: ", JSON.stringify(error));
+
+            return JSON.stringify(error.response?.data || error.message);
+
+        }
+
+    }
+
+    /**
+
+     * Builds a deep-link URL to the UI app for a specific upload.
+
+     * - Fetches header details for the given upload ID.
+
+     * - Packs relevant fields into a JSON string appended to the URL path.
+
+     *
+
+     * @param {string} sUploadId - The UploadFiles.uploadID for which to build the link.
+
+     * @returns {Promise<string>} Fully-qualified app URL containing the upload ID and serialized params.
+
+     */
+
+    async function generateAppURL(sUploadId) {
+
+        // Read header details for the upload to include in the link context
+
+        let oUplDetails = await SELECT.one.from(UploadFiles).where({ uploadID: sUploadId });
+
+        let oAppParamDetails = {
+
+            uploadID: sUploadId,
+
+            dateTime: oUplDetails.dateTime,
+
+            noOfRecords: oUplDetails.noOfRecords,
+
+            fileName: oUplDetails.fileName,
+
+            sStatus: oUplDetails.status,
+
+            sCreatedBy: oUplDetails.createdBy,
+
+        };
+
+        // Serialize parameters; consumer route will parse this segment
+
+        oAppParamDetails = JSON.stringify(oAppParamDetails);
+
+        // Construct final deep link: <base>/<uploadId>/<jsonPayload>
+
+        let sAppParams = `/${sUploadId}/${oAppParamDetails}`;
+
+        let sBTPUrl;
+
+        if (process.env.CF_INSTANCE_INDEX !== undefined) {
+
+            sBTPUrl = process.env.BTP_UIAPPURL_ENV;
+
+        } else {
+
+            sBTPUrl = BTPUIAPPURL;
+
+        }
+
+        let sComAppUrl = sBTPUrl + sAppParams;
+
+        console.log("Generated UI url - " + sComAppUrl)
+
+        return sComAppUrl;
+
+    }
+
+    /**
+
+     * Creates Return POs in S/4 for "Create" actions:
+
+     * 1) Groups upload records by `batch`.
+
+     * 2) Builds S/4 payload entries for each group (mode "C").
+
+     * 3) Chunks requests and fires create calls.
+
+     * 4) Processes results and updates RETPORecords per batch.
+
+     *
+
+     * @param {Array<Object>} oUplRecds - Upload detail records (expected to contain `batch` and fields for payload).
+
+     * @param {string}        sUploadId - The UploadFiles.uploadID used to correlate updates.
+
+     * @returns {Promise<boolean|undefined>} `true` if any error occurred; otherwise `false` (or `undefined` on exception).
+
+     */
+
+    async function triggerS4UploadProcessForCreate(oUplRecds, sUploadId) {
+
+        try {
+
+            // Group all lines by batch
+
+            let oGroupedByRET = Object.groupBy(oUplRecds, (item) => {
+
+                return item.groupingPo;
+
+            });
+
+            let aPayloadEntries = [];
+
+            // Build S/4 payload for each batch group
+
+            Object.entries(oGroupedByRET).map((key) => {
+
+                let aGrpLineItems = key[1];
+
+                let oGenrtedPayload = genS4PayloadEntry(aGrpLineItems, "C");
+
+                oGroupedByRET[key[0]] = oGenrtedPayload;    // store generated payload back on the group map
+
+                aPayloadEntries.push(oGenrtedPayload);
+
+            });
+
+            // chunking logic  
+
+            const iChunkSize = 20;
+
+            const aChunkedRecs = fnChunkArray(aPayloadEntries, iChunkSize);
+
+            let aPostRequests = [], aPostResult = [];
+
+            for (let each of aChunkedRecs) {
+
+                // Queue POST calls for the current chunk
+
+                for (let req of each) {
+
+                    await aPostResult.push(await createRETPO(req));
+
+                }
+
+                // Execute queued requests for this pass
+
+                aPostResult.push(await Promise.allSettled(aPostRequests));
+
+            }
+
+            // Map settled results back to groups
+
+            let aRETPOs = Object.keys(oGroupedByRET);
+
+            aPostResult = processAllChunksSerially(aPostResult);    // normalize/flatten results if needed
+
+            for (let each in aRETPOs) {
+
+                oGroupedByRET[aRETPOs[each]] = aPostResult[each];
+
+            }
+
+            // Update RETPORecords per batch based on result
+
+            let bError = false;
+
+            let aErrLog = [];
+
+            // Object.entries(oGroupedByRET).map(async (key, value) => {
+
+            //     if (oGroupedByRET[key[0]].status === "fulfilled") {
+
+            //         for (let each of oGroupedByRET[key[0]].value._PurchaseOrderItem) {
+
+            //             await UPDATE(RETPORecords)
+
+            //                 .where({ groupingPo: key[0], uploadID: sUploadId })
+
+            //                 .set({
+
+            //                     errorMessage: `Return PO created with no ${each.PurchaseOrder}`,
+
+            //                     validationStatus: SUCCESS,
+
+            //                 });
+
+            //         }
+
+
+
+            //         }
+
+            //     } else {
+
+            //         bError = true;
+
+            //         let sTextToRemove = "Error during request to remote service: ";
+
+            //         await UPDATE(RETPORecords).where({ groupingPo: key[0], uploadID: sUploadId }).set({
+
+            //             errorMessage: key[1].reason.message.replace(sTextToRemove, ""),
+
+            //             validationStatus: ERROR,
+
+            //         });
+
+            //         if (key[1].reason.message.indexOf("Request failed with status code 401") !== -1) {
+
+            //             aErrLog.push({ err: key[1].reason });
+
+            //         }
+
+            //     }
+
+            // });
+
+            // if (aErrLog && aErrLog.length)
+
+            //     LOG.error("Posting Error 401", JSON.stringify(aErrLog));
+
+            Object.entries(oGroupedByRET).map(async (key) => {
+
+                if (key[1].status === "Success") {
+
+                    for (let each of key[1]._PurchaseOrderItem) {
+
+                        await UPDATE(RETPORecords).where({ groupingPo: key[0], uploadID: sUploadId }).set(
+
+                            {
+
+                                validationStatus: SUCCESS,
+
+                                errorMessage: `Return PO created with no ${each.PurchaseOrder}`
+
+                            }
+
+                        )
+
+                    }
+
+                }
+
+                else {
+
+                    bError = true;
+
+                    await UPDATE(RETPORecords).where({ groupingPo: key[0], uploadID: sUploadId }).set(
+
+                        {
+
+                            validationStatus: ERROR,
+
+                            errorMessage: key[1].message
+
+                        }
+
+                    )
+
+                }
+
+            });
+
+            return bError;
+
+        }
+
+        catch (err) {
+
+            console.log(err);
+
+            await UPDATE(RETPORecords).where({ uploadID: sUploadId }).set({
+
+                errorMessage: SMTNG_WNT_WRNG_S4_UPLD,
+
+                validationStatus: ERROR,
+
+            });
+
+        }
+
+    }
+
+});
+
+/**
+
+* Builds the S/4 payload entry for either Create ("C") or Delete ("D") actions.
+
+* - For "C": Produces a full PO header with items and schedule lines (batches).
+
+* - For "D": Produces a minimal header with `IsDeleted` marker.
+
+*
+
+* @param {Array<Object>} aGrpLineItems - Line items belonging to the same batch/group (array for "C"; first element used for header fields).
+
+* @param {"C"|"D"}       sAction       - Action code: "C" (create) or "D" (delete).
+
+* @returns {Object} S/4 payload entry matching the expected API contract.
+
+*/
+
+function genS4PayloadEntry(aGrpLineItems, sAction) {
+
+    let oPayloadEntry;
+
+    if (sAction === "C") {
+
+        // Extract common header fields from FIRST record
+
+        const first = aGrpLineItems[0];
+
+        oPayloadEntry = {
+
+            PurchaseOrderType: first.documentType,
+
+            CompanyCode: first.companyCode,
+
+            PurchasingOrganization: first.purchaseOrg,
+
+            PurchasingGroup: first.purchaseGroup,
+
+            Supplier: first.vendor,
+
+            POHeaderText: first.poheadertext || "",
+
+            _PurchaseOrderItem: aGrpLineItems.map(rec => ({
+
+                IsReturnsItem: true,
+
+                Material: rec.material,
+
+                Plant: rec.plant,
+
+                OrderQuantity: rec.quantity,
+
+                PurchaseOrderQuantityUnit: rec.PurchaseOrderQuantityUnit || "",
+
+                StorageLocation: rec.storageLocation || "",
+
+                PurchaseOrder: rec.purchaseDocument,
+
+                PurchaseOrderItem: rec.purchaseDocumentItem,
+
+                StockType: rec.stockType,
+
+                PurchasingOrderReason: rec.reasonForOrdering,
+
+                PurchaseContract: rec.agreementNo,
+
+                PurchaseContractItem: rec.agreementItem,
+
+                POItemText: rec.poitemtext,
+
+                // Schedule lines: allow array or single batch
+
+                _PurchaseOrderSch: [{ Batch: rec.batch }]
+
+            }))
+
+        };
+
+    }
+
+    return oPayloadEntry;
+
+}
+
+/**
+
+* Creates a Return PO in S/4 via the external service destination `ZSD_SO_RETURNPO`.
+
+* - Cleans the incoming payload before sending to the remote entity.
+
+*
+
+* @param {Object} oPayload - Raw payload to be sent to S/4.
+
+* @returns {Promise<any>}   The response returned by the remote service.
+
+* @throws {Error} Re-throws the underlying error if the remote call fails.
+
+*/
+
+async function createRETPO(oPayload) {
+
+    try {
+
+        const ext = await cds.connect.to('ZSD_SO_RETURNPO');
+
+        const { ZC_SO_RETURNPOHDR } = ext.entities;
+
+        const payload = fnCleanPayload(oPayload);
+
+        const results = [];
+
+        try {
+
+            const res = await ext.send({
+
+                method: 'POST',
+
+                path: 'ZC_SO_RETURNPOHDR',
+
+                data: payload,
+
+                headers: { 'Content-Type': 'application/json' }
+
+            });
+
+            //   await new Promise(resolve => setTimeout(resolve, 20000));
+
+            results.push({
+
+                ...res,
+
+                status: "Success"
+
+            });
+
+        }
+
+        catch (error) {
+
+            results.push({
+
+                status: "Error",
+
+                message: error.message
+
+            });
+
+        }
+
+        return results;
+
+    } catch (e) {
+
+        console.error('[RETPO] Cannot reach remote service via destination:', e);
+
+        throw e;
+
+    }
+
+}
+
+/**
+
+* Produces a deep-cloned payload with all `null` values removed.
+
+* Uses a JSON stringify/parse cycle with a custom replacer to omit keys whose value is `null`.
+
+*
+
+* @param {Object} oPayload - The original payload object (may contain `null` values).
+
+* @returns {Object} A new object identical to `oPayload` but without any `null` fields.
+
+*/
+
+function fnCleanPayload(oPayload) {
+
+    const cleanJsonString = JSON.stringify(oPayload, (key, value) => {
+
+        // If the value is null, return undefined to omit the key/value pair
+
+        if (value === null) {
+
+            return undefined;
+
+        }
+
+        return value;
+
+    });
+
+    return JSON.parse(cleanJsonString);
+
+}
+
+/**
+
+* Normalizes various Excel/typical date inputs to an ISO (UTC) date string `YYYY-MM-DD`.
+
+* Supports:
+
+*  - JS Date instances (converted to UTC and formatted).
+
+*  - Excel serial numbers (1900 and 1904 date systems; handles serial 60 bug).
+
+*  - Common string formats: "YYYY-MM-DD", "MM/DD/YYYY", "DD-MM-YYYY",
+
+*    and a generic fallback via Date parsing (normalized to UTC).
+
+*
+
+* @param {Date|number|string|null|undefined} val - The input value to normalize.
+
+* @param {Object} [opts] - Optional configuration.
+
+* @param {boolean} [opts.use1904=false] - Whether to interpret numbers using the Excel 1904 date system.
+
+* @param {'truncate'|'round'} [opts.fraction='truncate'] - How to handle fractional day components in serials.
+
+* @returns {string|null} ISO date string in the form `YYYY-MM-DD`, or `null` if unrecognized/empty.
+
+*/
+
+function normalizeExcelDate(val) {
+
+    if (!val) return null;
+
+    if (typeof val === "number") {
+
+        let excelEpoch = new Date(Date.UTC(1899, 11, 30));
+
+        excelEpoch.setUTCDate(excelEpoch.getUTCDate() + val);
+
+        return excelEpoch.toISOString().slice(0, 10); // yyyy-mm-dd
+
+    }
+
+    if (typeof val === "string") {
+
+        const mdyRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+
+        const match = val.match(mdyRegex);
+
+        if (match) {
+
+            const [_, month, day, year] = match;
+
+            return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+
+        }
+
+        if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
+
+    }
+
+    return null;
+
+}
+
+
+/**
+
+* Splits an array into evenly sized chunks.
+
+*
+
+* @param {Array<any>} array - The source array to chunk.
+
+* @param {number} chunkSize - The maximum size of each chunk (must be > 0).
+
+* @returns {Array<Array<any>>} A new array of chunk arrays.
+
+*/
+
+function fnChunkArray(array, chunkSize) {
+
+    const chunkedArr = [];
+
+    for (let i = 0; i < array.length; i += chunkSize) {
+
+        // Push a slice from i to i+chunkSize into the result
+
+        chunkedArr.push(array.slice(i, i + chunkSize));
+
+    }
+
+    return chunkedArr;
+
+}
+
+
+/**
+
+* Flattens an array of results collected per chunk into a single array.
+
+* Assumes each entry in `chunks` is itself an array (e.g., from Promise.allSettled).
+
+*
+
+* @param {Array<Array<any>>} chunks - Array of chunked result arrays.
+
+* @returns {Array<any>} A single-level array containing all results in order.
+
+*/
+
+function processAllChunksSerially(chunks) {
+
+    let combinedResults = [];
+
+    for (const chunk of chunks) {
+
+        // Append the entire chunk to the accumulator
+
+        combinedResults.push(...chunk);
+
+    }
+
+    return combinedResults;
+
+}
+
+/**
+
+* Returns a Promise that resolves after a given number of milliseconds.
+
+*
+
+* @param {number} ms - Milliseconds to wait.
+
+* @returns {Promise<void>} Resolves after the delay.
+
+*/
+
+function sleep(ms) {
+
+    return new Promise((resolve) => setTimeout(resolve, ms));
+
+}
+
+/**
+
+* Determines whether a parsed Excel row should be considered blank,
+
+* based on the provided headers to align indexes.
+
+*
+
+* A row is blank if for every header index the corresponding value is:
+
+*   - undefined, null, or an empty/whitespace-only string.
+
+*
+
+* @param {Array<any>} rowValues - Row values array (e.g., from ExcelJS row.values).
+
+* @param {Array<string>} headers - Header array used to align indices.
+
+* @returns {boolean} True if the row is blank; otherwise false.
+
+*/
+
+function isBlankRow(rowValues, headers) {
+
+    return headers.every((_, index) => {
+
+        const value = rowValues[index];
+
+        return value === undefined || value === null || (typeof value === "string" && value.trim() === "");
+
+    });
+
+}
