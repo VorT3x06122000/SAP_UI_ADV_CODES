@@ -1,0 +1,688 @@
+sap.ui.define(
+    [
+        'sap/ui/core/mvc/ControllerExtension',
+        'sap/m/MessageBox',
+        'sap/ui/model/json/JSONModel',
+        "customer/zoqr_e_0008ui/model/Constants"
+    ],
+    function (
+        ControllerExtension,
+        MessageBox,
+        JSONModel,
+        Constants
+    ) {
+        'use strict';
+        return ControllerExtension.extend("customer.zoqr_e_0008ui.MainPage", {
+            override: {
+                /**
+                 * Called when a controller is instantiated and its View controls (if available) are already created.
+                 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
+                 * @memberOf customer.zoqr_e_0008ui.MainPage
+                 */
+                onInit: function () {
+                    this.base.byId("i2d.qm.inspusgdsc.manages1::sap.suite.ui.generic.template.ListReport.view.ListReport::C_InspUsgDescMng--responsiveTable").attachSelectionChange(this.onItemSelect, this);
+
+                }
+            },
+
+
+            /**
+             * onItemSelect will be triggered on selection of any line item from table
+             * @param {Event} oEvent 
+             */
+            onItemSelect: function (oEvent) {
+                var selIndices = this.base.byId("i2d.qm.inspusgdsc.manages1::sap.suite.ui.generic.template.ListReport.view.ListReport::C_InspUsgDescMng--responsiveTable").getSelectedItems();
+                if (selIndices.length == 1) {
+                    this.base.byId("i2d.qm.inspusgdsc.manages1::sap.suite.ui.generic.template.ListReport.view.ListReport::C_InspUsgDescMng--customer.zoqr_e_0008ui.btn-8b13dfb5").setEnabled(true);
+                    this.base.byId("i2d.qm.inspusgdsc.manages1::sap.suite.ui.generic.template.ListReport.view.ListReport::C_InspUsgDescMng--customer.zoqr_e_0008ui.IdAutoUDBtn").setEnabled(true);
+                }
+                else if (selIndices.length > 1) {
+                    this.base.byId("i2d.qm.inspusgdsc.manages1::sap.suite.ui.generic.template.ListReport.view.ListReport::C_InspUsgDescMng--customer.zoqr_e_0008ui.btn-8b13dfb5").setEnabled(false);
+                    this.base.byId("i2d.qm.inspusgdsc.manages1::sap.suite.ui.generic.template.ListReport.view.ListReport::C_InspUsgDescMng--customer.zoqr_e_0008ui.IdAutoUDBtn").setEnabled(true);
+                }
+                else {
+                    this.base.byId("i2d.qm.inspusgdsc.manages1::sap.suite.ui.generic.template.ListReport.view.ListReport::C_InspUsgDescMng--customer.zoqr_e_0008ui.btn-8b13dfb5").setEnabled(false);
+                    this.base.byId("i2d.qm.inspusgdsc.manages1::sap.suite.ui.generic.template.ListReport.view.ListReport::C_InspUsgDescMng--customer.zoqr_e_0008ui.IdAutoUDBtn").setEnabled(false);
+                }
+            },
+
+            /**
+            * onPressClose will be triggered on clicking close button of table fragment
+            */
+            onPressClose: function () {
+                if (this.fragmentOpen) {
+                    this.fragmentOpen.close();
+                }
+                if (this.AUDfragmentOpen) {
+                    this.AUDfragmentOpen.close();
+                }
+                this.getView().setBusy(false);
+            },
+
+            /**
+            * geti18nText is used to fetch the text bundle from i18n.properties file
+            */
+            geti18nText: function () {
+                return this.getView().getModel("i18n").getResourceBundle();
+            },
+
+            /**
+             * Onerrlogpress will be triggered on clicking of the Error Log button
+             */
+            Onerrlogpress: async function (oEvent) {
+                var that = this;
+
+                // Show busy indicator while processing
+                this.getView().setBusy(true);
+
+                // Get the error log model
+                this.oDataModel = this.getView().getModel("customer.errorlog");
+
+                // Get selected inspection lot from the responsive table
+                var oselData = this.base.byId(
+                    "i2d.qm.inspusgdsc.manages1::sap.suite.ui.generic.template.ListReport.view.ListReport::C_InspUsgDescMng--responsiveTable"
+                ).getSelectedItem().getBindingContext().getObject();
+
+                // Extract inspection lot number
+                this.InspLot = oselData.InspectionLot;
+
+                // Filter String for API
+                var FilterString = `INSPECTIONLOT eq '${this.InspLot}'`
+
+                // Construct the API URL to fetch error messages for the selected inspection lot
+                const sUrl = `${Constants.ErrorAPIURL}${FilterString}${Constants.SkipTop}`;
+
+                // Fetch error log data from the API
+                fetch(sUrl, {
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        var aData = data.value;
+
+                        // If error log data is returned
+                        if (aData.length > 0) {
+                            var oModel = new JSONModel();
+
+                            // Store the OVERRIDE flag from the first error message
+                            this.sOverride = aData[0].OVERRIDE;
+
+                            // Set the error log data to the model
+                            oModel.setProperty("/LogData", aData);
+
+                            // Load and open the error log fragment if not already opened
+                            if (!that.fragmentOpen) {
+                                that.fragmentOpen = sap.ui.xmlfragment("customer.zoqr_e_0008ui.changes.fragments.ErrorLogReport", this);
+                            }
+
+                            // Add fragment as dependent to the view and open it
+                            that.getView().addDependent(that.fragmentOpen);
+                            that.fragmentOpen.open();
+
+                            // Set the model to the error log table in the fragment
+                            sap.ui.getCore().byId("Idlogtbl").setModel(oModel);
+
+                            // Enable or disable the override button based on OVERRIDE flag
+                            if (aData[0].OVERRIDE == "X") {
+                                sap.ui.getCore().byId("btnoverrd").setEnabled(true);
+                            } else {
+                                sap.ui.getCore().byId("btnoverrd").setEnabled(false);
+                            }
+
+                            // Hide busy indicator
+                            that.getView().setBusy(false);
+                            return;
+                        } else {
+                            // Show message if no records are found
+                            MessageBox.information(this.geti18nText().getText("NoRec"));
+                            that.getView().setBusy(false);
+                            return;
+                        }
+                    })
+                    .catch(error => {
+                        // Show error message if fetch fails
+                        MessageBox.information(this.geti18nText().getText("error"));
+                        that.getView().setBusy(false);
+                    });
+            },
+
+            /**
+             * onlinkpress will be triggered on clicking on the Hyperlink in the HardStop Error Table
+             * below function has loginc to navigate to T-Code fiori tile.
+             */
+            onlinkpress: function (oEvent) {
+                // Get the text of the clicked link (usually the object ID like Notification or Batch number)
+                let objID = oEvent.getSource().getText();
+
+                // Get the transaction code (TCODE) from the binding context of the clicked item
+                let sTcode = oEvent.getSource().getBindingContext().getObject().TCODE;
+
+                // Get the Batch number (MSGV2) and Material number (MSGV1) from the same context
+                let sBatch = oEvent.getSource().getBindingContext().getObject().MSGV2;
+                let sMaterial = oEvent.getSource().getBindingContext().getObject().MSGV1;
+
+                // Check if the transaction code is QM03 (Quality Notification)
+                if (sTcode === "QM03") {
+                    // Get the CrossApplicationNavigation service
+                    var oCrossAppNavigator = sap.ushell.Container.getService("CrossApplicationNavigation");
+
+                    // Navigate to the Quality Notification display screen
+                    oCrossAppNavigator.toExternal({
+                        target: {
+                            semanticObject: "QualityNotification",
+                            action: "display"
+                        },
+                        params: {
+                            "QualityNotification": [objID], // Pass the notification number
+                            "DynproNoFirstScreen": "1"      // Skip the first screen
+                        }
+                    });
+                }
+                // Check if the transaction code is MSC3N (Batch Display)
+                else if (sTcode === "MSC3N") {
+                    // Get the CrossApplicationNavigation service
+                    var oCrossAppNavigator = sap.ushell.Container.getService("CrossApplicationNavigation");
+
+                    // Navigate to the Batch display screen
+                    oCrossAppNavigator.toExternal({
+                        target: {
+                            semanticObject: "Batch",
+                            action: "display"
+                        },
+                        params: {
+                            "Material": [sMaterial],        // Pass the material number
+                            "Batch": [sBatch],              // Pass the batch number
+                            "DynproNoFirstScreen": "1"      // Skip the first screen
+                        }
+                    });
+                }
+            },
+
+            /**
+             * @function onPressOverride
+             * @description
+             * This function is triggered when the user clicks the "Override" button in the error log fragment.
+             * It constructs a navigation key using the selected inspection lot and navigates to the 
+             * "C_InspUsgDescMng" object page using SAP Fiori's router.
+             * The navigation targets the active entity with a default DraftUUID.
+             */
+            onPressOverride: function (oEvent) {
+
+                // Construct the navigation key with InspectionLot and default DraftUUID
+                const sKey = `InspectionLot='${this.InspLot}',DraftUUID=guid'00000000-0000-0000-0000-000000000000',IsActiveEntity=true`;
+
+                // Get the current view object
+                var oView = this.base.getView();
+
+                // Retrieve the component ID owning the current view
+                var sComponentId = sap.ui.core.Component.getOwnerIdFor(oView);
+
+                // Get the component instance using the component ID
+                var oComponent = sap.ui.component(sComponentId);
+
+                // Get the router instance from the component
+                var oRouter = oComponent.getRouter();
+
+                // Navigate to the object page "C_InspUsgDescMng" using the constructed key
+                oRouter.navTo("C_InspUsgDescMng", {
+                    keys1: sKey
+                });
+            },
+
+            /**
+             * @function OnAutoUDpress
+             * @description
+             * This function is triggered when the user initiates the Auto Usage Decision (Auto UD) process.
+             * It collects selected inspection lots from the UI table, validates their inspection types,* fetches error messages via an OData API, and displays the results in a fragment.
+             * If no records are returned, it prompts the user with a confirmation dialog to proceed manually.
+             */
+            OnAutoUDpress: function () {
+                var that = this;
+
+                // Show busy indicator while processing
+                this.getView().setBusy(true);
+
+                // Get selected items from the responsive table
+                let selItems = this.base.byId(
+                    "i2d.qm.inspusgdsc.manages1::sap.suite.ui.generic.template.ListReport.view.ListReport::C_InspUsgDescMng--responsiveTable"
+                ).getSelectedItems();
+
+                var aPayload = []; // Array to hold inspection lots
+                var InspTyp = [];  // Array to hold inspection types
+
+                // Extract inspection lot and type from each selected item
+                selItems.forEach(function (oItem) {
+                    var oContext = oItem.getBindingContext();
+                    var oData = oContext.getObject();
+
+                    aPayload.push({ inspectionLot: oData.InspectionLot });
+                    InspTyp.push({ inspectionType: oData.InspectionLotType });
+                });
+
+                // Build filter string for OData query
+                var aFilters = aPayload.map(function (oLot) {
+                    return "INSPECTIONLOT eq '" + oLot.inspectionLot + "'";
+                });
+                var sFilterString = aFilters.join(" or ");
+
+                // Construct the API URL
+                var aUrl = `${Constants.ErrorAPIURL}${sFilterString}${Constants.SkipTop}`;
+
+
+                // Validate inspection types before proceeding
+                if (this.validateInspectionTypes(InspTyp) == true) {
+                    this.InspectionType = InspTyp[0].inspectionType;
+
+                    // Fetch UD codes (custom logic)
+                    this._UDfetch();
+
+                    // Call the API to get error messages
+                    fetch(aUrl, {
+                        headers: {
+                            "Accept": "application/json"
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(aData => {
+                            var ReceivedData = aData.value;
+
+                            // If error messages are returned
+                            if (ReceivedData.length > 0) {
+                                this.getView().setBusy(false);
+
+                                // Load and open the Auto UD error fragment
+                                if (!this.AUDfragmentOpen) {
+                                    this.AUDfragmentOpen = sap.ui.xmlfragment("customer.zoqr_e_0008ui.changes.fragments.AutoUDError", this);
+                                }
+                                this.getView().addDependent(this.AUDfragmentOpen);
+                                this.AUDfragmentOpen.open();
+
+                                // Filter out inspection lots with MSGV3 = 'X'
+                                this.TotalInspLot = this._filterInspectionLots(ReceivedData, aPayload);
+
+                                // Enable or disable override button based on OVERRIDE flag
+                                if (ReceivedData[0].OVERRIDE == "X") {
+                                    sap.ui.getCore().byId("btnOverrideAud").setEnabled(true);
+                                } else {
+                                    sap.ui.getCore().byId("btnOverrideAud").setEnabled(false);
+                                }
+
+                                // Set error log data to model and bind to table
+                                var audModel = new JSONModel();
+                                audModel.setProperty("/AudLogData", ReceivedData);
+                                sap.ui.getCore().byId("IdAUDlogtbl").setModel(audModel);
+
+                                // Identify inspection lots that did not return any error messages
+                                this.missingLots = aPayload.filter(payloadItem => {
+                                    const lot = payloadItem.inspectionLot;
+                                    return !ReceivedData.some(receivedItem => receivedItem.INSPECTIONLOT === lot);
+                                });
+
+                                // Enable continue button if there are missing lots
+                                if (this.missingLots.length > 0) {
+                                    sap.ui.getCore().byId("btncontAud").setEnabled(true);
+                                } else {
+                                    sap.ui.getCore().byId("btncontAud").setEnabled(false);
+                                }
+
+                            } else {
+                                // If no records are returned, show confirmation dialog
+                                MessageBox.confirm(this.geti18nText().getText("ConfirmNoRec"), {
+                                    icon: MessageBox.Icon.QUESTION,
+                                    title: "Confirm",
+                                    actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
+                                    onClose: function (oAction) {
+                                        if (oAction === MessageBox.Action.YES) {
+                                            that.Norec = "X";
+
+                                            // Open manual UD selection fragment
+                                            if (!that.sUDfragmentOpen) {
+                                                that.sUDfragmentOpen = sap.ui.xmlfragment("customer.zoqr_e_0008ui.changes.fragments.selectUd", that);
+                                                that.getView().addDependent(that.sUDfragmentOpen);
+                                            }
+                                            that.sUDfragmentOpen.open();
+
+                                            // Bind UD codes to dropdown
+                                            var sudModel = new sap.ui.model.json.JSONModel();
+                                            sudModel.setProperty("/usageDecisionList", that.UDCode || []);
+                                            var oDropdown = sap.ui.getCore().byId("usageDecisionDropdown");
+                                            if (oDropdown) {
+                                                oDropdown.setModel(sudModel);
+                                            }
+                                        } else {
+                                            // Close fragment if user cancels
+                                            if (that.sUDfragmentOpen) {
+                                                that.Norec = "";
+                                                that.sUDfragmentOpen.close();
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            // Handle fetch error
+                            MessageBox.information(this.geti18nText().getText("error"));
+                            this.getView().setBusy(false);
+                        });
+
+                } else {
+                    // Show error if inspection types are invalid
+                    MessageBox.error(this.geti18nText().getText("AutoUDselError"));
+                    this.getView().setBusy(false);
+                }
+            },
+
+            /**
+             * Filter function to remove inspection lots with MSGV3 as 'X'
+             */
+            _filterInspectionLots: function (apiResponse, totalInspLot) {
+                const excludedLots = new Set(
+                    apiResponse
+                        .filter(item => item.switch === true)
+                        .map(item => item.INSPECTIONLOT)
+                );
+
+                return totalInspLot.filter(lot => !excludedLots.has(lot.inspectionLot));
+            },
+
+            /**
+             * Triggers on Selection of Usage Decision Dropdown to enable Continue Button.
+             */
+            onDropSelChange: function () {
+                sap.ui.getCore().byId("btnsel").setEnabled(true);
+            },
+
+
+
+            /**
+             * Formatter Function to change the color of a icon in type column according to message type
+             */
+            formatIconColor: function (sStatus) {
+                switch (sStatus) {
+                    case "S":
+                        return "green";
+                    case "E":
+                        return "red";
+                    case "W":
+                        return "yellow";
+                    default:
+                        return "gray";
+                }
+            },
+
+            /**
+             * @function onPressContinue
+             * @description
+             * This function is triggered when the user clicks the "Continue" button in the Auto UD error fragment.
+             * It closes the error fragment and prompts the user with a confirmation dialog to proceed with manual Usage Decision (UD) selection.
+             * If confirmed, it opens the UD selection fragment and binds the available UD codes to the dropdown.
+             */
+            onPressContinue: function () {
+                // Set continuation flag
+                this.Cont = "X";
+                var that = this;
+
+                // Close the Auto UD error fragment if it's open
+                if (this.AUDfragmentOpen.open()) {
+                    this.AUDfragmentOpen.close();
+                }
+
+                // Proceed only if UD codes are available
+                if (this.UDCode.length > 0) {
+                    // Show confirmation dialog to proceed with manual UD selection
+                    MessageBox.confirm(this.geti18nText().getText("ConfirmContinue"), {
+                        icon: MessageBox.Icon.QUESTION,
+                        title: "Confirm",
+                        actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
+                        onClose: function (oAction) {
+                            if (oAction === MessageBox.Action.YES) {
+                                // Open the UD selection fragment if not already opened
+                                if (!that.sUDfragmentOpen) {
+                                    that.sUDfragmentOpen = sap.ui.xmlfragment("customer.zoqr_e_0008ui.changes.fragments.selectUd", that);
+                                    that.getView().addDependent(that.sUDfragmentOpen);
+                                }
+                                that.sUDfragmentOpen.open();
+
+                                // Bind UD codes to the dropdown in the fragment
+                                var sudModel = new sap.ui.model.json.JSONModel();
+                                sudModel.setProperty("/usageDecisionList", that.UDCode || []);
+                                var oDropdown = sap.ui.getCore().byId("usageDecisionDropdown");
+                                if (oDropdown) {
+                                    oDropdown.setModel(sudModel);
+                                }
+                            } else {
+                                // If user cancels, reset continuation flag and close fragment if open
+                                if (that.sUDfragmentOpen) {
+                                    this.Cont = "";
+                                    that.sUDfragmentOpen.close();
+                                }
+                            }
+                        }
+                    });
+
+                } else {
+                    // Show error if UD codes are not available
+                    MessageBox.error(this.geti18nText().getText("UDfetchError"));
+                }
+            },
+
+            /**
+             * @function onPressAudOverride
+             * @description
+             * This function is triggered when the user clicks the "Override" button in the Auto UD error fragment.
+             * It sets the override flag, closes the error fragment, and prompts the user with a confirmation dialog.
+             * If confirmed, it opens the manual Usage Decision (UD) selection fragment and binds the available UD codes to the dropdown.
+             */
+            onPressAudOverride: function () {
+                // Set override flag
+                this.Over = "X";
+                var that = this;
+
+                // Close the Auto UD error fragment if it's open
+                if (this.AUDfragmentOpen.open()) {
+                    this.AUDfragmentOpen.close();
+                }
+ // Proceed only if UD codes are available
+                if (this.UDCode.length > 0) {
+                    // Show confirmation dialog to proceed with override
+                    MessageBox.confirm(this.geti18nText().getText("ConfirmOverride"), {
+                        icon: MessageBox.Icon.QUESTION,
+                        title: "Confirm",
+                        actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
+                        onClose: function (oAction) {
+                            if (oAction === MessageBox.Action.YES) {
+                                // Open the UD selection fragment if not already opened
+                                if (!that.sUDfragmentOpen) {
+                                    that.sUDfragmentOpen = sap.ui.xmlfragment("customer.zoqr_e_0008ui.changes.fragments.selectUd", that);
+                                    that.getView().addDependent(that.sUDfragmentOpen);
+                                }
+                                that.sUDfragmentOpen.open();
+                                // Bind UD codes to the dropdown in the fragment
+                                var sudModel = new sap.ui.model.json.JSONModel();
+                                sudModel.setProperty("/usageDecisionList", that.UDCode || []);
+                                var oDropdown = sap.ui.getCore().byId("usageDecisionDropdown");
+                                if (oDropdown) {
+                                    oDropdown.setModel(sudModel);
+                                }
+                            } else {
+                                // If user cancels, reset override flag and close fragment if open
+                                if (that.sUDfragmentOpen) {
+                                    this.Over = "";
+                                    that.sUDfragmentOpen.close();
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    // Show error if UD codes are not available
+                    MessageBox.error(this.geti18nText().getText("UDfetchError"));
+                }
+            },
+            /**
+             * @function onPressSelect
+             * @description
+             * This function is triggered when the user selects a Usage Decision (UD) code from the dropdown and confirms the action.
+             * Based on the current operation context (Override, Continue with missing lots, or Continue with no records),
+             * it prepares the payload and calls the UD service to process the selected inspection lots.
+             */
+            onPressSelect: function () {
+                // Disable the select button to prevent duplicate submissions
+                sap.ui.getCore().byId("btnsel").setEnabled(false);
+                var SavData = {};
+                // Get the selected UD code from the dropdown
+                var selText = sap.ui.getCore().byId("usageDecisionDropdown").getSelectedItem().getKey();
+                SavData.UDCODE = selText;
+                // Case 1: If override flag is set, send all inspection lots for override
+                if (this.Over == "X") {
+                    SavData.INSPLOT = this.TotalInspLot;
+                    SavData.OPERATION = "OVERRIDE";
+                    this._UDsrvCall(SavData);
+                }
+                // Case 2: If no records were returned, send all inspection lots for manual continuation
+                if (this.Norec == "X") {
+                    SavData.INSPLOT = this.TotalInspLot;
+                    SavData.OPERATION = "CONTINUE";
+                    this._UDsrvCall(SavData);
+                }
+                // Case 3: If continuing with only missing lots, send those for manual UD
+                if (this.Cont == "X") {
+                    SavData.INSPLOT = this.missingLots;
+                    SavData.OPERATION = "CONTINUE";
+                    this._UDsrvCall(SavData);
+                }
+            },
+            /**
+             * @function onPressCancle
+             * @description
+             * This function is triggered when the user clicks the "Cancel" button in the Usage Decision (UD) selection fragment.
+             * It resets override and continuation flags, disables the select button, closes the UD fragment,
+             * and removes the busy state from the view.
+             */
+            onPressCancle: function () {
+                // Reset override and continuation flags
+                this.Over = "";
+                this.Cont = "";
+                // Disable the select button to prevent further actions
+                sap.ui.getCore().byId("btnsel").setEnabled(false);
+                // Close the UD selection fragment
+                this.sUDfragmentOpen.close();
+                // Remove busy indicator from the view
+                this.getView().setBusy(false);
+            },
+            /**
+             * @function _UDsrvCall
+             * @description
+             * This internal function sends a request to the Auto Usage Decision (UD) OData service
+             * with the selected inspection lots, operation type (OVERRIDE or CONTINUE), and UD code.
+             * It constructs the filter string dynamically based on the payload and handles both success
+             * and error responses by showing appropriate messages and closing the UD fragment.
+             */
+            _UDsrvCall: function (oPayload) {
+                var that = this;
+                try {
+                    // Build filter conditions for each inspection lot
+                    const aLots = oPayload.INSPLOT.map(item => `INSPLOT eq '${item.inspectionLot}'`);
+                    const filterString = aLots.join(" or ");
+                    // Combine all filters including operation and UD code
+                    const finalFilter = `(${filterString}) and OPERATION eq '${oPayload.OPERATION}' and UDCODE eq '${oPayload.UDCODE}'`;
+                    // Construct the OData service URL with filters
+                    const sUrl = `${Constants.AutoUDAPIURL}${finalFilter}${Constants.SkipTop}`;
+                    // Make the fetch call to the OData service
+                    fetch(sUrl, {
+                        headers: {
+                            "Accept": "application/json"
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(aData => {
+                            // Reset override and continue flags
+                            this.Over = "";
+                            this.Cont = "";
+                            // Close the UD selection fragment if open
+                            if (that.sUDfragmentOpen.open()) {
+                                that.sUDfragmentOpen.close();
+                            }
+                            // Show success message from the service response
+                            MessageBox.information(aData.value[0].message);
+                        })
+                        .catch(error => {
+                            // Reset flags and close fragment on error
+                            this.Over = "";
+                            this.Cont = "";
+                            if (that.sUDfragmentOpen.open()) {
+                                that.sUDfragmentOpen.close();
+                            }
+                            // Show generic error message
+                            MessageBox.information(this.geti18nText().getText("error"));
+                        });
+                }
+                catch {
+                    // Handle unexpected errors (e.g., malformed payload)
+                    this.Over = "";
+                    this.Cont = "";
+                    if (this.sUDfragmentOpen.open()) {
+                        this.sUDfragmentOpen.close();
+                    }
+                    // Show error message
+                    MessageBox.error(this.geti18nText().getText("error"));
+                }
+            },
+            /**
+             * @function validateInspectionTypes
+             * @description
+             * This utility function checks whether all inspection types in the given array are the same.
+             * It ensures consistency before performing operations like Auto Usage Decision (Auto UD),
+             * which may require uniform inspection types across selected inspection lots.
+             *
+             * @param {Array} array - Array of objects containing `inspectionType` properties.
+             * @returns {Boolean} - Returns `true` if all inspection types are the same or array is empty; otherwise `false`.
+             */
+            validateInspectionTypes: function (array) {
+                // If the array is empty, consider it valid
+                if (!array.length) return true;
+                // Get the inspection type of the first item
+                const firstValue = array[0].inspectionType;
+                // Check if all items have the same inspection type
+                const isUniform = array.every(item => item.inspectionType === firstValue);
+                // Return false if any item differs, otherwise true
+                if (!isUniform) {
+                    return false;
+                }
+                return true;
+            },
+            /**
+             * @function _UDfetch
+             * @description
+             * This internal function fetches Usage Decision (UD) codes from the OData model based on the inspection type.
+             * It binds to the `/UDCode` entity set, filters the results by `UsageDecisionCodeGroup` matching the current inspection type,
+             * and stores the filtered list in `this.UDCode` for use in dropdowns and UD selection fragments.
+             */
+            _UDfetch: function () {
+                // Set busy indicator while fetching UD codes
+                this.getView().setBusy(true);
+                var that = this;
+                // Get the error log model from the view
+                var oModel = this.getView().getModel("customer.errorlog");
+                // Bind to the UDCode entity set
+                const udModel = oModel.bindList("/UDCode");
+                // Request up to 100 contexts (records) from the model
+                udModel.requestContexts(0, 100).then((aContexts) => {
+                    // Remove busy indicator once data is received
+                    this.getView().setBusy(false);
+                    // Extract raw data objects from contexts
+                    const aData = aContexts.map(ctx => ctx.getObject());
+                    // Filter UD codes matching the current inspection type
+                    this.UDCode = aData.filter(item => item.UsageDecisionCodeGroup === this.InspectionType);
+                    return true;
+                }).catch((oError) => {
+                    // Remove busy indicator and handle error
+                    this.getView().setBusy(false);
+                    return false;
+                });
+            }
+        });
+    }
+);

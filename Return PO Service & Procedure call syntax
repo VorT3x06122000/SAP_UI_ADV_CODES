@@ -1672,3 +1672,71 @@ function isBlankRow(rowValues, headers) {
     });
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Procedure call Syntax    
+
+
+
+
+    async function UploadData(sFileData, fileID, sFileType, Data) {
+        try {
+            // const db = await cds.connect.to('db');
+            const buffer = Buffer.from(sFileData, 'base64');
+            const workbook = XLSX.read(buffer, { type: 'buffer' });
+            const firstSheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[firstSheetName];
+
+            // Convert to JSON (header row assumed)
+            const rows = XLSX.utils.sheet_to_json(sheet, { defval: null, raw: false });
+            const InsertEntries = rows.map(record => ({
+                ...record,
+                uploadID: fileID
+            })
+            );
+            const jsonString = JSON.stringify(InsertEntries);
+
+            let result = await _callHdbProcedure("UPLOAD_RETPORECORDS", { "I_RETPO_MASSUPLOAD": jsonString });
+            if (result.results == undefined) {
+                await INSERT.into(UploadFiles).entries(Data);
+                const inserted = await SELECT.one.from(UploadFiles).where({ uploadID: Data.uploadID });
+                if (inserted.uploadID != 0) {
+                    inserted.STATUS_CODE = 201;
+                    inserted.message = "File Upload Successful";
+                    return inserted;
+                }
+                else {
+                    // res.push({ "STATUS_CODE": 500, "message": "Could Not Create Records" });
+                    return ({ "STATUS_CODE": 500, "message": "Could Not Create Records" });
+                }
+            }
+        }
+        catch (error) {
+            return error.message;
+        }
+    }
+
+    let _callHdbProcedure = async function (sProcedureName, oInputParams) {
+        //call procedure
+        const db = await cds.connect.to('db');
+        const dbConn = new dbclass(await dbclass.createConnection(db.options.credentials));
+        const sp = await dbConn.loadProcedurePromisified(hdbext, null, sProcedureName);
+        var oDbProcedureRet = dbConn.callProcedurePromisified(sp, oInputParams);
+        return oDbProcedureRet;
+    }
+});
+ 
