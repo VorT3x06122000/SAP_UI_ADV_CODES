@@ -1,0 +1,29 @@
+{
+  "changeType": "propertyChange",
+  "reference": "customer.fmoadapted",
+  "namespace": "apps/customer.fmoadapted/changes/",
+  "creation": "2026-08-12T10:30:47.153Z",
+  "projectId": "customer.fmoadapted",
+  "packageName": "$TMP",
+  "support": {
+    "generator": "@sap-ux/control-property-editor",
+    "sapui5Version": "1.151.0",
+    "command": "property"
+  },
+  "originalLanguage": "EN",
+  "layer": "CUSTOMER_BASE",
+  "fileType": "change",
+  "fileName": "id_1786530596942_199_propertyChange",
+  "content": {
+    "property": "text",
+    "newValue": "Review and Validate"
+  },
+  "texts": {},
+  "selector": {
+    "id": "i2d.eam.order.manages1::sap.suite.ui.generic.template.ListReport.view.ListReport::C_ObjPgMaintOrder--customer.fmoadapted.btn-7e24c77d",
+    "type": "sap.m.Button",
+    "idIsLocal": false
+  },
+  "dependentSelector": {},
+  "jsOnly": false
+}

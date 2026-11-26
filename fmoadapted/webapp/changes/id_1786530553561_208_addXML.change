@@ -1,0 +1,30 @@
+{
+  "changeType": "addXML",
+  "reference": "customer.fmoadapted",
+  "namespace": "apps/customer.fmoadapted/changes/",
+  "creation": "2026-08-12T10:29:36.161Z",
+  "projectId": "customer.fmoadapted",
+  "packageName": "$TMP",
+  "moduleName": "customer/fmoadapted/changes/fragments/review.fragment.xml",
+  "support": {
+    "generator": "@sap-ux/control-property-editor",
+    "sapui5Version": "1.151.0",
+    "command": "addXML"
+  },
+  "originalLanguage": "EN",
+  "layer": "CUSTOMER_BASE",
+  "fileType": "change",
+  "fileName": "id_1786530553561_208_addXML",
+  "content": {
+    "targetAggregation": "content",
+    "index": 4,
+    "fragmentPath": "fragments/review.fragment.xml"
+  },
+  "texts": {},
+  "selector": {
+    "id": "i2d.eam.order.manages1::sap.suite.ui.generic.template.ListReport.view.ListReport::C_ObjPgMaintOrder--template::ListReport::TableToolbar",
+    "idIsLocal": false
+  },
+  "dependentSelector": {},
+  "jsOnly": false
+}

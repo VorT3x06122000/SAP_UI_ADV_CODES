@@ -1,0 +1,8 @@
+<!-- Use stable and unique IDs!-->
+<core:FragmentDefinition xmlns:core='sap.ui.core' xmlns='sap.m'>
+    <!-- viewName: sap.suite.ui.generic.template.ObjectPage.view.Details -->
+    <!-- controlType: sap.m.OverflowToolbar -->
+    <!-- targetAggregation: content --> 
+    <!-- add your xml here -->
+    <Button text="Custom Action"  id="btn-b4ae1e74" press=".extension.customer.ftoadapted.extension.onCustomAction" enabled="false"></Button>
+</core:FragmentDefinition>

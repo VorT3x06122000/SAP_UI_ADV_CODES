@@ -1,0 +1,94 @@
+<mvc:View
+    xmlns:core="sap.ui.core"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:macros="sap.fe.macros"
+    xmlns:macrosTable="sap.fe.macros.table"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    controllerName="testfpm.ext.main.Main"
+>
+    <Page
+        id="Main"
+        title="{i18n>MainTitle}"
+        class="sapUiResponsiveContentPadding"
+    >
+        <content />
+        <macros:FilterBar
+            id="FilterBar"
+            metaPath="/Books/@com.sap.vocabularies.UI.v1.SelectionFields#filterBarMacro"
+        />
+        <macros:Table
+            id="Table"
+            metaPath="/Books/@com.sap.vocabularies.UI.v1.LineItem#tableMacro"
+            filterBar="FilterBar"
+            header="Books"
+            selectionChange="RowSelection"
+        >
+            <macros:columns>
+                <macrosTable:Column
+                    id="_IDGenColumn1"
+                    header="{i18n>MyColumn}"
+                    importance="High"
+                    width="10em"
+                    key="FirstColumnKey"
+                >
+                    <Text
+                        id="_IDGenText"
+                        text="{author}"
+                    />
+                </macrosTable:Column>
+            
+                <macrosTable:Column
+                    id="_IDGenColumn2"
+                    header="My Column2"
+                    importance="High"
+                    width="10em"
+                    key="FirstColumnKey2"
+                >
+                    <Text
+                        id="_IDGenText2"
+                        text="{author}"
+                    />
+                </macrosTable:Column>
+            </macros:columns>
+            <macros:actions>
+                <macrosTable:Action
+                    key="customAction"
+                    id="IDcustomAction"
+                    text="Custom Action (VC)"
+                    press=".onPressAction"
+                    placement="After"
+                    anchor="DataFieldForAction::Service.toggleBoolean"
+                    requiresSelection="true"
+                />
+            </macros:actions>
+        </macros:Table>
+        <Button
+            id="_IDGenButton"
+            text="Hide My Column"
+            press=".hideMyColumn"
+            enabled="{ui>/myColumnVisible}"
+        />
+        <Button
+            id="_IDGenButton1"
+            text="Show My Column"
+            press=".showMyColumn"
+            enabled="{= !${ui>/myColumnVisible}}"
+        />
+        <FlexBox
+            alignItems="Center"
+            justifyContent="Start"
+        >
+            <Label
+                text="Field with Value Help"
+                class="sapUiSmallMarginEnd"
+            />
+            <macros:Field
+                metaPath="/Books/author"
+                id="Field"
+                bindingContexts=""
+                readOnly="false"
+            />
+        </FlexBox>
+    </Page>
+</mvc:View>

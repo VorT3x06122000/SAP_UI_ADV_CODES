@@ -1,0 +1,23 @@
+{
+  "changeType": "codeExt",
+  "reference": "customer.ftoadapted",
+  "namespace": "apps/customer.ftoadapted/changes/",
+  "creation": "2026-08-13T11:02:27.136Z",
+  "projectId": "customer.ftoadapted",
+  "moduleName": "customer/ftoadapted/changes/coding/extension",
+  "support": {
+    "generator": "@sap-ux/control-property-editor",
+    "sapui5Version": "1.151.0"
+  },
+  "originalLanguage": "EN",
+  "layer": "CUSTOMER_BASE",
+  "fileType": "change",
+  "fileName": "id_1786618937741_609_codeExt",
+  "content": {
+    "codeRef": "coding/extension.js"
+  },
+  "texts": {},
+  "selector": {
+    "controllerName": "sap.suite.ui.generic.template.ObjectPage.view.Details"
+  }
+}

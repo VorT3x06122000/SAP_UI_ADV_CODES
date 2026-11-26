@@ -1,0 +1,29 @@
+{
+  "changeType": "propertyChange",
+  "reference": "customer.ftoadapted",
+  "namespace": "apps/customer.ftoadapted/changes/",
+  "creation": "2026-08-14T10:58:09.206Z",
+  "projectId": "customer.ftoadapted",
+  "packageName": "$TMP",
+  "support": {
+    "generator": "@sap-ux/control-property-editor",
+    "sapui5Version": "1.151.0",
+    "command": "property"
+  },
+  "originalLanguage": "EN",
+  "layer": "CUSTOMER_BASE",
+  "fileType": "change",
+  "fileName": "id_1786705085014_426_propertyChange",
+  "content": {
+    "property": "text",
+    "newValue": "Custom Action"
+  },
+  "texts": {},
+  "selector": {
+    "id": "i2d.eam.technicalobject.manages1::sap.suite.ui.generic.template.ObjectPage.view.Details::C_ObjPgTechnicalObject--customer.ftoadapted.btn-b4ae1e74",
+    "type": "sap.m.Button",
+    "idIsLocal": false
+  },
+  "dependentSelector": {},
+  "jsOnly": false
+}

@@ -1,0 +1,30 @@
+{
+  "changeType": "addXML",
+  "reference": "customer.ftoadapted",
+  "namespace": "apps/customer.ftoadapted/changes/",
+  "creation": "2026-08-14T10:57:19.015Z",
+  "projectId": "customer.ftoadapted",
+  "packageName": "$TMP",
+  "moduleName": "customer/ftoadapted/changes/fragments/customAction.fragment.xml",
+  "support": {
+    "generator": "@sap-ux/control-property-editor",
+    "sapui5Version": "1.151.0",
+    "command": "addXML"
+  },
+  "originalLanguage": "EN",
+  "layer": "CUSTOMER_BASE",
+  "fileType": "change",
+  "fileName": "id_1786705036108_617_addXML",
+  "content": {
+    "targetAggregation": "content",
+    "index": 4,
+    "fragmentPath": "fragments/customAction.fragment.xml"
+  },
+  "texts": {},
+  "selector": {
+    "id": "i2d.eam.technicalobject.manages1::sap.suite.ui.generic.template.ObjectPage.view.Details::C_ObjPgTechnicalObject--TechObjMaintenanceOrderFacet::Table::Toolbar",
+    "idIsLocal": false
+  },
+  "dependentSelector": {},
+  "jsOnly": false
+}

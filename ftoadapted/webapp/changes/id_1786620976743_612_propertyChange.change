@@ -1,0 +1,29 @@
+{
+  "changeType": "propertyChange",
+  "reference": "customer.ftoadapted",
+  "namespace": "apps/customer.ftoadapted/changes/",
+  "creation": "2026-08-13T11:36:18.298Z",
+  "projectId": "customer.ftoadapted",
+  "packageName": "$TMP",
+  "support": {
+    "generator": "@sap-ux/control-property-editor",
+    "sapui5Version": "1.151.0",
+    "command": "property"
+  },
+  "originalLanguage": "EN",
+  "layer": "CUSTOMER_BASE",
+  "fileType": "change",
+  "fileName": "id_1786620976743_612_propertyChange",
+  "content": {
+    "property": "includeItemInSelection",
+    "newValue": true
+  },
+  "texts": {},
+  "selector": {
+    "id": "i2d.eam.technicalobject.manages1::sap.suite.ui.generic.template.ObjectPage.view.Details::C_ObjPgTechnicalObject--TechObjMaintenanceOrderFacet::responsiveTable",
+    "type": "sap.m.Table",
+    "idIsLocal": false
+  },
+  "dependentSelector": {},
+  "jsOnly": false
+}

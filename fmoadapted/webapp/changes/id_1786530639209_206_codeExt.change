@@ -1,0 +1,23 @@
+{
+  "changeType": "codeExt",
+  "reference": "customer.fmoadapted",
+  "namespace": "apps/customer.fmoadapted/changes/",
+  "creation": "2026-08-12T10:30:47.154Z",
+  "projectId": "customer.fmoadapted",
+  "moduleName": "customer/fmoadapted/changes/coding/reviewController",
+  "support": {
+    "generator": "@sap-ux/control-property-editor",
+    "sapui5Version": "1.151.0"
+  },
+  "originalLanguage": "EN",
+  "layer": "CUSTOMER_BASE",
+  "fileType": "change",
+  "fileName": "id_1786530639209_206_codeExt",
+  "content": {
+    "codeRef": "coding/reviewController.js"
+  },
+  "texts": {},
+  "selector": {
+    "controllerName": "sap.suite.ui.generic.template.ListReport.view.ListReport"
+  }
+}
